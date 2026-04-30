@@ -1,0 +1,141 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0')
+  title NyondoStock - Sales Attendant Dashboard
+  // Bootstrap 5 CSS + Icons
+  link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
+  link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
+  link(rel='stylesheet' href='/css/sales_dashboard.css')
+// SIDEBAR
+.sidebar
+  .logo
+    img(src='/images/logo.png' alt='Logo')
+    h4 NyondoStock
+    p Hardware Management
+  nav.nav.flex-column
+    a.nav-link.active(href='#')
+      i.bi.bi-speedometer2
+      |  Dashboard
+    a.nav-link(href='#')
+      i.bi.bi-cart-plus
+      |  New Sale
+    a.nav-link(href='#')
+      i.bi.bi-clock-history
+      |  Sales History
+    a.nav-link(href='#')
+      i.bi.bi-box-seam
+      |  View Stock
+  .user-section
+    .user-name &#x1F464; Sarah Kamau
+    .user-role Sales Attendant
+    button.logout-btn 
+      i.bi.bi-box-arrow-right
+      |  Sign Out
+//MAIN CONTENT 
+.main-content
+  // Welcome Row
+  .row.mb-4
+    .col-12
+      h4(style='color: var(--nyondo-green);') Welcome back, Sarah! &#x1F44B;
+      p(style='color: #6c757d;') Ready to serve customers today.
+  // Stats Row
+  .row.g-3.mb-4
+    .col-md-6
+      .stat-card
+        .stat-value UGX 1,850,000
+        .stat-label Today&apos;s Sales
+    .col-md-6
+      .stat-card
+        .stat-value 4
+        .stat-label Low Stock Alerts
+  // Quick Sale Button
+  .row.mb-4
+    .col-12
+      button.quick-sale-btn
+        i.bi.bi-cart-plus.fs-4.me-2
+        |  START NEW SALE
+  // Low Stock Alerts Table
+  .section-title
+    i.bi.bi-exclamation-triangle-fill(style='color: #C6A43F;')
+    |  Low Stock Alerts
+  .table-responsive.custom-table.mb-4
+    table.table.mb-0
+      thead
+        tr
+          th Product
+          th Current Stock
+          th Reorder Level
+          th Status
+      tbody
+        tr
+          td Portland Cement (50kg)
+          td 28 bags
+          td 50 bags
+          td
+            span.badge-critical Critical
+        tr
+          td 3-inch Nails (box)
+          td 12 boxes
+          td 20 boxes
+          td
+            span.badge-low Low
+        tr
+          td PVC Pipe 4&quot; (10ft)
+          td 8 pieces
+          td 15 pieces
+          td
+            span.badge-low Low
+        tr
+          td Paint Brush 4&quot;
+          td 15 pcs
+          td 25 pcs
+          td
+            span.badge-low Low
+  // Recent Sales Table
+  .section-title
+    i.bi.bi-clock-history
+    |  Recent Sales
+  .table-responsive.custom-table
+    table.table.mb-0
+      thead
+        tr
+          th Time
+          th Customer
+          th Items
+          th Total
+          th Status
+      tbody
+        tr
+          td 10:30 AM
+          td Sarah Kamau
+          td Cement (10 bags)
+          td UGX 350,000
+          td
+            span.badge-paid Paid
+        tr
+          td 11:15 AM
+          td John Otieno
+          td Paint (5 cans)
+          td UGX 275,000
+          td
+            span.badge-paid Paid
+        tr
+          td 1:45 PM
+          td Peter Omondi
+          td Pipes &amp; Fittings
+          td UGX 189,500
+          td
+            span.badge-credit Credit
+        tr
+          td 3:20 PM
+          td Alice Wanjiku
+          td Nails (8 boxes)
+          td UGX 64,000
+          td
+            span.badge-paid Paid
+// Footer
+.footer
+  i.bi.bi-shield-check
+  |  NyondoStock &mdash; Enterprise Hardware Management System
+script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')

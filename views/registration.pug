@@ -1,0 +1,57 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0')
+  title NyondoStock - Register
+  // Bootstrap 5 CSS + Icons
+  link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
+  link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
+  link(rel='stylesheet' href='/css/registration.css')
+.register-card
+  // Logo
+  img(src='/images/logo.png' alt='NyondoStock Logo')
+  h2 Create Account
+  p Register to access NyondoStock
+  // Security Badge
+  .security-badge
+    i.bi.bi-shield-lock-fill
+    span SECURE REGISTRATION
+  // Registration Form
+  form(action='/postreg' method='post')
+    // Full Name
+    .mb-3.text-start
+      label.form-label Full Name
+      input.form-control(type='text' placeholder='Enter your full name' name='fullname')
+    // Email
+    .mb-3.text-start
+      label.form-label Email Address
+      input.form-control(type='email' placeholder='Enter your email' name='email')
+    // Phone Number
+    .mb-3.text-start
+      label.form-label Phone Number
+      input.form-control(type='tel' placeholder='e.g., 07XX XXX XXX' name='phonenumber')
+    // Password
+    .mb-3.text-start
+      label.form-label Password
+      input.form-control(type='password' placeholder='Create a password' name='password')
+    // Confirm Password
+    .mb-3.text-start
+      label.form-label Confirm Password
+      input.form-control(type='password' placeholder='Confirm your password' name='confirmpassword')
+    // Role Selection
+    .mb-3.text-start
+      label.form-label Select Role
+      select.form-select(name='role')
+        option(selected='' disabled='') Select your role
+        option(value='admin') Administrator
+        option(value='store_manager') Store Manager
+        option(value='sales_attendant') Sales Attendant
+    // Register Button
+    button.btn-register(type='submit')
+      i.bi.bi-person-plus.me-2
+      |  REGISTER
+    // Login Link
+    .login-link
+      | Already have an account? 
+      a(href='login.html') Sign In
+script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NyondoStock - Deposit Scheme Management</title>
+    
+    <!-- Bootstrap 5 CSS + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/scheme.css">
+</head>
+<body>
+
+    <!-- ========== SIDEBAR ========== -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="/images/logo.png" alt="Logo">
+            <h3>NyondoStock</h3>
+            <p>Hardware Management</p>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-box-seam"></i> Stock Management</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-cart-plus"></i> Sales Recording</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-clock-history"></i> Sales History</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-credit-card"></i> Supplier Credit</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom active"><i class="bi bi-piggy-bank"></i> Deposit Scheme</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-bar-chart-steps"></i> Reports</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-people"></i> User Management</a></li>
+        </ul>
+        
+        <div class="sidebar-user">
+            <div class="user-name">👤 Admin User <span class="role-badge">Admin</span></div>
+            <div class="user-role">System Administrator</div>
+            <button class="logout-btn"><i class="bi bi-box-arrow-right"></i> Sign Out</button>
+        </div>
+    </div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+            <div>
+                <h3 style="color: var(--nyondo-green); font-weight: 700; margin: 0;">Salary-Earner Deposit Scheme</h3>
+                <p style="color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;">Manage customer deposits, withdrawals, and track balances.</p>
+            </div>
+        </div>
+        
+        <!-- Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <div style="font-size: 0.7rem; opacity: 0.8;">Total Deposits</div>
+                    <div class="summary-value">UGX 4,600,000</div>
+                    <small style="opacity: 0.7;">Across 4 depositors</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="summary-card" style="background: linear-gradient(135deg, #C6A43F 0%, #B8922E 100%);">
+                    <div style="font-size: 0.7rem; opacity: 0.8;">Total Withdrawals</div>
+                    <div class="summary-value" style="color: #0D3B2E;">UGX 850,000</div>
+                    <small style="opacity: 0.8;">Year to date</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="summary-card" style="background: linear-gradient(135deg, #2E7D64 0%, #236854 100%);">
+                    <div style="font-size: 0.7rem; opacity: 0.8;">Current Balance</div>
+                    <div class="summary-value">UGX 3,750,000</div>
+                    <small style="opacity: 0.8;">Total savings</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Register New Depositor Form -->
+        <div class="form-card">
+            <div class="form-title">
+                <i class="bi bi-person-plus" style="color: #C6A43F;"></i> Register New Depositor
+                <span class="role-badge" style="background: #0D3B2E; color: white;">Admin Only</span>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-control" placeholder="Enter full name">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" placeholder="07XX XXX XXX">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">NIN</label>
+                    <input type="text" class="form-control" placeholder="National ID">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Employer (Optional)</label>
+                    <input type="text" class="form-control" placeholder="Company name">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn-save w-100"><i class="bi bi-save"></i> Register</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Record Deposit / Withdrawal -->
+        <div class="form-card">
+            <div class="form-title">
+                <i class="bi bi-cash-stack" style="color: #C6A43F;"></i> Record Transaction
+                <span class="role-badge" style="background: #0D3B2E; color: white;">Admin Only</span>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Select Depositor</label>
+                    <select class="form-select">
+                        <option>James Mwangi</option>
+                        <option>Mary Wanjiku</option>
+                        <option>Peter Ochieng</option>
+                        <option>Lucy Achieng</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Transaction Type</label>
+                    <select class="form-select">
+                        <option>Deposit</option>
+                        <option>Withdrawal</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Amount (UGX)</label>
+                    <input type="number" class="form-control" placeholder="Amount">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn-save w-100"><i class="bi bi-check-circle"></i> Record Transaction</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Depositors Table -->
+        <div class="section-title">
+            <i class="bi bi-people"></i> Registered Depositors
+        </div>
+        <div class="custom-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>NIN</th>
+                        <th>Employer</th>
+                        <th>Join Date</th>
+                        <th>Current Balance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>James Mwangi</td>
+                        <td>0772 123 456</td>
+                        <td>CM1234567890AB</td>
+                        <td>Uganda Breweries</td>
+                        <td>Jan 15, 2026</td>
+                        <td class="balance-positive">UGX 1,000,000</td>
+                        <td><button class="btn-deposit"><i class="bi bi-cash"></i> Deposit</button> <button class="btn-withdraw"><i class="bi bi-cash-stack"></i> Withdraw</button></td>
+                    </tr>
+                    <tr>
+                        <td>Mary Wanjiku</td>
+                        <td>0755 987 654</td>
+                        <td>CM2345678901CD</td>
+                        <td>KCCA</td>
+                        <td>Feb 01, 2026</td>
+                        <td class="balance-positive">UGX 700,000</td>
+                        <td><button class="btn-deposit"><i class="bi bi-cash"></i> Deposit</button> <button class="btn-withdraw"><i class="bi bi-cash-stack"></i> Withdraw</button></td>
+                    </tr>
+                    <tr>
+                        <td>Peter Ochieng</td>
+                        <td>0788 456 789</td>
+                        <td>CM3456789012EF</td>
+                        <td>Jumia Uganda</td>
+                        <td>Mar 10, 2026</td>
+                        <td class="balance-positive">UGX 1,600,000</td>
+                        <td><button class="btn-deposit"><i class="bi bi-cash"></i> Deposit</button> <button class="btn-withdraw"><i class="bi bi-cash-stack"></i> Withdraw</button></td>
+                    </tr>
+                    <tr>
+                        <td>Lucy Achieng</td>
+                        <td>0700 321 654</td>
+                        <td>CM4567890123GH</td>
+                        <td>Self Employed</td>
+                        <td>Apr 05, 2026</td>
+                        <td class="balance-positive">UGX 450,000</td>
+                        <td><button class="btn-deposit"><i class="bi bi-cash"></i> Deposit</button> <button class="btn-withdraw"><i class="bi bi-cash-stack"></i> Withdraw</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Transaction History Table -->
+        <div class="section-title">
+            <i class="bi bi-clock-history"></i> Recent Transactions
+        </div>
+        <div class="custom-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Depositor</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Balance After</th>
+                        <th>Processed By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Apr 24, 2026</td>
+                        <td>James Mwangi</td>
+                        <td><span class="badge" style="background:#2E7D64; color:white; padding:3px 8px; border-radius:30px;">Deposit</span></td>
+                        <td>UGX 200,000</td>
+                        <td>UGX 1,000,000</td>
+                        <td>Admin</td>
+                    </tr>
+                    <tr>
+                        <td>Apr 20, 2026</td>
+                        <td>Peter Ochieng</td>
+                        <td><span class="badge" style="background:#C6A43F; color:#0D3B2E; padding:3px 8px; border-radius:30px;">Withdrawal</span></td>
+                        <td>UGX 150,000</td>
+                        <td>UGX 1,600,000</td>
+                        <td>Admin</td>
+                    </tr>
+                    <tr>
+                        <td>Apr 15, 2026</td>
+                        <td>Mary Wanjiku</td>
+                        <td><span class="badge" style="background:#2E7D64; color:white; padding:3px 8px; border-radius:30px;">Deposit</span></td>
+                        <td>UGX 100,000</td>
+                        <td>UGX 700,000</td>
+                        <td>Admin</td>
+                    </tr>
+                    <tr>
+                        <td>Apr 10, 2026</td>
+                        <td>Lucy Achieng</td>
+                        <td><span class="badge" style="background:#2E7D64; color:white; padding:3px 8px; border-radius:30px;">Deposit</span></td>
+                        <td>UGX 150,000</td>
+                        <td>UGX 450,000</td>
+                        <td>Admin</td>
+                    </tr>
+                    <tr>
+                        <td>Apr 05, 2026</td>
+                        <td>James Mwangi</td>
+                        <td><span class="badge" style="background:#C6A43F; color:#0D3B2E; padding:3px 8px; border-radius:30px;">Withdrawal</span></td>
+                        <td>UGX 50,000</td>
+                        <td>UGX 800,000</td>
+                        <td>Admin</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+    
+    <div class="footer">
+        <i class="bi bi-shield-check"></i> NyondoStock — Enterprise Hardware Management System
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

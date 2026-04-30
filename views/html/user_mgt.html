@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NyondoStock - User Management</title>
+    
+    <!-- Bootstrap 5 CSS + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="/css/user_mgt.css">
+</head>
+<body>
+
+    <!-- ========== SIDEBAR ========== -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="/images/logo.png" alt="NyondoStock Logo">
+            <h3>NyondoStock</h3>
+            <p>Hardware Management</p>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-box-seam"></i> Stock Management</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-cart-plus"></i> Sales Recording</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-clock-history"></i> Sales History</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-credit-card"></i> Supplier Credit</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-piggy-bank"></i> Deposit Scheme</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-bar-chart-steps"></i> Reports</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom active"><i class="bi bi-people"></i> User Management</a></li>
+        </ul>
+        
+        <div class="sidebar-user">
+            <div class="user-name">
+                <i class="bi bi-person-circle"></i> Admin User 
+                <span class="role-badge">Admin</span>
+            </div>
+            <div class="user-role">System Administrator</div>
+            <button class="logout-btn"><i class="bi bi-box-arrow-right"></i> Sign Out</button>
+        </div>
+    </div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="main-content">
+        
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+            <div>
+                <h3 class="page-title">User Management</h3>
+                <p class="page-subtitle">Manage system users — add, edit, delete, and assign roles.</p>
+            </div>
+        </div>
+        
+        <!-- Add New User Form -->
+        <div class="form-card">
+            <div class="form-title">
+                <i class="bi bi-person-plus"></i> Add New User
+                <span class="admin-badge">Admin Only</span>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-control" placeholder="Enter full name">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" placeholder="Enter email">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" placeholder="07XX XXX XXX">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">NIN No</label>
+                    <input type="text" class="form-control" placeholder="Enter NIN">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">User Role</label>
+                    <select class="form-select">
+                        <option>Sales Attendant</option>
+                        <option>Store Manager</option>
+                        <option>Administrator</option>
+                    </select>
+                </div>
+                <div class="col-md-12 mt-3">
+                    <button class="btn-save"><i class="bi bi-save"></i> Add User</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Statistics Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card stat-total">
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-value">8</div>
+                    <small>Active system accounts</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card stat-admin">
+                    <div class="stat-label">Administrators</div>
+                    <div class="stat-value">2</div>
+                    <small>Full system access</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card stat-manager">
+                    <div class="stat-label">Store Managers</div>
+                    <div class="stat-value">2</div>
+                    <small>Inventory & sales access</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card stat-attendant">
+                    <div class="stat-label">Sales Attendants</div>
+                    <div class="stat-value">4</div>
+                    <small>Point of sale access</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Users Table -->
+        <div class="section-title">
+            <i class="bi bi-list-ul"></i> System Users
+        </div>
+        <div class="custom-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Administrators -->
+                    <tr>
+                        <td>001</td>
+                        <td>Admin User</td>
+                        <td>admin@nyondohardware.com</td>
+                        <td>0772 000 001</td>
+                        <td><span class="role-badge-admin">Administrator</span></td>
+                        <td><span class="status-active">Active</span></td>
+                        <td>Apr 24, 2026</td>
+                        <td class="actions-cell">
+                            <button class="btn-edit"><i class="bi bi-pencil"></i> Edit</button>
+                            <button class="btn-delete"><i class="bi bi-trash"></i> Del</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>002</td>
+                        <td>John Mukasa</td>
+                        <td>john@nyondohardware.com</td>
+                        <td>0772 000 002</td>
+                        <td><span class="role-badge-admin">Administrator</span></td>
+                        <td><span class="status-active">Active</span></td>
+                        <td>Apr 23, 2026</td>
+                        <td class="actions-cell">
+                            <button class="btn-edit"><i class="bi bi-pencil"></i> Edit</button>
+                            <button class="btn-delete"><i class="bi bi-trash"></i> Del</button>
+                        </td>
+                    </tr>
+                    <!-- Store Managers -->
+                    <tr>
+                        <td>003</td>
+                        <td>Michael Nyondo</td>
+                        <td>michael@nyondohardware.com</td>
+                        <td>0772 000 003</td>
+                        <td><span class="role-badge-manager">Store Manager</span></td>
+                        <td><span class="status-active">Active</span></td>
+                        <td>Apr 24, 2026</td>
+                        <td class="actions-cell">
+                            <button class="btn-edit"><i class="bi bi-pencil"></i> Edit</button>
+                            <button class="btn-delete"><i class="bi bi-trash"></i> Del</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>004</td>
+                        <td>Grace Achieng</td>
+                        <td>grace@nyondohardware.com</td>
+                        <td>0772 000 004</td>
+                        <td><span class="role-badge-manager">Store Manager</span></td>
+                        <td><span class="status-active">Active</span></td>
+                        <td>Apr 22, 2026</td>
+                        <td class="actions-cell">
+                            <button class="btn-edit"><i class="bi bi-pencil"></i> Edit</button>
+                            <button class="btn-delete"><i class="bi bi-trash"></i> Del</button>
+                        </td>
+                    </tr>
+                    <!-- Sales Attendants -->
+                    <tr>
+                        <td>005</td>
+                        <td>Sarah Kamau</td>
+                        <td>sarah@nyondohardware.com</td>
+                        <td>0772 000 005</td>
+                        <td><span class="role-badge-attendant">Sales Attendant</span></td>
+                        <td><span class="status-active">Active</span></td>
+                        <td>Apr 24, 2026</td>
+                        <td class="actions-cell">
+                            <button class="btn-edit"><i class="bi bi-pencil"></i> Edit</button>
+                            <button class="btn-delete"><i class="bi bi-trash"></i> Del</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>006</td>
+                        <td>Peter Omondi</td>
+                        <td>peter@nyondohardware.com</td>
+                        <td>0772 000 006</td>
+                        <td><span class="role-badge-attendant">Sales Attendant</span></td>
+                        <td><span class="status-active">Active</span></td>
+                        <td>Apr 23, 2026</td>
+                        <td class="actions-cell">
+                            <button class="btn-edit"><i class="bi bi-pencil"></i> Edit</button>
+                            <button class="btn-delete"><i class="bi bi-trash"></i> Del</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>007</td>
+                        <td>Alice Wanjiku</td>
+                        <td>alice@nyondohardware.com</td>
+                        <td>0772 000 007</td>
+                        <td><span class="role-badge-attendant">Sales Attendant</span></td>
+                        <td><span class="status-active">Active</span></td>
+                        <td>Apr 21, 2026</td>
+                        <td class="actions-cell">
+                            <button class="btn-edit"><i class="bi bi-pencil"></i> Edit</button>
+                            <button class="btn-delete"><i class="bi bi-trash"></i> Del</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>008</td>
+                        <td>James Mwangi</td>
+                        <td>james@nyondohardware.com</td>
+                        <td>0772 000 008</td>
+                        <td><span class="role-badge-attendant">Sales Attendant</span></td>
+                        <td><span class="status-inactive">Inactive</span></td>
+                        <td>Mar 15, 2026</td>
+                        <td class="actions-cell">
+                            <button class="btn-edit"><i class="bi bi-pencil"></i> Edit</button>
+                            <button class="btn-delete"><i class="bi bi-trash"></i> Del</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+      <!-- Role Description Card -->
+        <div class="form-card mt-3">
+            <div class="form-title">
+                <i class="bi bi-info-circle" style="color: #C6A43F;"></i> Role Permissions Overview
+            </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div style="background: #f8f9fa; border-radius: 12px; padding: 12px;">
+                        <h6 style="color: #0D3B2E; font-weight: 700;"><i class="bi bi-shield-lock"></i> Administrator</h6>
+                        <p style="font-size: 0.7rem; color: #6c757d; margin: 0;">Full system access — manage users, stock, sales, credit, deposits, and reports.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="background: #f8f9fa; border-radius: 12px; padding: 12px;">
+                        <h6 style="color: #0D3B2E; font-weight: 700;"><i class="bi bi-graph-up"></i> Store Manager</h6>
+                        <p style="font-size: 0.7rem; color: #6c757d; margin: 0;">Manage stock, record sales, view reports — no user management or financial modules.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="background: #f8f9fa; border-radius: 12px; padding: 12px;">
+                        <h6 style="color: #0D3B2E; font-weight: 700;"><i class="bi bi-cart"></i> Sales Attendant</h6>
+                        <p style="font-size: 0.7rem; color: #6c757d; margin: 0;">Record sales, view stock, process payments — no editing or deletion rights.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="footer">
+        <i class="bi bi-shield-check"></i> NyondoStock — Enterprise Hardware Management System
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>  

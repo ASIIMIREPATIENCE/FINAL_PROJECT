@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NyondoStock - Sales Recording</title>
+
+    <!-- Bootstrap 5 CSS + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/new_sale.css">
+</head>
+
+<body>
+
+    <!-- ========== SIDEBAR ========== -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="/images/logo.png" alt="Logo">
+            <h3>NyondoStock</h3>
+            <p>Hardware Management</p>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            </li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-box-seam"></i> Stock Management</a>
+            </li>
+            <li class="nav-item"><a href="#" class="nav-link-custom active"><i class="bi bi-cart-plus"></i> Sales
+                    Recording</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-clock-history"></i> Sales
+                    History</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-credit-card"></i> Supplier
+                    Credit</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-piggy-bank"></i> Deposit Scheme</a>
+            </li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-bar-chart-steps"></i> Reports</a>
+            </li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-people"></i> User Management</a>
+            </li>
+        </ul>
+
+        <div class="sidebar-user">
+            <div class="user-name">👤 Admin User <span class="role-badge">Admin</span></div>
+            <div class="user-role">System Administrator</div>
+            <button class="logout-btn"><i class="bi bi-box-arrow-right"></i> Sign Out</button>
+        </div>
+    </div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="main-content">
+
+        <!-- Top Bar -->
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+            <div>
+                <h3 style="color: var(--nyondo-green); font-weight: 700; margin: 0;">Sales Recording</h3>
+                <p style="color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;">Record customer sales — add items to
+                    cart, calculate transport, complete transaction.</p>
+            </div>
+        </div>
+
+        <!-- Customer Information Form -->
+        <div class="form-card" action="/postSale" method="post">
+            <div class="form-title">
+                <i class="bi bi-person" style="color: #C6A43F;"></i> Customer Information
+            </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Customer Name</label>
+                    <input type="text" class="form-control" placeholder="Enter customer name" name="customername">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" placeholder="07XX XXX XXX" name="phonenumber">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">NIN (Optional)</label>
+                    <input type="text" class="form-control" placeholder="National ID number" name="nin">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" name="payementmethod">Payment Method</label>
+                    <select class="form-select">
+                        <option>Cash</option>
+                        <option>Mobile Money</option>
+                        <option>Credit</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Product to Cart -->
+        <div class="form-card">
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" class="form-control" placeholder="Search or select product" name="productname">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" class="form-control" placeholder="Qty" name="quantity">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Unit Price (UGX)</label>
+                    <input type="text" class="form-control" placeholder="0" name="unitprice">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Unit Price (UGX)</label>
+                    <input type="text" class="form-control" placeholder="0" name="unitprice">
+                </div>
+            </div>
+        </div>
+
+        <!-- Cart Table -->
+        <div class="form-card">
+
+            <!-- Transport Calculation -->
+            <div class="row g-3 mt-2">
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox">
+                        <label class="form-check-label" style="font-size: 0.85rem;">
+                            Add Transport Charges
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Distance (km)</label>
+                    <input type="number" class="form-control" placeholder="Enter distance" name="distance">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Rate per km (UGX)</label>
+                    <input type="number" class="form-control" name="rate">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn-outline-custom w-100">Calculate</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total & Complete Sale -->
+        <div class="form-card">
+            <div class="row">
+                <div class="col-md-6 offset-md-6">
+                    <div class="cart-table">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="padding: 8px;"><strong>Subtotal:</strong></td>
+                                <td style="padding: 8px; text-align: right;"></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px;"><strong>Transport:</strong></td>
+                                <td style="padding: 8px; text-align: right;"></td>
+                            </tr>
+                            <tr class="total-row">
+                                <td style="padding: 8px;"><strong>TOTAL:</strong></td>
+                                <td
+                                    style="padding: 8px; text-align: right; font-size: 1.2rem; color: var(--nyondo-gold);">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <button class="btn-success-custom mt-3" style="width: 100%;" data-bs-toggle="modal"
+                        data-bs-target="#receiptModal" type="submit">
+                        <i class="bi bi-check-circle"></i> COMPLETE SALE
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">
+        <i class="bi bi-shield-check"></i> NyondoStock — Enterprise Hardware Management System
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NyondoStock - Reports</title>
+    
+    <!-- Bootstrap 5 CSS + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/reports.css">
+</head>
+<body>
+
+    <!-- ========== SIDEBAR ========== -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="/images/logo.png" alt="Logo">
+            <h3>NyondoStock</h3>
+            <p>Hardware Management</p>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-box-seam"></i> Stock Management</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-cart-plus"></i> Sales Recording</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-clock-history"></i> Sales History</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-credit-card"></i> Supplier Credit</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-piggy-bank"></i> Deposit Scheme</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom active"><i class="bi bi-bar-chart-steps"></i> Reports</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-people"></i> User Management</a></li>
+        </ul>
+        
+        <div class="sidebar-user">
+            <div class="user-name">👤 Admin User</div>
+            <div class="user-role">System Administrator</div>
+            <button class="logout-btn"><i class="bi bi-box-arrow-right"></i> Sign Out</button>
+        </div>
+    </div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+            <div>
+                <h3 style="color: var(--nyondo-green); font-weight: 700; margin: 0;">Reports</h3>
+                <p style="color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;">Generate and export business reports.</p>
+            </div>
+        </div>
+        
+        <!-- Report Type Tabs -->
+        <div class="filter-card">
+            <div class="form-title">
+                <i class="bi bi-funnel"></i> Report Type
+            </div>
+            <div class="mb-3">
+                <a href="#" class="report-tab report-tab-active">Sales Report</a>
+                <a href="#" class="report-tab report-tab-inactive">Stock Report</a>
+                <a href="#" class="report-tab report-tab-inactive">Credit Report</a>
+                <a href="#" class="report-tab report-tab-inactive">Deposit Report</a>
+                <a href="#" class="report-tab report-tab-inactive">Profit Report</a>
+            </div>
+        </div>
+        
+        <!-- Date Range Filter -->
+        <div class="filter-card">
+            <div class="form-title">
+                <i class="bi bi-calendar3"></i> Date Range
+            </div>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">From Date</label>
+                    <input type="date" class="form-control" value="2026-04-01">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">To Date</label>
+                    <input type="date" class="form-control" value="2026-04-30">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select">
+                        <option>All</option>
+                        <option>Paid</option>
+                        <option>Credit</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn-generate"><i class="bi bi-search"></i> Generate Report</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Export Options -->
+        <div class="filter-card">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div class="form-title mb-0">
+                    <i class="bi bi-file-earmark-text"></i> Sales Report (April 2026)
+                </div>
+                <div>
+                    <button class="btn-export me-2"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
+                    <button class="btn-export"><i class="bi bi-file-earmark-pdf"></i> Export PDF</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sales Report Table -->
+        <div class="section-title">
+            <i class="bi bi-receipt"></i> Sales Transaction Details
+        </div>
+        <div class="custom-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Invoice #</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Subtotal</th>
+                        <th>Transport</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2026-04-24</td>
+                        <td>INV-001</td>
+                        <td>Sarah Kamau</td>
+                        <td>Cement (10 bags)</td>
+                        <td>UGX 350,000</td>
+                        <td>UGX 15,000</td>
+                        <td>UGX 365,000</td>
+                        <td>Cash</td>
+                        <td><span class="badge-paid">Paid</span></td>
+                    </tr>
+                    <tr>
+                        <td>2026-04-23</td>
+                        <td>INV-002</td>
+                        <td>John Otieno</td>
+                        <td>Paint (5 cans)</td>
+                        <td>UGX 275,000</td>
+                        <td>UGX 0</td>
+                        <td>UGX 275,000</td>
+                        <td>Mobile Money</td>
+                        <td><span class="badge-paid">Paid</span></td>
+                    </tr>
+                    <tr>
+                        <td>2026-04-22</td>
+                        <td>INV-003</td>
+                        <td>Peter Omondi</td>
+                        <td>Pipes & Fittings</td>
+                        <td>UGX 189,500</td>
+                        <td>UGX 8,000</td>
+                        <td>UGX 197,500</td>
+                        <td>Credit</td>
+                        <td><span class="badge-credit">Credit</span></td>
+                    </tr>
+                    <tr>
+                        <td>2026-04-21</td>
+                        <td>INV-004</td>
+                        <td>Alice Wanjiku</td>
+                        <td>Nails (8 boxes)</td>
+                        <td>UGX 64,000</td>
+                        <td>UGX 0</td>
+                        <td>UGX 64,000</td>
+                        <td>Cash</td>
+                        <td><span class="badge-paid">Paid</span></td>
+                    </tr>
+                    <tr>
+                        <td>2026-04-20</td>
+                        <td>INV-005</td>
+                        <td>James Mwangi</td>
+                        <td>Hammer (5 pcs)</td>
+                        <td>UGX 60,000</td>
+                        <td>UGX 5,000</td>
+                        <td>UGX 65,000</td>
+                        <td>Mobile Money</td>
+                        <td><span class="badge-paid">Paid</span></td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="4" style="text-align: right;"><strong>TOTALS</strong></td>
+                        <td><strong>UGX 938,500</strong></td>
+                        <td><strong>UGX 28,000</strong></td>
+                        <td><strong>UGX 966,500</strong></td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Summary Cards at Bottom -->
+        <div class="row g-3 mt-3">
+            <div class="col-md-3">
+                <div class="summary-card" style="background: linear-gradient(135deg, #0D3B2E 0%, #1a5c48 100%); color: white; border-radius: 16px; padding: 1rem; text-align: center;">
+                    <div style="font-size: 0.7rem; opacity: 0.8;">Total Sales</div>
+                    <div style="font-size: 1.3rem; font-weight: 700; color: #C6A43F;">UGX 966,500</div>
+                    <small style="opacity: 0.7;">5 transactions</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-card" style="background: linear-gradient(135deg, #C6A43F 0%, #B8922E 100%); color: #0D3B2E; border-radius: 16px; padding: 1rem; text-align: center;">
+                    <div style="font-size: 0.7rem; opacity: 0.8;">Cash Sales</div>
+                    <div style="font-size: 1.3rem; font-weight: 700;">UGX 429,000</div>
+                    <small style="opacity: 0.8;">2 transactions</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-card" style="background: linear-gradient(135deg, #2E7D64 0%, #236854 100%); color: white; border-radius: 16px; padding: 1rem; text-align: center;">
+                    <div style="font-size: 0.7rem; opacity: 0.8;">Mobile Money</div>
+                    <div style="font-size: 1.3rem; font-weight: 700; color: #C6A43F;">UGX 340,000</div>
+                    <small style="opacity: 0.7;">2 transactions</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-card" style="background: linear-gradient(135deg, #9E3C2A 0%, #7a2e1f 100%); color: white; border-radius: 16px; padding: 1rem; text-align: center;">
+                    <div style="font-size: 0.7rem; opacity: 0.8;">Credit Sales</div>
+                    <div style="font-size: 1.3rem; font-weight: 700; color: #C6A43F;">UGX 197,500</div>
+                    <small style="opacity: 0.8;">1 transaction</small>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="footer">
+        <i class="bi bi-shield-check"></i> NyondoStock — Enterprise Hardware Management System
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

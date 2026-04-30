@@ -1,0 +1,43 @@
+// models/Registration.js
+const mongoose = require('mongoose');
+const passportLocalMongoose = require('passport-local-mongoose').default || require('passport-local-mongoose');
+
+const registrationSchema = new mongoose.Schema({
+    fullname: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,
+    },
+    phonenumber: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    role: {
+        type: String,
+        trim:true,
+        enum: ['admin', 'store_manager', 'sales_attendant'],
+       
+    },
+});
+
+
+if (typeof passportLocalMongoose === 'function') {
+    registrationSchema.plugin(passportLocalMongoose, {
+        usernameField: 'email' 
+    });
+} else {
+    console.error('Error: passport-local-mongoose is not properly installed');
+    console.error('Run: npm install passport-local-mongoose');
+    process.exit(1);
+}
+
+module.exports = mongoose.model('Registration', registrationSchema);

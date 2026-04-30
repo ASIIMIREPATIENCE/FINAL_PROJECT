@@ -1,0 +1,330 @@
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #F0E6D6;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        :root {
+            --nyondo-green: #0D3B2E;
+            --nyondo-gold: #C6A43F;
+            --nyondo-gold-hover: #B8922E;
+        }
+        
+        /* ========== SIDEBAR ========== */
+        .sidebar {
+            width: 280px;
+            background: #0D3B2E;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            overflow-y: auto;
+            box-shadow: 2px 0 15px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--nyondo-gold);
+            border-radius: 4px;
+        }
+        
+        .sidebar-logo {
+            padding: 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .sidebar-logo img {
+            height: 50px;
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-logo h3 {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        .sidebar-logo p {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.65rem;
+            margin: 5px 0 0 0;
+        }
+        
+        .nav-menu {
+            padding: 0 0.8rem;
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin-bottom: 4px;
+        }
+        
+        .nav-link-custom {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-link-custom i {
+            font-size: 1.1rem;
+            width: 22px;
+        }
+        
+        .nav-link-custom:hover {
+            background: rgba(198, 164, 63, 0.2);
+            color: var(--nyondo-gold);
+        }
+        
+        .nav-link-custom.active {
+            background: var(--nyondo-gold);
+            color: #0D3B2E;
+        }
+        
+        .sidebar-user {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: #0D3B2E;
+        }
+        
+        .user-name {
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+        
+        .user-role {
+            color: var(--nyondo-gold);
+            font-size: 0.65rem;
+            margin-bottom: 10px;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            padding: 7px 12px;
+            border-radius: 30px;
+            color: white;
+            font-size: 0.7rem;
+            width: 100%;
+            cursor: pointer;
+        }
+        
+        .logout-btn:hover {
+            background: var(--nyondo-gold);
+            color: #0D3B2E;
+        }
+        
+        /* ========== MAIN CONTENT ========== */
+        .main-content {
+            margin-left: 280px;
+            padding: 1.5rem;
+            min-height: 100vh;
+        }
+        
+        /* Form Cards */
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .form-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--nyondo-green);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 3px solid var(--nyondo-gold);
+            padding-left: 12px;
+        }
+        
+        .form-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--nyondo-green);
+            margin-bottom: 4px;
+        }
+        
+        .form-control, .form-select {
+            font-size: 0.85rem;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-primary-custom {
+            background: var(--nyondo-gold);
+            color: #0D3B2E;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .btn-success-custom {
+            background: #2E7D64;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        
+        .btn-outline-custom {
+            background: transparent;
+            border: 1px solid var(--nyondo-gold);
+            color: var(--nyondo-gold);
+            padding: 5px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+        }
+        
+        .btn-remove {
+            background: #9E3C2A;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+        }
+        
+        /* Cart Table */
+        .cart-table {
+            background: white;
+            border-radius: 16px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+        
+        .cart-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .cart-table th {
+            background: #0D3B2E;
+            color: white;
+            padding: 10px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: left;
+        }
+        
+        .cart-table td {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .total-row {
+            background: #f8f9fa;
+            font-weight: 700;
+        }
+        
+        /* Product Search Results - Static */
+        .product-result {
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .product-name-result {
+            font-weight: 600;
+            color: var(--nyondo-green);
+        }
+        
+        /* Receipt Modal */
+        .receipt-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .receipt-header {
+            text-align: center;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .receipt-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+        }
+        
+        .receipt-total {
+            border-top: 1px solid #ddd;
+            padding-top: 8px;
+            margin-top: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 0.8rem;
+            color: #8E8E8E;
+            font-size: 0.65rem;
+            margin-left: 280px;
+            background: transparent;
+        }
+        
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .main-content, .footer {
+                margin-left: 0;
+            }
+        }
+        
+        .role-badge {
+            background: #C6A43F;
+            color: #0D3B2E;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }

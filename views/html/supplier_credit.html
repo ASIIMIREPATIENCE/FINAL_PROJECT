@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NyondoStock - Supplier Credit Management</title>
+    
+    <!-- Bootstrap 5 CSS + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="/css/supplier_credit.css">
+</head>
+<body>
+
+    <!-- ========== SIDEBAR ========== -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="/images/logo.png" alt="Logo">
+            <h3>NyondoStock</h3>
+            <p>Hardware Management</p>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-box-seam"></i> Stock Management</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-cart-plus"></i> Sales Recording</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-clock-history"></i> Sales History</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom active"><i class="bi bi-credit-card"></i> Supplier Credit</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-piggy-bank"></i> Deposit Scheme</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-bar-chart-steps"></i> Reports</a></li>
+            <li class="nav-item"><a href="#" class="nav-link-custom"><i class="bi bi-people"></i> User Management</a></li>
+        </ul>
+        
+        <div class="sidebar-user">
+            <div class="user-name">👤 Admin User <span class="role-badge">Admin</span></div>
+            <div class="user-role">System Administrator</div>
+            <button class="logout-btn"><i class="bi bi-box-arrow-right"></i> Sign Out</button>
+        </div>
+    </div>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <div class="main-content">
+        
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+            <div>
+                <h3 style="color: var(--nyondo-green); font-weight: 700; margin: 0;">Supplier Credit Management</h3>
+                <p style="color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;">Track credit given to suppliers and manage payment schedules.</p>
+            </div>
+        </div>
+        
+        <!-- Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <div style="font-size: 0.7rem; opacity: 0.8;">Total Outstanding Credit</div>
+                    <div class="summary-value">UGX 6,630,000</div>
+                    <small style="opacity: 0.7;">Across 3 suppliers</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="summary-card" style="background: linear-gradient(135deg, #C6A43F 0%, #B8922E 100%);">
+                    <div style="font-size: 0.7rem; opacity: 0.8;">Due Within 7 Days</div>
+                    <div class="summary-value" style="color: #0D3B2E;">UGX 2,450,000</div>
+                    <small style="opacity: 0.8;">1 payment due soon</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="summary-card" style="background: linear-gradient(135deg, #9E3C2A 0%, #7a2e1f 100%);">
+                    <div style="font-size: 0.7rem; opacity: 0.8;">Overdue Payments</div>
+                    <div class="summary-value">UGX 3,200,000</div>
+                    <small style="opacity: 0.8;">1 overdue payment</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Record Credit Form -->
+        <div class="form-card">
+            <div class="form-title">
+                <i class="bi bi-plus-circle" style="color: #C6A43F;"></i> Record New Credit
+                <span class="role-badge" style="background: #0D3B2E; color: white;">Admin Only</span>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Supplier Name</label>
+                    <input type="text" class="form-control" placeholder="Enter supplier name">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Amount (UGX)</label>
+                    <input type="number" class="form-control" placeholder="Amount">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Credit Date</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Due Date</label>
+                    <input type="date" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Notes</label>
+                    <input type="text" class="form-control" placeholder="Optional notes">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button class="btn-save w-100"><i class="bi bi-save"></i> Save</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Outstanding Credit Table -->
+        <div class="section-title">
+            <i class="bi bi-list-ul"></i> Outstanding Credit
+        </div>
+        <div class="custom-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Supplier</th>
+                        <th>Amount Owed</th>
+                        <th>Credit Date</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Bamburi Cement Ltd</td>
+                        <td>UGX 2,450,000</td>
+                        <td>Apr 15, 2026</td>
+                        <td>May 30, 2026</td>
+                        <td><span class="badge-pending">Pending</span></td>
+                        <td><button class="btn-pay"><i class="bi bi-cash"></i> Pay</button></td>
+                    </tr>
+                    <tr>
+                        <td>Rainbow Paints</td>
+                        <td>UGX 980,000</td>
+                        <td>Apr 20, 2026</td>
+                        <td>Jun 10, 2026</td>
+                        <td><span class="badge-pending">Pending</span></td>
+                        <td><button class="btn-pay"><i class="bi bi-cash"></i> Pay</button></td>
+                    </tr>
+                    <tr>
+                        <td>Steel Masters Ltd</td>
+                        <td>UGX 3,200,000</td>
+                        <td>Mar 25, 2026</td>
+                        <td>May 25, 2026</td>
+                        <td><span class="badge-overdue">Overdue</span></td>
+                        <td><button class="btn-pay"><i class="bi bi-cash"></i> Pay</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Payment History Table -->
+        <div class="section-title">
+            <i class="bi bi-clock-history"></i> Recent Payments
+        </div>
+        <div class="custom-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Supplier</th>
+                        <th>Amount Paid</th>
+                        <th>Payment Method</th>
+                        <th>Reference</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Apr 10, 2026</td>
+                        <td>Bamburi Cement Ltd</td>
+                        <td>UGX 500,000</td>
+                        <td>Bank Transfer</td>
+                        <td>REF-001</td>
+                    </tr>
+                    <tr>
+                        <td>Apr 5, 2026</td>
+                        <td>Rainbow Paints</td>
+                        <td>UGX 200,000</td>
+                        <td>Cash</td>
+                        <td>REF-002</td>
+                    </tr>
+                    <tr>
+                        <td>Mar 28, 2026</td>
+                        <td>Steel Masters Ltd</td>
+                        <td>UGX 800,000</td>
+                        <td>Mobile Money</td>
+                        <td>REF-003</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+    
+    <div class="footer">
+        <i class="bi bi-shield-check"></i> NyondoStock — Enterprise Hardware Management System
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
