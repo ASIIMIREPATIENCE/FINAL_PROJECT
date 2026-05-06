@@ -7,7 +7,7 @@ head
   link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
   link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
   link(rel='stylesheet' href='/css/new_sale.css')
-  
+// ========== SIDEBAR ==========
 .sidebar
   .sidebar-logo
     img(src='/images/logo.png' alt='Logo')
@@ -48,20 +48,21 @@ head
         |  User Management
   .sidebar-user
     .user-name
-      | 👤 Admin User 
+      | &#x1F464; Admin User 
       span.role-badge Admin
     .user-role System Administrator
     button.logout-btn
       i.bi.bi-box-arrow-right
       |  Sign Out
-      
+// ========== MAIN CONTENT ==========
 .main-content
   // Top Bar
   .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
     div
       h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Sales Recording
       p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;')
-        | Record customer sales — add items to cart, calculate transport, complete transaction.
+        | Record customer sales &mdash; add items to
+        | cart, calculate transport, complete transaction.
   
   // MAIN FORM
   form(action='/postSale' method='POST')
@@ -73,47 +74,54 @@ head
       .row.g-3
         .col-md-4
           label.form-label Customer Name
-          input.form-control(type='text' placeholder='Enter customer name' name='customername')
+          input.form-control(type='text' placeholder='Enter customer name' name='customername' required)
         .col-md-3
           label.form-label Phone Number
-          input.form-control(type='tel' placeholder='07XX XXX XXX' name='phonenumber')
+          input.form-control(type='tel' placeholder='07XX XXX XXX' name='phonenumber' required)
         .col-md-3
           label.form-label NIN (Optional)
           input.form-control(type='text' placeholder='National ID number' name='nin')
         .col-md-2
           label.form-label Payment Method
-          select.form-select(name='paymentmethod')
-            option Cash
-            option Mobile Money
-            option Credit
+          select.form-select(name='paymentmethod' required)
+            option(value='') Select payment method
+            option(value='Cash') Cash
+            option(value='Mobile Money') Mobile Money
+            option(value='Credit') Credit
     
-    // Add Product to Cart
+    // Add Product
     .form-card
       .row.g-3
         .col-md-4
-          label.form-label Product Name
-          input.form-control(type='text' placeholder='Search or select product' name='productname')
+          label(for='productName') Product Name
+          select.form-select(name='productName' required)
+            option(value='' disabled selected) Select Product
+            each product in items 
+              option(value=product.productname)= product.productname + ' (Stock: ' + product.quantity + ' | Price: ' + product.sellingprice + ' UGX)'
         .col-md-3
           label.form-label Quantity
-          input.form-control(type='number' placeholder='Qty' name='quantity')
+          input.form-control(type='number' placeholder='Qty' name='quantity' required min='1')
         .col-md-3
           label.form-label Unit Price (UGX)
-          input.form-control(type='text' placeholder='0' name='unitprice')
+          input.form-control(type='number' placeholder='0' name='unitprice' required min='0')
+        .col-md-2
+          label.form-label &nbsp;
     
     // Transport Calculation
     .form-card
-      .row.g-3.mt-2
+      .row.g-3
         .col-md-4
           .form-check
-            input.form-check-input(type='checkbox' id='addTransport')
-            label.form-check-label(style='font-size: 0.85rem;' for='addTransport')
+            input.form-check-input(type='checkbox' name='addTransport' value='true')
+            label.form-check-label(style='font-size: 0.85rem;')
               | Add Transport Charges
         .col-md-3
           label.form-label Distance (km)
-          input.form-control(type='number' placeholder='Enter distance' name='distance')
+          input.form-control(type='number' placeholder='Enter distance' name='distance' value='0' min='0')
         .col-md-3
           label.form-label Rate per km (UGX)
-          input.form-control(type='number' name='rate')
+          input.form-control(type='number' name='rate' placeholder= "0")
+        
     
     // Total & Complete Sale
     .form-card
@@ -124,21 +132,24 @@ head
               tr
                 td(style='padding: 8px;')
                   strong Subtotal:
-                td(style='padding: 8px; text-align: right;') 
+                td(style='padding: 8px; text-align: right;')
+                  | (Calculated on server)
               tr
                 td(style='padding: 8px;')
                   strong Transport:
-                td(style='padding: 8px; text-align: right;') 
+                td(style='padding: 8px; text-align: right;')
+                  | (Calculated on server)
               tr.total-row
                 td(style='padding: 8px;')
                   strong TOTAL:
-                td(style='padding: 8px; text-align: right; font-size: 1.2rem; color: var(--nyondo-gold);') 
-          button.btn-success-custom.mt-3(style='width: 100%;' type='submit')
+                td(style='padding: 8px; text-align: right; font-size: 1.2rem; color: var(--nyondo-gold);')
+                  | (Calculated on server)
+          button.btn-success-custom.mt-3(type='submit' style='width: 100%;')
             i.bi.bi-check-circle
             |  COMPLETE SALE
 
 .footer
   i.bi.bi-shield-check
-  |  NyondoStock — Enterprise Hardware Management System
+  |  NyondoStock &mdash; Enterprise Hardware Management System
 
 script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')

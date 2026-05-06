@@ -100,40 +100,22 @@ head
     table.table.mb-0
       thead
         tr
-          th Time
-          th Customer
-          th Items
+          th Date
+          th Customer Name
+          th Product Name
           th Total
-          th Status
+          th Attendant
       tbody
+      each sale in sales
         tr
-          td 10:30 AM
-          td Sarah Kamau
-          td Cement (10 bags)
-          td UGX 350,000
-          td
-            span.badge-paid Paid
+          td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
+          td #{sale.customername}
+          td #{sale.productname || 'Unknown Product'}
+          td #{sale.total ? sale.total.toLocaleString() : '0'}
+          td #{sale.attendant ? sale.attendant.fullname : 'unknown attendant'}
+      else
         tr
-          td 11:15 AM
-          td John Otieno
-          td Paint (5 cans)
-          td UGX 275,000
-          td
-            span.badge-paid Paid
-        tr
-          td 1:45 PM
-          td Peter Omondi
-          td Pipes &amp; Fittings
-          td UGX 189,500
-          td
-            span.badge-credit Credit
-        tr
-          td 3:20 PM
-          td Alice Wanjiku
-          td Nails (8 boxes)
-          td UGX 64,000
-          td
-            span.badge-paid Paid
+          td.text-center(colspan='6') No sales found
 // Footer
 .footer
   i.bi.bi-shield-check

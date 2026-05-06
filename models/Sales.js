@@ -16,7 +16,7 @@ const salesSchema = new mongoose.Schema({
     },
     nin: {
         type: String,
-        required: true,
+        required: false,
         trim: true,
     },
     productname: {
@@ -49,6 +49,10 @@ const salesSchema = new mongoose.Schema({
     Date: {
         type: Date,
         default: Date.now
+    },
+      attendant:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Registration'
     }
     });
 

@@ -49,7 +49,7 @@ app.use((req, res, next) => {
  app.use('/', require('./routes/indexRoutes'))
  app.use('/', require('./routes/salesRoutes'))
  app.use('/', require('./routes/stockRoutes'))
-//  app.use('/', require('./routes/stockRoutes'))
+ app.use('/', require('./routes/dashboardRoutes'))
 // app.use('/', require('./routes/indexRoutes'))
 // app.use('/login', require('./routes/loginRoutes'))
 

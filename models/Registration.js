@@ -27,6 +27,10 @@ const registrationSchema = new mongoose.Schema({
         enum: ['admin', 'store_manager', 'sales_attendant'],
        
     },
+    Date: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 
