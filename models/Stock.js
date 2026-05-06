@@ -37,7 +37,7 @@ const stockSchema = new mongoose.Schema({
    
    
     
-    Dateadded: {
+    Date: {
         type: Date,
         default: Date.now
     }

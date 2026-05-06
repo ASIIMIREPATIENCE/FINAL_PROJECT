@@ -27,7 +27,7 @@ head
       i.bi.bi-box-seam
       |  View Stock
   .user-section
-    .user-name &#x1F464; Sarah Kamau
+    .user-name 👤 Sarah Kamau
     .user-role Sales Attendant
     button.logout-btn 
       i.bi.bi-box-arrow-right
@@ -37,7 +37,7 @@ head
   // Welcome Row
   .row.mb-4
     .col-12
-      h4(style='color: var(--nyondo-green);') Welcome back, Sarah! &#x1F44B;
+      h4(style='color: var(--nyondo-green);') Welcome back, Sarah! 👋
       p(style='color: #6c757d;') Ready to serve customers today.
   // Stats Row
   .row.g-3.mb-4
@@ -63,35 +63,26 @@ head
     table.table.mb-0
       thead
         tr
-          th Product
+          th Date
+          th Product Name
           th Current Stock
           th Reorder Level
-          th Status
+          th Selling Price
+          th Supplier
+          th Attendant
       tbody
-        tr
-          td Portland Cement (50kg)
-          td 28 bags
-          td 50 bags
-          td
-            span.badge-critical Critical
-        tr
-          td 3-inch Nails (box)
-          td 12 boxes
-          td 20 boxes
-          td
-            span.badge-low Low
-        tr
-          td PVC Pipe 4&quot; (10ft)
-          td 8 pieces
-          td 15 pieces
-          td
-            span.badge-low Low
-        tr
-          td Paint Brush 4&quot;
-          td 15 pcs
-          td 25 pcs
-          td
-            span.badge-low Low
+        each item in stockItems
+          tr
+            td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
+            td #{item.productname || 'Unknown product'}
+            td #{item.quantity || 0}
+            td #{item.reorderlevel || 'N/A'}
+            td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
+            td #{item.supplier || 'N/A'}
+            td #{item.attendant || 'unknown attendant'}
+        else
+          tr
+            td.text-center(colspan='7') No stock items found
   // Recent Sales Table
   .section-title
     i.bi.bi-clock-history
@@ -106,16 +97,16 @@ head
           th Total
           th Attendant
       tbody
-      each sale in sales
-        tr
-          td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
-          td #{sale.customername}
-          td #{sale.productname || 'Unknown Product'}
-          td #{sale.total ? sale.total.toLocaleString() : '0'}
-          td #{sale.attendant ? sale.attendant.fullname : 'unknown attendant'}
-      else
-        tr
-          td.text-center(colspan='6') No sales found
+        each sale in sales
+          tr
+            td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
+            td #{sale.customername}
+            td #{sale.productname || 'Unknown Product'}
+            td #{sale.total ? 'UGX ' + sale.total.toLocaleString() : 'UGX 0'}
+            td #{sale.attendant ? sale.attendant.fullname : 'unknown attendant'}
+        else
+          tr
+            td.text-center(colspan='5') No sales found
 // Footer
 .footer
   i.bi.bi-shield-check

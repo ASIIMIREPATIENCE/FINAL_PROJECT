@@ -115,128 +115,34 @@ head
     table
       thead
         tr
-          th Product
-          th Category
-          th Quantity
-          th Cost Price
+          th Date
+          th Product Name
+          th Current Stock
+          th Reorder Level
           th Selling Price
           th Supplier
-          th Status
+          th Attendant
           th(style='text-align: center;') Actions
       tbody
-        // Critical Stock Row
-        tr(style='border-left: 3px solid #9E3C2A;')
-          td Portland Cement (50kg)
-          td Cement
-          td 28 bags
-          td UGX 18,000
-          td UGX 28,000
-          td Bamburi Cement Ltd
-          td
-            span.badge-critical Critical
-          td(style='text-align: center;')
-            button.btn-edit
-              i.bi.bi-pencil
-              |  Edit
-            button.btn-delete
-              i.bi.bi-trash
-              |  Delete
-        tr
-          td 3-inch Nails (box)
-          td Nails
-          td 12 boxes
-          td UGX 25,000
-          td UGX 35,000
-          td Steel Masters Ltd
-          td
-            span.badge-low Low
-          td(style='text-align: center;')
-            button.btn-edit
-              i.bi.bi-pencil
-              |  Edit
-            button.btn-delete
-              i.bi.bi-trash
-              |  Delete
-        tr
-          td PVC Pipe 4&quot; (10ft)
-          td Pipes
-          td 8 pieces
-          td UGX 12,000
-          td UGX 18,000
-          td Pexco Pipes Ltd
-          td
-            span.badge-low Low
-          td(style='text-align: center;')
-            button.btn-edit
-              i.bi.bi-pencil
-              |  Edit
-            button.btn-delete
-              i.bi.bi-trash
-              |  Delete
-        tr
-          td Paint Brush 4&quot;
-          td Tools
-          td 15 pcs
-          td UGX 3,500
-          td UGX 5,500
-          td Tools Plus Ltd
-          td
-            span.badge-low Low
-          td(style='text-align: center;')
-            button.btn-edit
-              i.bi.bi-pencil
-              |  Edit
-            button.btn-delete
-              i.bi.bi-trash
-              |  Delete
-        tr
-          td White Paint (20L)
-          td Paint
-          td 45 cans
-          td UGX 45,000
-          td UGX 65,000
-          td Rainbow Paints
-          td
-            span.badge-good Good
-          td(style='text-align: center;')
-            button.btn-edit
-              i.bi.bi-pencil
-              |  Edit
-            button.btn-delete
-              i.bi.bi-trash
-              |  Delete
-        tr
-          td Hammer (16oz)
-          td Tools
-          td 32 pcs
-          td UGX 8,000
-          td UGX 12,000
-          td Tools Plus Ltd
-          td
-            span.badge-good Good
-          td(style='text-align: center;')
-            button.btn-edit
-              i.bi.bi-pencil
-              |  Edit
-            button.btn-delete
-              i.bi.bi-trash
-              |  Delete
-        tr
-          td Electrical Wire (roll)
-          td Electrical
-          td 18 rolls
-          td UGX 55,000
-          td UGX 75,000
-          td Power Electric Ltd
-          td
-            span.badge-good Good
-          td(style='text-align: center;')
-            button.btn-edit
-              i.bi.bi-pencil
-              |  Edit
-            button.btn-delete
-              i.bi.bi-trash
-              |  Delete
+        each item in stockItems
+          tr
+            td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
+            td #{item.productname || 'Unknown product'}
+            td #{item.quantity || 0}
+            td #{item.reorderlevel || 'N/A'}
+            td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
+            td #{item.supplier || 'N/A'}
+            td #{item.attendant || 'unknown attendant'}
+            td(style='text-align: center;')
+              button.btn-edit(type='button')
+                i.bi.bi-pencil
+                |  Edit
+              button.btn-delete(type='button')
+                i.bi.bi-trash
+                |  Delete
+        else
+          tr
+            td.text-center(colspan='8') No stock items found
 
   // Low Stock Summary Card
   .row.g-3.mt-2
