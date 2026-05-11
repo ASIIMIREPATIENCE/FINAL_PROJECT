@@ -1,3 +1,4 @@
+// 
 const express = require("express");
 const router = express.Router();
 const Stock = require('../models/Stock');
@@ -11,6 +12,17 @@ router.get('/addStock', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.render('stock', { stockItems: [] }); // Pass empty array if error
+    }
+});
+
+// GET route - Show edit form
+router.get('/editStock/:id', async (req, res) => {
+    try {
+        const item = await Stock.findById(req.params.id);
+        res.render('stock_edit', { item: item });
+    } catch (error) {
+        console.error(error);
+        res.redirect('/addStock');
     }
 });
 
@@ -39,10 +51,11 @@ router.post('/postStock', async (req, res) => {
     }
 });
 
-// DELETE route - Delete stock item (optional)
+// DELETE route - Delete stock item
 router.post('/deleteStock/:id', async (req, res) => {
     try {
         await Stock.findByIdAndDelete(req.params.id);
+        console.log("Stock deleted with ID:", req.params.id);
         res.redirect('/addStock');
     } catch (error) {
         console.error(error);
@@ -50,14 +63,12 @@ router.post('/deleteStock/:id', async (req, res) => {
     }
 });
 
-// EDIT route - Update stock item (optional)
+// EDIT route - Update stock item
 router.post('/editStock/:id', async (req, res) => {
     try {
-        const { productname, category, quantity, costprice, sellingprice, supplier, reorderlevel } = req.body;
+        const { quantity, costprice, sellingprice, supplier, reorderlevel } = req.body;
         
         await Stock.findByIdAndUpdate(req.params.id, {
-            productname,
-            category,
             quantity: Number(quantity),
             costprice: Number(costprice),
             sellingprice: Number(sellingprice),
@@ -65,6 +76,7 @@ router.post('/editStock/:id', async (req, res) => {
             reorderlevel: Number(reorderlevel)
         });
         
+        console.log("Stock updated with ID:", req.params.id);
         res.redirect('/addStock');
     } catch (error) {
         console.error(error);

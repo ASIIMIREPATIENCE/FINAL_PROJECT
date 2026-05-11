@@ -6,40 +6,40 @@ const Sale = require('../models/Sales');
 
 
 
-// router.get("/", (req, res) => {
-//     res.render('index')
-// })
+router.get("/", (req, res) => {
+    res.render('index')
+})
 
 
-// // user registration
-// router.get("/register", (req, res) => {
-//     res.render('registration')
-// })
+// user registration
+router.get("/register", (req, res) => {
+    res.render('registration')
+})
 
-// router.post('/postreg',async(req,res)=>{
+router.post('/postreg',async(req,res)=>{
 
-// try{
-//    const { fullname, email, phonenumber, password,confirmpassword,role} = req.body;
-//     let existingemail=await Registration.findOne({email:email.toLowerCase()})
+try{
+   const { fullname, email, phonenumber, password,confirmpassword,role} = req.body;
+    let existingemail=await Registration.findOne({email:email.toLowerCase()})
 
-// if(existingemail){
-//     return res.status(401).render('registration',{message:"Email already exists"})}
+if(existingemail){
+    return res.status(401).render('registration',{message:"Email already exists"})}
 
-//    const newemail=new Registration({
-//      fullname,
-//     email:email.toLowerCase(),
-//     phonenumber,
-//     role,
-//    })
+   const newemail=new Registration({
+     fullname,
+    email:email.toLowerCase(),
+    phonenumber,
+    role,
+   })
 
-//   await Registration.register(newemail, password);
-//   res.redirect('/')
+  await Registration.register(newemail, password);
+  res.redirect('/')
     
-//    }catch(error){
-//     console.log(error)
-//     res.render('registration',{error:error.message})
-//    }
-// })
+   }catch(error){
+    console.log(error)
+    res.render('registration',{error:error.message})
+   }
+})
 
 // user login
 router.get("/userlogin", (req, res) => {

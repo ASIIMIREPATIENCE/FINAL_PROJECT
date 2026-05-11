@@ -1,3 +1,5 @@
+//- 
+
 doctype html
 head
   meta(charset='UTF-8')
@@ -199,7 +201,7 @@ head
     .col-lg-7
       .section-title
         i.bi.bi-exclamation-triangle-fill(style='color: #C6A43F;')
-        |  Low Stock Alerts
+        |  Stock 
       .table-responsive.custom-table.mb-4
         table.table.mb-0
           thead
@@ -212,15 +214,16 @@ head
               th Supplier
               th Attendant
           tbody
-            each item in stockItems
-              tr
-                td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
-                td #{item.productname || 'Unknown product'}
-                td #{item.quantity || 0}
-                td #{item.reorderlevel || 'N/A'}
-                td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
-                td #{item.supplier || 'N/A'}
-                td #{item.attendant || 'unknown attendant'}
+            if stockItems && stockItems.length
+              each item in stockItems
+                tr
+                  td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
+                  td #{item.productname || 'Unknown product'}
+                  td #{item.quantity || 0}
+                  td #{item.reorderlevel || 'N/A'}
+                  td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
+                  td #{item.supplier || 'N/A'}
+                  td #{item.attendant || 'unknown attendant'}
             else
               tr
                 td.text-center(colspan='7') No stock items found
@@ -271,13 +274,14 @@ head
               th Total
               th Attendant
           tbody
-            each sale in sales
-              tr
-                td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
-                td #{sale.customername}
-                td #{sale.productname || 'Unknown Product'}
-                td #{sale.total ? 'UGX ' + sale.total.toLocaleString() : 'UGX 0'}
-                td #{sale.attendant ? sale.attendant.fullname : 'unknown attendant'}
+            if sales && sales.length
+              each sale in sales
+                tr
+                  td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
+                  td #{sale.customername}
+                  td #{sale.productname || 'Unknown Product'}
+                  td #{sale.total ? 'UGX ' + sale.total.toLocaleString() : 'UGX 0'}
+                  td #{sale.attendant ? sale.attendant.fullname : 'unknown attendant'}
             else
               tr
                 td.text-center(colspan='5') No sales found

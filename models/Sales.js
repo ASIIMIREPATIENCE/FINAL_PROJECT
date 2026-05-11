@@ -52,7 +52,8 @@ const salesSchema = new mongoose.Schema({
     },
       attendant:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Registration'
+        ref: 'Registration',
+        required: false
     }
     });
 

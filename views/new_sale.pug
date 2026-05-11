@@ -1,155 +1,340 @@
-doctype html
-head
-  meta(charset='UTF-8')
-  meta(name='viewport' content='width=device-width, initial-scale=1.0')
-  title NyondoStock - Sales Recording
-  // Bootstrap 5 CSS + Icons
-  link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
-  link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
-  link(rel='stylesheet' href='/css/new_sale.css')
-// ========== SIDEBAR ==========
-.sidebar
-  .sidebar-logo
-    img(src='/images/logo.png' alt='Logo')
-    h3 NyondoStock
-    p Hardware Management
-  ul.nav-menu
-    li.nav-item
-      a.nav-link-custom(href='#')
-        i.bi.bi-speedometer2
-        |  Dashboard
-    li.nav-item
-      a.nav-link-custom(href='#')
-        i.bi.bi-box-seam
-        |  Stock Management
-    li.nav-item
-      a.nav-link-custom.active(href='#')
-        i.bi.bi-cart-plus
-        |  Sales Recording
-    li.nav-item
-      a.nav-link-custom(href='#')
-        i.bi.bi-clock-history
-        |  Sales History
-    li.nav-item
-      a.nav-link-custom(href='#')
-        i.bi.bi-credit-card
-        |  Supplier Credit
-    li.nav-item
-      a.nav-link-custom(href='#')
-        i.bi.bi-piggy-bank
-        |  Deposit Scheme
-    li.nav-item
-      a.nav-link-custom(href='#')
-        i.bi.bi-bar-chart-steps
-        |  Reports
-    li.nav-item
-      a.nav-link-custom(href='#')
-        i.bi.bi-people
-        |  User Management
-  .sidebar-user
-    .user-name
-      | &#x1F464; Admin User 
-      span.role-badge Admin
-    .user-role System Administrator
-    button.logout-btn
-      i.bi.bi-box-arrow-right
-      |  Sign Out
-// ========== MAIN CONTENT ==========
-.main-content
-  // Top Bar
-  .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
-    div
-      h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Sales Recording
-      p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;')
-        | Record customer sales &mdash; add items to
-        | cart, calculate transport, complete transaction.
+//- doctype html
+//- html(lang='en')
+//-   head
+//-     meta(charset='UTF-8')
+//-     meta(name='viewport' content='width=device-width, initial-scale=1.0')
+//-     title NyondoStock - Sales Recording
+//-     // Bootstrap 5 CSS + Icons
+//-     link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
+//-     link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
+//-     link(rel='stylesheet' href='/css/new_sale.css')
   
-  // MAIN FORM
-  form(action='/postSale' method='POST')
-    // Customer Information Form
-    .form-card
-      .form-title
-        i.bi.bi-person(style='color: #C6A43F;')
-        |  Customer Information
-      .row.g-3
-        .col-md-4
-          label.form-label Customer Name
-          input.form-control(type='text' placeholder='Enter customer name' name='customername' required)
-        .col-md-3
-          label.form-label Phone Number
-          input.form-control(type='tel' placeholder='07XX XXX XXX' name='phonenumber' required)
-        .col-md-3
-          label.form-label NIN (Optional)
-          input.form-control(type='text' placeholder='National ID number' name='nin')
-        .col-md-2
-          label.form-label Payment Method
-          select.form-select(name='paymentmethod' required)
-            option(value='') Select payment method
-            option(value='Cash') Cash
-            option(value='Mobile Money') Mobile Money
-            option(value='Credit') Credit
-    
-    // Add Product
-    .form-card
-      .row.g-3
-        .col-md-4
-          label(for='productName') Product Name
-          select.form-select(name='productName' required)
-            option(value='' disabled selected) Select Product
-            each product in items 
-              option(value=product.productname)= product.productname + ' (Stock: ' + product.quantity + ' | Price: ' + product.sellingprice + ' UGX)'
-        .col-md-3
-          label.form-label Quantity
-          input.form-control(type='number' placeholder='Qty' name='quantity' required min='1')
-        .col-md-3
-          label.form-label Unit Price (UGX)
-          input.form-control(type='number' placeholder='0' name='unitprice' required min='0')
-        .col-md-2
-          label.form-label &nbsp;
-    
-    // Transport Calculation
-    .form-card
-      .row.g-3
-        .col-md-4
-          .form-check
-            input.form-check-input(type='checkbox' name='addTransport' value='true')
-            label.form-check-label(style='font-size: 0.85rem;')
-              | Add Transport Charges
-        .col-md-3
-          label.form-label Distance (km)
-          input.form-control(type='number' placeholder='Enter distance' name='distance' value='0' min='0')
-        .col-md-3
-          label.form-label Rate per km (UGX)
-          input.form-control(type='number' name='rate' placeholder= "0")
+//-   body
+//-     // ========== SIDEBAR ==========
+//-     .sidebar
+//-       .sidebar-logo
+//-         img(src='/images/logo.png' alt='Logo')
+//-         h3 NyondoStock
+//-         p Hardware Management
+      
+//-       ul.nav-menu
+//-         li.nav-item
+//-           a.nav-link-custom(href='#')
+//-             i.bi.bi-speedometer2
+//-             |  Dashboard
+//-         li.nav-item
+//-           a.nav-link-custom(href='#')
+//-             i.bi.bi-box-seam
+//-             |  Stock Management
+//-         li.nav-item
+//-           a.nav-link-custom.active(href='#')
+//-             i.bi.bi-cart-plus
+//-             |  Sales Recording
+//-         li.nav-item
+//-           a.nav-link-custom(href='#')
+//-             i.bi.bi-clock-history
+//-             |  Sales History
+//-         li.nav-item
+//-           a.nav-link-custom(href='#')
+//-             i.bi.bi-credit-card
+//-             |  Supplier Credit
+//-         li.nav-item
+//-           a.nav-link-custom(href='#')
+//-             i.bi.bi-piggy-bank
+//-             |  Deposit Scheme
+//-         li.nav-item
+//-           a.nav-link-custom(href='#')
+//-             i.bi.bi-bar-chart-steps
+//-             |  Reports
+//-         li.nav-item
+//-           a.nav-link-custom(href='#')
+//-             i.bi.bi-people
+//-             |  User Management
+      
+//-       .sidebar-user
+//-         .user-name
+//-           | 👤 Admin User 
+//-           span.role-badge Admin
+//-         .user-role System Administrator
+//-         button.logout-btn
+//-           i.bi.bi-box-arrow-right
+//-           |  Sign Out
+
+//-     // ========== MAIN CONTENT ==========
+//-     .main-content
+//-       // Top Bar
+//-       .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
+//-         div
+//-           h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Sales Recording
+//-           p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;')
+//-             | Record customer sales — add items to cart, calculate transport, complete transaction.
+      
+//-       // Success Message
+//-       if success === true
+//-         .alert.alert-success.alert-dismissible.fade.show(role='alert')
+//-           i.bi.bi-check-circle-fill.me-2
+//-           strong Sale completed successfully!
+//-           button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+      
+//-       // Error Message
+//-       if error
+//-         .alert.alert-danger.alert-dismissible.fade.show(role='alert')
+//-           i.bi.bi-exclamation-triangle-fill.me-2
+//-           strong Error: 
+//-           | #{error}
+//-           button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+      
+//-       // MAIN FORM
+//-       form(action='/postSale' method='POST')
+//-         // Customer Information Section
+//-         .form-card
+//-           .form-title
+//-             i.bi.bi-person(style='color: #C6A43F;')
+//-             |  Customer Information
+          
+//-           .row.g-3
+//-             .col-md-4
+//-               label.form-label Customer Name
+//-               input.form-control(type='text' placeholder='Enter customer name' name='customername' required)
+            
+//-             .col-md-3
+//-               label.form-label Phone Number
+//-               input.form-control(type='tel' placeholder='07XX XXX XXX' name='phonenumber' required)
+            
+//-             .col-md-3
+//-               label.form-label NIN (Optional)
+//-               input.form-control(type='text' placeholder='National ID number' name='nin')
+            
+//-             .col-md-2
+//-               label.form-label Payment Method
+//-               select.form-select(name='paymentmethod' required)
+//-                 option(value='') Select payment method
+//-                 option(value='Cash') Cash
+//-                 option(value='Mobile Money') Mobile Money
+//-                 option(value='Credit') Credit
         
-    
-    // Total & Complete Sale
-    .form-card
-      .row
-        .col-md-6.offset-md-6
-          .cart-table
-            table(style='width: 100%;')
-              tr
-                td(style='padding: 8px;')
-                  strong Subtotal:
-                td(style='padding: 8px; text-align: right;')
-                  | (Calculated on server)
-              tr
-                td(style='padding: 8px;')
-                  strong Transport:
-                td(style='padding: 8px; text-align: right;')
-                  | (Calculated on server)
-              tr.total-row
-                td(style='padding: 8px;')
-                  strong TOTAL:
-                td(style='padding: 8px; text-align: right; font-size: 1.2rem; color: var(--nyondo-gold);')
-                  | (Calculated on server)
-          button.btn-success-custom.mt-3(type='submit' style='width: 100%;')
-            i.bi.bi-check-circle
-            |  COMPLETE SALE
+//-         // Product Selection Section
+//-         .form-card
+//-           .row.g-3
+//-             .col-md-4
+//-               label.form-label(for='productName') Product Name
+//-               select.form-select(name='productName' required)
+//-                 option(value='' disabled selected) Select Product
+//-                 each product in items 
+//-                   option(value=product.productname)= `${product.productname} (Stock: ${product.quantity} | Price: ${product.sellingprice} UGX)`
+            
+//-             .col-md-3
+//-               label.form-label Quantity
+//-               input.form-control(type='number' placeholder='Qty' name='quantity' required min='1')
+            
+//-             .col-md-3
+//-               label.form-label Unit Price (UGX)
+//-               input.form-control(type='number' placeholder='0' name='unitprice' required min='0')
+            
+//-             .col-md-2
+//-               label.form-label &nbsp;
+        
+//-         // Transport Charges Section
+//-         .form-card
+//-           .row.g-3
+//-             .col-md-4
+//-               .form-check
+//-                 input.form-check-input(type='checkbox' name='addTransport' value='true')
+//-                 label.form-check-label(style='font-size: 0.85rem;')
+//-                   | Add Transport Charges (UGX 5,000 per km)
+            
+//-             .col-md-3
+//-               label.form-label Distance (km)
+//-               input.form-control(type='number' placeholder='Enter distance' name='distance' value='0' min='0')
+        
+//-         // Submit Section - Button Centered
+//-         .form-card
+//-           .row
+//-             .col-md-12.d-flex.justify-content-center
+//-               button.btn-success-custom.mt-3(type='submit' style='width: 50%;')
+//-                 i.bi.bi-check-circle
+//-                 |  COMPLETE SALE
 
-.footer
-  i.bi.bi-shield-check
-  |  NyondoStock &mdash; Enterprise Hardware Management System
+//-     // Footer
+//-     .footer
+//-       i.bi.bi-shield-check
+//-       |  NyondoStock — Enterprise Hardware Management System
 
-script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
+//-     // Scripts
+//-     script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
+
+
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    title NyondoStock - Sales Recording
+    // Bootstrap 5 CSS + Icons
+    link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
+    link(rel='stylesheet' href='/css/new_sale.css')
+  
+  body
+    // ========== SIDEBAR ==========
+    .sidebar
+      .sidebar-logo
+        img(src='/images/logo.png' alt='Logo')
+        h3 NyondoStock
+        p Hardware Management
+      
+      ul.nav-menu
+        li.nav-item
+          a.nav-link-custom(href='#')
+            i.bi.bi-speedometer2
+            |  Dashboard
+        li.nav-item
+          a.nav-link-custom(href='#')
+            i.bi.bi-box-seam
+            |  Stock Management
+        li.nav-item
+          a.nav-link-custom.active(href='#')
+            i.bi.bi-cart-plus
+            |  Sales Recording
+        li.nav-item
+          a.nav-link-custom(href='#')
+            i.bi.bi-clock-history
+            |  Sales History
+        li.nav-item
+          a.nav-link-custom(href='#')
+            i.bi.bi-credit-card
+            |  Supplier Credit
+        li.nav-item
+          a.nav-link-custom(href='#')
+            i.bi.bi-piggy-bank
+            |  Deposit Scheme
+        li.nav-item
+          a.nav-link-custom(href='#')
+            i.bi.bi-bar-chart-steps
+            |  Reports
+        li.nav-item
+          a.nav-link-custom(href='#')
+            i.bi.bi-people
+            |  User Management
+      
+      .sidebar-user
+        .user-name
+          | 👤 Admin User 
+          span.role-badge Admin
+        .user-role System Administrator
+        button.logout-btn
+          i.bi.bi-box-arrow-right
+          |  Sign Out
+
+    // ========== MAIN CONTENT ==========
+    .main-content
+      // Top Bar
+      .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
+        div
+          h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Sales Recording
+          p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;')
+            | Record customer sales — add items to cart, calculate transport, complete transaction.
+      
+      // Success Message
+      if success === true
+        .alert.alert-success.alert-dismissible.fade.show(role='alert')
+          i.bi.bi-check-circle-fill.me-2
+          strong Sale completed successfully!
+          button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+      
+      // Error Message
+      if error
+        .alert.alert-danger.alert-dismissible.fade.show(role='alert')
+          i.bi.bi-exclamation-triangle-fill.me-2
+          strong Error: 
+          | #{error}
+          button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+      
+      // Transport Info Banner
+      .alert.alert-info.mb-3(role='alert')
+        i.bi.bi-truck.me-2
+        strong Transport Policy: 
+        | Free delivery for purchases of UGX 500,000 or more within 10km radius. Otherwise, a fixed fee of UGX 30,000 applies.
+      
+      // MAIN FORM
+      form(action='/postSale' method='POST')
+        // Customer Information Section
+        .form-card
+          .form-title
+            i.bi.bi-person(style='color: #C6A43F;')
+            |  Customer Information
+          
+          .row.g-3
+            .col-md-4
+              label.form-label Customer Name
+              input.form-control(type='text' placeholder='Enter customer name' name='customername' required)
+            
+            .col-md-3
+              label.form-label Phone Number
+              input.form-control(type='tel' placeholder='07XX XXX XXX' name='phonenumber' required)
+            
+            .col-md-3
+              label.form-label NIN (Optional)
+              input.form-control(type='text' placeholder='National ID number' name='nin')
+            
+            .col-md-2
+              label.form-label Payment Method
+              select.form-select(name='paymentmethod' required)
+                option(value='') Select payment method
+                option(value='Cash') Cash
+                option(value='Mobile Money') Mobile Money
+                option(value='Credit') Credit
+        
+        // Product Selection Section
+        .form-card
+          .row.g-3
+            .col-md-4
+              label.form-label(for='productName') Product Name
+              select.form-select(name='productName' required)
+                option(value='' disabled selected) Select Product
+                each product in items 
+                  option(value=product.productname)= `${product.productname} (Stock: ${product.quantity} | Price: ${product.sellingprice} UGX)`
+            
+            .col-md-3
+              label.form-label Quantity
+              input.form-control(type='number' placeholder='Qty' name='quantity' required min='1')
+            
+            .col-md-3
+              label.form-label Unit Price (UGX)
+              input.form-control(type='number' placeholder='0' name='unitprice' required min='0')
+            
+            .col-md-2
+              label.form-label &nbsp;
+        
+        // Transport Charges Section
+        .form-card
+          .row.g-3
+            .col-md-4
+              .form-check
+                input.form-check-input(type='checkbox' name='addTransport' value='true')
+                label.form-check-label(style='font-size: 0.85rem;')
+                  | Need Transport Delivery?
+            
+            .col-md-3
+              label.form-label Distance (km)
+              input.form-control(type='number' placeholder='Enter distance' name='distance' value='0' min='0')
+            .col-md-5
+              small.text-muted
+                i.bi.bi-info-circle
+                |  Free delivery if total ≥ UGX 500,000 and distance ≤ 10km, otherwise UGX 30,000 fixed fee
+        
+        // Submit Section - Button Centered
+        .form-card
+          .row
+            .col-md-12.d-flex.justify-content-center
+              button.btn-success-custom.mt-3(type='submit' style='width: 50%;')
+                i.bi.bi-check-circle
+                |  COMPLETE SALE
+
+    // Footer
+    .footer
+      i.bi.bi-shield-check
+      |  NyondoStock — Enterprise Hardware Management System
+
+    // Scripts
+    script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
