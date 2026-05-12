@@ -1,4 +1,4 @@
-
+// 
 const mongoose = require('mongoose');
 
 const stockSchema = new mongoose.Schema({
@@ -30,17 +30,24 @@ const stockSchema = new mongoose.Schema({
         trim: true,
     },
     reorderlevel: {
-        type: String,
+        type: Number,
         required: true,
         trim: true,
     },
-   
-   
-    
+    paymentMethod: {
+        type: String,
+        enum: ['Cash', 'Credit'],
+        default: 'Cash'
+    },
     Date: {
         type: Date,
         default: Date.now
+    },
+    // Add these 2 fields for payment tracking
+    amountPaid: {
+        type: Number,
+        default: 0
     }
-    });
+});
 
-module.exports = mongoose.model('Stock',stockSchema);
+module.exports = mongoose.model('Stock', stockSchema);

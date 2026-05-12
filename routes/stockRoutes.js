@@ -29,7 +29,7 @@ router.get('/editStock/:id', async (req, res) => {
 // POST route - Add new stock item
 router.post('/postStock', async (req, res) => {
     try {
-        const { productname, category, quantity, costprice, sellingprice, supplier, reorderlevel } = req.body;
+        const { productname, category, quantity, costprice, sellingprice, supplier, reorderlevel, paymentMethod } = req.body; // Added paymentMethod
         
         const newStock = new Stock({
             productname,
@@ -39,11 +39,13 @@ router.post('/postStock', async (req, res) => {
             sellingprice: Number(sellingprice),
             supplier,
             reorderlevel: Number(reorderlevel),
+            paymentMethod: paymentMethod || 'Cash', // Add paymentMethod field
             Date: new Date() // Add current date
         });
         
         await newStock.save();
         console.log("Stock saved:", req.body);
+        console.log("Payment Method:", paymentMethod); // Debug log
         res.redirect('/addStock');
     } catch (error) {
         console.error(error);
@@ -66,17 +68,19 @@ router.post('/deleteStock/:id', async (req, res) => {
 // EDIT route - Update stock item
 router.post('/editStock/:id', async (req, res) => {
     try {
-        const { quantity, costprice, sellingprice, supplier, reorderlevel } = req.body;
+        const { quantity, costprice, sellingprice, supplier, reorderlevel, paymentMethod } = req.body; // Added paymentMethod
         
         await Stock.findByIdAndUpdate(req.params.id, {
             quantity: Number(quantity),
             costprice: Number(costprice),
             sellingprice: Number(sellingprice),
             supplier,
-            reorderlevel: Number(reorderlevel)
+            reorderlevel: Number(reorderlevel),
+            paymentMethod: paymentMethod || 'Cash' // Add paymentMethod field to update
         });
         
         console.log("Stock updated with ID:", req.params.id);
+        console.log("Updated Payment Method:", paymentMethod); // Debug log
         res.redirect('/addStock');
     } catch (error) {
         console.error(error);

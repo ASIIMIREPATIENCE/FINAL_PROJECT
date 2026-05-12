@@ -1,0 +1,109 @@
+doctype html
+html(lang='en')
+head
+  meta(charset='UTF-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0')
+  title NyondoStock - Make Payment
+  
+  link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
+  link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
+  link(rel='stylesheet' href='/css/supplier_credit.css')
+
+body
+  .sidebar
+    .sidebar-logo
+      img(src='/images/logo.png' alt='Logo')
+      h3 NyondoStock
+      p Hardware Management
+    
+    ul.nav-menu
+      li.nav-item
+        a.nav-link-custom(href='#')
+          i.bi.bi-speedometer2
+          |  Dashboard
+      li.nav-item
+        a.nav-link-custom(href='#')
+          i.bi.bi-box-seam
+          |  Stock Management
+      li.nav-item
+        a.nav-link-custom(href='#')
+          i.bi.bi-cart-plus
+          |  Sales Recording
+      li.nav-item
+        a.nav-link-custom(href='#')
+          i.bi.bi-clock-history
+          |  Sales History
+      li.nav-item
+        a.nav-link-custom.active(href='#')
+          i.bi.bi-credit-card
+          |  Supplier Credit
+      li.nav-item
+        a.nav-link-custom(href='#')
+          i.bi.bi-piggy-bank
+          |  Deposit Scheme
+      li.nav-item
+        a.nav-link-custom(href='#')
+          i.bi.bi-bar-chart-steps
+          |  Reports
+      li.nav-item
+        a.nav-link-custom(href='#')
+          i.bi.bi-people
+          |  User Management
+    
+    .sidebar-user
+      .user-name
+        | 👤 Admin User 
+        span.role-badge Admin
+      .user-role System Administrator
+      button.logout-btn
+        i.bi.bi-box-arrow-right
+        |  Sign Out
+
+  .main-content
+    .d-flex.justify-content-between.align-items-center.mb-4
+      div
+        h3(style='color: var(--nyondo-green); font-weight: 700;') Make Payment
+        p(style='color: #6c757d;') Record payment for supplier credit
+    
+    .form-card
+      .form-title
+        i.bi.bi-cash-stack(style='color: #C6A43F;')
+        |  Payment Details
+      
+      form(action='/recordSupplierPayment' method='post')
+        input(type='hidden' name='stockId' value=stockItem._id)
+        
+        .row.g-3
+          .col-md-6
+            label.form-label Supplier
+            input.form-control(type='text' value=stockItem.supplier readonly)
+          
+          .col-md-6
+            label.form-label Product
+            input.form-control(type='text' value=stockItem.productname readonly)
+          
+          .col-md-6
+            label.form-label Total Owed
+            input.form-control(type='text' value='UGX ' + totalOwed.toLocaleString() readonly)
+          
+          .col-md-6
+            label.form-label Remaining Balance
+            input.form-control(type='text' value='UGX ' + balance.toLocaleString() readonly)
+          
+          .col-md-6
+            label.form-label Due Date
+            input.form-control(type='text' value=dueDate.toLocaleDateString() readonly)
+          
+          .col-md-6
+            label.form-label Amount Paying Now
+            input.form-control(type='number' name='amountPaid' required placeholder='Enter amount' min='1' max=balance)
+          
+          .col-md-12.mt-3
+            a.btn.btn-secondary.me-2(href='/supplier-credit') Cancel
+            button.btn-save(type='submit') Record Payment
+
+  .footer
+    i.bi.bi-shield-check
+    |  NyondoStock &mdash; Enterprise Hardware Management System
+
+  script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')

@@ -273,6 +273,11 @@ head
         .col-md-2
           label.form-label Reorder Level
           input.form-control(type='number' placeholder='Min stock alert' name='reorderlevel')
+        .col-md-2
+          label.form-label Payment Method
+          select.form-select(name='paymentMethod')
+            option(value='Cash') Cash
+            option(value='Credit') Credit (Supplier Credit)
         .col-md-2.d-flex.align-items-end
           button.btn-save.w-100(type='submit')
             i.bi.bi-save
@@ -292,6 +297,7 @@ head
           th Reorder Level
           th Selling Price
           th Supplier
+          th Payment Method
           th Attendant
           th(style='text-align: center;') Actions
       tbody
@@ -303,6 +309,11 @@ head
             td #{item.reorderlevel || 'N/A'}
             td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
             td #{item.supplier || 'N/A'}
+            td 
+              if item.paymentMethod
+                | #{item.paymentMethod}
+              else
+                | Cash
             td #{item.attendant || 'unknown attendant'}
             td(style='text-align: center;')
               a.btn-edit(href=`/editStock/${item._id}` style='text-decoration: none; display: inline-block; margin-right: 5px;')
@@ -314,7 +325,7 @@ head
                   |  Delete
         else
           tr
-            td.text-center(colspan='8') No stock items found
+            td.text-center(colspan='9') No stock items found
 
   // Low Stock Summary Card
   .row.g-3.mt-2

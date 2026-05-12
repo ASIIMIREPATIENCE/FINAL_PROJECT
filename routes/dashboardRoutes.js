@@ -1,9 +1,8 @@
-// 
-
 const express = require("express");
 const router = express.Router();
 const Sale = require('../models/Sales'); 
 const Stock = require('../models/Stock'); 
+const Registration = require('../models/Registration');
 
 router.get("/admin", async (req, res) => {
     try {
@@ -25,15 +24,31 @@ router.get("/manager", (req, res) => {
 
 router.get("/salesattendant", async (req, res) => {
     try {
+        console.log("=== /salesattendant route hit ===");
+        
+        // Fetch data
         const sales = await Sale.find()
             .populate('attendant', 'fullname')
             .sort({ Date: -1 });
+            
         const stockItems = await Stock.find();
         
-        res.render('sales_dashboard', { sales, stockItems });
+        console.log("Sales count:", sales.length);
+        console.log("Stock items count:", stockItems.length);
+        
+        // Render template with data
+        return res.render('sales_dashboard', { 
+            sales: sales, 
+            stockItems: stockItems 
+        });
+        
     } catch (error) {
-        console.log(error.message);
-        res.render('sales_dashboard', { sales: [], stockItems: [] });
+        console.error("ERROR in /salesattendant:", error.message);
+        console.error(error.stack);
+        return res.render('sales_dashboard', { 
+            sales: [], 
+            stockItems: [] 
+        });
     }
 });
 
