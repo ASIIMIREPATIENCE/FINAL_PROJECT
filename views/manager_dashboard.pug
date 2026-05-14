@@ -1,212 +1,121 @@
 //- 
 doctype html
-html(lang='en')
 head
   meta(charset='UTF-8')
   meta(name='viewport' content='width=device-width, initial-scale=1.0')
-  title NyondoStock - Store Manager Dashboard
+  title NyondoStock - Sales Attendant Dashboard
   // Bootstrap 5 CSS + Icons
   link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
   link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
-  link(rel='stylesheet' href='/css/manager_dashboard.css')
+  link(rel='stylesheet' href='/css/sales_dashboard.css')
 
-body
-  // ========== SIDEBAR ==========
-  .sidebar
-    .logo
-      img(src='/images/logo.png' alt='Logo')
-      h4 NyondoStock
-      p Hardware Management
-    nav.nav.flex-column
-      a.nav-link.active(href='#')
-        i.bi.bi-speedometer2
-        |  Dashboard
-      a.nav-link(href='/addStock')
-        i.bi.bi-box-seam
-        |  Stock Management
-      a.nav-link(href='#')
-        i.bi.bi-cart-plus
-        |  Sales Recording
-      a.nav-link(href='#')
-        i.bi.bi-clock-history
-        |  Sales History
-      a.nav-link(href='#')
-        i.bi.bi-bar-chart-steps
-        |  Reports
-    .user-section
-      .user-name 👤 #{currentUser ? currentUser.fullname : 'Store Manager'}
-      .user-role Store Manager
-      button.logout-btn(onclick='window.location.href="/logout"')
-        i.bi.bi-box-arrow-right
-        |  Sign Out
-
-  // ========== MAIN CONTENT ==========
-  .main-content
-    // Top Bar with Dashboard Title
-    .d-flex.justify-content-between.align-items-center.flex-wrap.mb-4
-      div
-        h3(style='color: var(--nyondo-green); font-weight: 700;') Dashboard
-        p(style='color: #6c757d; margin: 0;') Welcome back, #{currentUser ? currentUser.fullname : 'Store Manager'} &mdash; here&apos;s what&apos;s happening at Nyondo Hardware today.
-    
-    // Stats Row - 4 Cards
-    .row.g-3.mb-4
-      .col-md-3.col-sm-6
-        .stat-card
-          .stat-value UGX #{totalStockValue ? totalStockValue.toLocaleString() : '0'}
-          .stat-label Total Stock Value
-      .col-md-3.col-sm-6
-        .stat-card
-          .stat-value UGX #{todaySales ? todaySales.toLocaleString() : '0'}
-          .stat-label Today&apos;s Sales
-      .col-md-3.col-sm-6
-        .stat-card
-          .stat-value #{lowStockCount}
-          .stat-label Low Stock Alerts
-      .col-md-3.col-sm-6
-        .stat-card
-          .stat-value #{depositorsCount}
-          .stat-label Active Depositors
-    
-    // Stock Inventory Table
-    .section-title
-      i.bi.bi-box-seam
-      |  Current Stock Inventory
-      button.btn-save(style='float: right; padding: 5px 15px;' onclick='window.location.href="/addStock"')
-        i.bi.bi-plus-circle
-        |  Add New Stock
-    .table-responsive.custom-table
-      table.table.mb-0
-        thead
-          tr
-            th Product
-            th Category
-            th Current Stock
-            th Selling Price
-            th Supplier
-            th Reorder Level
-            th Actions
-        tbody
-          if stockItems && stockItems.length
-            each item in stockItems
-              tr
-                td #{item.productname}
-                td #{item.category}
-                td #{item.quantity} units
-                td UGX #{item.sellingprice ? item.sellingprice.toLocaleString() : '0'}
-                td #{item.supplier}
-                td #{item.reorderlevel}
-                td
-                  a.btn-edit(href=`/editStock/${item._id}` style='text-decoration: none; display: inline-block; margin-right: 5px; padding: 5px 10px; background: #C6A43F; color: #0D3B2E; border-radius: 5px;')
-                    i.bi.bi-pencil
-                    |  Edit
-                  form(action=`/deleteStock/${item._id}` method='POST' style='display: inline;')
-                    button.btn-delete(type='submit' onclick='return confirm("Are you sure you want to delete this item?")' style='padding: 5px 10px; background: #9E3C2A; color: white; border: none; border-radius: 5px;')
-                      i.bi.bi-trash
-                      |  Delete
-          else
-            tr
-              td.text-center(colspan='7') No stock items found. Click "Add New Stock" to add items.
-    
-    // Two Column Layout: Low Stock Table + Top Products
-    .row.g-3
-      // Left Column: Low Stock Alerts Table
-      .col-lg-7
-        .section-title
-          i.bi.bi-exclamation-triangle-fill(style='color: #C6A43F;')
-          |  Low Stock Alerts
-        .table-responsive.custom-table
-          table.table.mb-0
-            thead
-              tr
-                th Product
-                th Current Stock
-                th Reorder Level
-                th Status
-            tbody
-              if lowStockItems && lowStockItems.length
-                each item in lowStockItems
-                  tr
-                    td #{item.productname}
-                    td #{item.quantity} units
-                    td #{item.reorderlevel}
-                    td
-                      if item.quantity <= (item.reorderlevel / 2)
-                        span.badge-critical Critical
-                      else
-                        span.badge-low Low
-              else
-                tr
-                  td.text-center(colspan='4') No low stock alerts. All stock levels are healthy.
-      
-      // Right Column: Top Selling Products
-      .col-lg-5
-        .section-title
-          i.bi.bi-trophy-fill(style='color: #C6A43F;')
-          |  Top Selling Products
-        .top-product-list
-          if topProducts && topProducts.length
-            each product, index in topProducts
-              .top-product-item
-                .d-flex.align-items-center.gap-3
-                  .product-rank #{index + 1}
-                  .product-name #{product._id}
-                .product-sales #{product.totalSold} units
-          else
-            .top-product-item
-              .d-flex.align-items-center.gap-3
-                .product-rank 1
-                .product-name No sales data available
-              .product-sales 0
-    
-    // Recent Sales Table
-    .section-title.mt-4
+// SIDEBAR
+.sidebar
+  .logo
+    img(src='/images/logo.png' alt='Logo')
+    h4 NyondoStock
+    p Hardware Management
+  nav.nav.flex-column
+    a.nav-link.active(href='#')
+      i.bi.bi-speedometer2
+      |  Dashboard
+    a.nav-link(href='#')
+      i.bi.bi-cart-plus
+      |  New Sale
+    a.nav-link(href='#')
       i.bi.bi-clock-history
-      |  Recent Sales
-    .table-responsive.custom-table
-      table.table.mb-0
-        thead
+      |  Sales History
+    a.nav-link(href='#')
+      i.bi.bi-box-seam
+      |  View Stock
+  .user-section
+    .user-name 👤 Sarah Kamau
+    .user-role Sales Attendant
+    button.logout-btn 
+      i.bi.bi-box-arrow-right
+      |  Sign Out
+
+// MAIN CONTENT 
+.main-content
+  // Welcome Row
+  .row.mb-4
+    .col-12
+      h4(style='color: var(--nyondo-green);') Welcome back, Sarah! 👋
+      p(style='color: #6c757d;') Ready to serve customers today.
+  
+  // Stats Row
+  .row.g-3.mb-4
+    
+      .stat-card
+        .stat-value UGX 1,850,000
+        .stat-label Today's Sales
+
+  
+  // Quick Sale Button
+  .row.mb-4
+    .col-12
+      a(href='/sale' style='text-decoration: none;')
+        button.quick-sale-btn
+          i.bi.bi-cart-plus.fs-4.me-2
+          |  START NEW SALE
+  
+  // Low Stock Alerts Table
+  .section-title
+    i.bi.bi-exclamation-triangle-fill(style='color: #C6A43F;')
+    |  Stock 
+  .table-responsive.custom-table.mb-4
+    table.table.mb-0
+      thead
+        tr
+          th Date
+          th Product Name
+          th Current Stock
+          th Reorder Level
+          th Selling Price
+          th Supplier
+          th Attendant
+      tbody
+        each item in stockItems
           tr
-            th Date & Time
-            th Customer
-            th Items
-            th Total
-            th Status
-            th Actions
-        tbody
-          if recentSales && recentSales.length
-            each sale in recentSales
-              tr
-                td #{sale.date ? new Date(sale.date).toLocaleString() : 'N/A'}
-                td #{sale.customerName || 'Walk-in Customer'}
-                td 
-                  if sale.items && sale.items.length
-                    each item in sale.items
-                      div #{item.productName} x #{item.quantity}
-                  else
-                    N/A
-                td UGX #{sale.total ? sale.total.toLocaleString() : '0'}
-                td
-                  if sale.paymentStatus === 'Paid'
-                    span.badge-paid Paid
-                  else if sale.paymentStatus === 'Credit'
-                    span.badge-low(style='background:#C6A43F;') Credit
-                  else
-                    span.badge-pending Pending
-                td
-                  a.btn-edit(href=`/editSale/${sale._id}` style='text-decoration: none; display: inline-block; margin-right: 5px; padding: 5px 10px; background: #C6A43F; color: #0D3B2E; border-radius: 5px; font-size: 12px;')
-                    i.bi.bi-pencil
-                    |  Edit
-                  form(action=`/deleteSale/${sale._id}` method='POST' style='display: inline;')
-                    button.btn-delete(type='submit' onclick='return confirm("Are you sure you want to delete this sale?")' style='padding: 5px 10px; background: #9E3C2A; color: white; border: none; border-radius: 5px; font-size: 12px;')
-                      i.bi.bi-trash
-                      |  Delete
-          else
-            tr
-              td.text-center(colspan='6') No recent sales found
+            td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
+            td #{item.productname || 'Unknown product'}
+            td #{item.quantity || 0}
+            td #{item.reorderlevel || 'N/A'}
+            td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
+            td #{item.supplier || 'N/A'}
+            td #{item.attendant || 'unknown attendant'}
+        else
+          tr
+            td.text-center(colspan='7') No stock items found
+  
+  // Recent Sales Table
+  .section-title
+    i.bi.bi-clock-history
+    |  Recent Sales
+  .table-responsive.custom-table
+    table.table.mb-0
+      thead
+        tr
+          th Date
+          th Customer Name
+          th Product Name
+          th Total
+          th Attendant
+      tbody
+        each sale in sales
+          tr
+            td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
+            td #{sale.customername}
+            td #{sale.productname || 'Unknown Product'}
+            td #{sale.total ? 'UGX ' + sale.total.toLocaleString() : 'UGX 0'}
+            td #{sale.attendant ? sale.attendant.fullname : 'unknown attendant'}
+        else
+          tr
+            td.text-center(colspan='5') No sales found
 
-  // Footer
-  .footer
-    i.bi.bi-shield-check
-    |  NyondoStock &mdash; Enterprise Hardware Management System
+// Footer
+.footer
+  i.bi.bi-shield-check
+  |  NyondoStock &mdash; Enterprise Hardware Management System
 
-  script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
+script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
