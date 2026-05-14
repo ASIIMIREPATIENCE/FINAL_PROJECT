@@ -18,7 +18,7 @@ body
       p Hardware Management
     ul.nav-menu
       li.nav-item
-        a.nav-link-custom(href='#')
+        a.nav-link-custom(href='/admin')
           i.bi.bi-speedometer2
           |  Dashboard
       li.nav-item
@@ -38,7 +38,7 @@ body
           i.bi.bi-credit-card
           |  Supplier Credit
       li.nav-item
-        a.nav-link-custom.active(href='#')
+        a.nav-link-custom.active(href='/scheme')
           i.bi.bi-piggy-bank
           |  Deposit Scheme
       li.nav-item
@@ -46,42 +46,60 @@ body
           i.bi.bi-bar-chart-steps
           |  Reports
       li.nav-item
-        a.nav-link-custom(href='#')
+        a.nav-link-custom(href='/users')
           i.bi.bi-people
           |  User Management
     .sidebar-user
       .user-name
-        | 👤 Admin User 
-        span.role-badge Admin
-      .user-role System Administrator
-      button.logout-btn
-        i.bi.bi-box-arrow-right
-        |  Sign Out
+        | 👤 #{user ? user.fullname : 'Guest User'}
+        span.role-badge #{user ? user.role : 'Guest'}
+      .user-role System User
+      a(href='/logout')
+        button.logout-btn
+          i.bi.bi-box-arrow-right
+          |  Sign Out
 
   // ========== MAIN CONTENT ==========
   .main-content
     .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
       div
-        h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Salary-Earner Deposit Scheme
-        p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Manage customer deposits, withdrawals, and track balances.
+        h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Deposit Scheme Management
+        p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Manage customer deposits and track savings balances.
+    
+    // Display Flash Messages
+    if messages && messages.success
+      .alert.alert-success.alert-dismissible.fade.show(role='alert')
+        i.bi.bi-check-circle-fill.me-2
+        | #{messages.success}
+        button.btn-close(type='button' data-bs-dismiss='alert')
+    if messages && messages.error
+      .alert.alert-danger.alert-dismissible.fade.show(role='alert')
+        i.bi.bi-exclamation-triangle-fill.me-2
+        | #{messages.error}
+        button.btn-close(type='button' data-bs-dismiss='alert')
     
     // Summary Cards
     .row.g-3.mb-4
       .col-md-4
         .summary-card
-          div(style='font-size: 0.7rem; opacity: 0.8;') Total Deposits
-          .summary-value UGX #{totalDeposits ? totalDeposits.toLocaleString() : '0'}
-          small(style='opacity: 0.7;') Across #{depositorsCount} depositors
+          div(style='font-size: 0.7rem; opacity: 0.8;') Top Depositor
+          if topBalanceDepositor
+            .summary-value #{topBalanceDepositor.fullName}
+            small(style='opacity: 0.7;') 
+              | Balance: UGX #{topBalanceDepositor.currentBalance.toLocaleString()}
+          else
+            .summary-value(style='font-size: 1.2rem;') No deposits yet
+            small(style='opacity: 0.7;') Waiting for first deposit
       .col-md-4
         .summary-card(style='background: linear-gradient(135deg, #C6A43F 0%, #B8922E 100%);')
-          div(style='font-size: 0.7rem; opacity: 0.8;') Total Withdrawals
-          .summary-value(style='color: #0D3B2E;') UGX #{totalWithdrawals ? totalWithdrawals.toLocaleString() : '0'}
-          small(style='opacity: 0.8;') Year to date
+          div(style='font-size: 0.7rem; opacity: 0.8;') Active Depositors
+          .summary-value(style='color: #0D3B2E;') #{depositorsCount}
+          small(style='opacity: 0.8;') Registered members
       .col-md-4
         .summary-card(style='background: linear-gradient(135deg, #2E7D64 0%, #236854 100%);')
-          div(style='font-size: 0.7rem; opacity: 0.8;') Current Balance
+          div(style='font-size: 0.7rem; opacity: 0.8;') Total Savings Balance
           .summary-value UGX #{currentBalance ? currentBalance.toLocaleString() : '0'}
-          small(style='opacity: 0.8;') Total savings
+          small(style='opacity: 0.8;') All depositors combined
     
     // Register New Depositor Form
     form(action='/registerDepositor' method='post')
@@ -89,7 +107,7 @@ body
         .form-title
           i.bi.bi-person-plus(style='color: #C6A43F;')
           |  Register New Depositor
-          span.role-badge(style='background: #0D3B2E; color: white;') Admin Only
+          span.role-badge(style='background: #0D3B2E; color: white;') #{user ? user.role : 'Admin'} Only
         .row.g-3
           .col-md-3
             label.form-label Full Name
@@ -108,35 +126,33 @@ body
               i.bi.bi-save
               |  Register
     
-    // Record Transaction Form (Deposit/Withdrawal)
-    form(action='/recordTransaction' method='post')
+    // Record Deposit Form (No date field - captured automatically)
+    form(action='/recordDeposit' method='post')
       .form-card
         .form-title
-          i.bi.bi-cash-stack(style='color: #C6A43F;')
-          |  Record Transaction
-          span.role-badge(style='background: #0D3B2E; color: white;') Admin Only
+          i.bi.bi-cash(style='color: #C6A43F;')
+          |  Record New Deposit
+          span.role-badge(style='background: #0D3B2E; color: white;') #{user ? user.role : 'Admin'} Only
         .row.g-3
-          .col-md-3
+          .col-md-5
             label.form-label Select Depositor
             select.form-select(name='depositorId' required)
               option(value='') Select depositor...
               each depositor in depositors
-                option(value=depositor._id) #{depositor.fullName} - Balance: UGX #{depositor.currentBalance.toLocaleString()}
-          .col-md-2
-            label.form-label Transaction Type
-            select.form-select(name='transactionType' required)
-              option(value='Deposit') Deposit
-              option(value='Withdrawal') Withdrawal
-          .col-md-2
-            label.form-label Amount (UGX)
+                option(value=depositor._id) #{depositor.fullName} - Current Balance: UGX #{depositor.currentBalance.toLocaleString()}
+          .col-md-3
+            label.form-label Deposit Amount (UGX)
             input.form-control(type='number' name='amount' placeholder='Amount' required)
           .col-md-2
-            label.form-label Date
-            input.form-control(type='date' name='date' required)
-          .col-md-3.d-flex.align-items-end
+            label.form-label Payment Method
+            select.form-select(name='paymentMethod')
+              option(value='Cash') Cash
+              option(value='Bank Transfer') Bank Transfer
+              option(value='Mobile Money') Mobile Money
+          .col-md-2.d-flex.align-items-end
             button.btn-save.w-100(type='submit')
               i.bi.bi-check-circle
-              |  Record Transaction
+              |  Record Deposit
     
     // Depositors Table
     .section-title
@@ -150,9 +166,8 @@ body
             th Phone
             th NIN
             th Employer
-            th Join Date
+            th Date Joined
             th Current Balance
-            th Actions
         tbody
           if depositors && depositors.length
             each depositor in depositors
@@ -161,60 +176,43 @@ body
                 td #{depositor.phoneNumber}
                 td #{depositor.nin}
                 td #{depositor.employer || 'N/A'}
-                td #{new Date(depositor.joinDate).toLocaleDateString()}
+                td #{depositor.joinDate ? new Date(depositor.joinDate).toLocaleDateString() : 'N/A'}
                 td.balance-positive UGX #{depositor.currentBalance.toLocaleString()}
-                td
-                  form(action='/recordTransaction' method='post' )
-                    input(type='hidden' name='depositorId' value=depositor._id)
-                    input(type='hidden' name='transactionType' value='Deposit')
-                    input(type='hidden' name='date' value=new Date().toISOString().split('T')[0])
-                    input.form-control(type='number' name='amount' placeholder='Amount' style='width: 100px; display: inline-block; margin-right: 5px;' required)
-                    button.btn-deposit(type='submit')
-                      i.bi.bi-cash
-                      |  Deposit
-                  form(action='/recordTransaction' method='post' style='display: inline-block;')
-                    input(type='hidden' name='depositorId' value=depositor._id)
-                    input(type='hidden' name='transactionType' value='Withdrawal')
-                    input(type='hidden' name='date' value=new Date().toISOString().split('T')[0])
-                    input.form-control(type='number' name='amount' placeholder='Amount' style='width: 100px; display: inline-block; margin-right: 5px;' required)
-                    button.btn-withdraw(type='submit')
-                      i.bi.bi-cash-stack
-                      |  Withdraw
           else
             tr
-              td.text-center(colspan='7') No depositors registered yet
+              td.text-center(colspan='6') No depositors registered yet
     
-    // Transaction History Table
+    // Deposit History Table
     .section-title
       i.bi.bi-clock-history
-      |  Recent Transactions
+      |  Recent Deposit History
     .custom-table
       table
         thead
           tr
             th Date
             th Depositor
-            th Type
             th Amount
             th Balance After
-            th Processed By
+            th Payment Method
+            th Attendant
         tbody
           if transactions && transactions.length
             each transaction in transactions
               tr
-                td #{new Date(transaction.date).toLocaleDateString()}
+                td #{transaction.date ? new Date(transaction.date).toLocaleDateString() : 'N/A'}
                 td #{transaction.depositorName}
-                td
-                  if transaction.type === 'Deposit'
-                    span.badge(style='background:#2E7D64; color:white; padding:3px 8px; border-radius:30px;') Deposit
-                  else
-                    span.badge(style='background:#C6A43F; color:#0D3B2E; padding:3px 8px; border-radius:30px;') Withdrawal
-                td UGX #{transaction.amount.toLocaleString()}
+                td.balance-positive UGX #{transaction.amount.toLocaleString()}
                 td UGX #{transaction.balanceAfter.toLocaleString()}
-                td #{transaction.processedBy}
+                td #{transaction.paymentMethod || 'Cash'}
+                td 
+                  if transaction.attendantName
+                    | #{transaction.attendantName}
+                  else
+                    span.text-muted Unknown User
           else
             tr
-              td.text-center(colspan='6') No transactions recorded yet
+              td.text-center(colspan='6') No deposits recorded yet
 
   .footer
     i.bi.bi-shield-check
