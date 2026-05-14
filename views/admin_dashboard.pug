@@ -1,27 +1,23 @@
-//- 
-
+//- admin_dashboard.pug
 doctype html
 head
   meta(charset='UTF-8')
   meta(name='viewport' content='width=device-width, initial-scale=1.0')
   title NyondoStock - Admin Dashboard
-  // Bootstrap 5 CSS + Icons
   link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
   link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
   link(rel='stylesheet' href='/css/admin_dashboard.css')
-// ========== SIDEBAR WITH DROPDOWNS - ADMIN FULL ACCESS ==========
+
 .sidebar
   .sidebar-logo
     img(src='/images/logo.png' alt='Logo')
     h3 NyondoStock
     p Enterprise Management
   ul.nav-menu
-    // Dashboard - Direct Link
     li.nav-item
       a.nav-link-custom.active(href='#')
         i.bi.bi-speedometer2
         |  Dashboard
-    // Stock Management Dropdown
     li.nav-item
       button.dropdown-btn(onclick="toggleDropdown('stockDropdown')")
         span.dropdown-title
@@ -29,22 +25,8 @@ head
           |  Stock Management
         i.bi.bi-chevron-down
       #stockDropdown.dropdown-container
-        a.dropdown-item(href='#')
-          i.bi.bi-plus-circle
-          |  Add New Stock
-        a.dropdown-item(href='#')
-          i.bi.bi-list-ul
-          |  View All Stock
-        a.dropdown-item(href='#')
-          i.bi.bi-exclamation-triangle
-          |  Low Stock Alerts
-        a.dropdown-item(href='#')
-          i.bi.bi-arrow-repeat
-          |  Stock Adjustments
-        a.dropdown-item(href='#')
-          i.bi.bi-upc-scan
-          |  Stock Categories
-    // Sales Management Dropdown
+        a.dropdown-item(href='#') Add New Stock
+        a.dropdown-item(href='#') View All Stock
     li.nav-item
       button.dropdown-btn(onclick="toggleDropdown('salesDropdown')")
         span.dropdown-title
@@ -52,19 +34,8 @@ head
           |  Sales Management
         i.bi.bi-chevron-down
       #salesDropdown.dropdown-container
-        a.dropdown-item(href='#')
-          i.bi.bi-receipt
-          |  New Sale
-        a.dropdown-item(href='#')
-          i.bi.bi-clock-history
-          |  Sales History
-        a.dropdown-item(href='#')
-          i.bi.bi-printer
-          |  Print Receipt
-        a.dropdown-item(href='#')
-          i.bi.bi-truck
-          |  Transport Charges
-    // Supplier Credit Dropdown
+        a.dropdown-item(href='#') New Sale
+        a.dropdown-item(href='#') Sales History
     li.nav-item
       button.dropdown-btn(onclick="toggleDropdown('creditDropdown')")
         span.dropdown-title
@@ -72,19 +43,8 @@ head
           |  Supplier Credit
         i.bi.bi-chevron-down
       #creditDropdown.dropdown-container
-        a.dropdown-item(href='#')
-          i.bi.bi-plus-circle
-          |  Record Credit
-        a.dropdown-item(href='#')
-          i.bi.bi-cash-stack
-          |  Record Payment
-        a.dropdown-item(href='#')
-          i.bi.bi-list-ul
-          |  Credit Summary
-        a.dropdown-item(href='#')
-          i.bi.bi-calendar
-          |  Payment Schedule
-    // Deposit Scheme Dropdown
+        a.dropdown-item(href='#') Record Credit
+        a.dropdown-item(href='#') Record Payment
     li.nav-item
       button.dropdown-btn(onclick="toggleDropdown('depositDropdown')")
         span.dropdown-title
@@ -92,22 +52,8 @@ head
           |  Deposit Scheme
         i.bi.bi-chevron-down
       #depositDropdown.dropdown-container
-        a.dropdown-item(href='#')
-          i.bi.bi-person-plus
-          |  Register Depositor
-        a.dropdown-item(href='#')
-          i.bi.bi-cash
-          |  Record Deposit
-        a.dropdown-item(href='#')
-          i.bi.bi-cash-stack
-          |  Record Withdrawal
-        a.dropdown-item(href='#')
-          i.bi.bi-list-ul
-          |  Depositors List
-        a.dropdown-item(href='#')
-          i.bi.bi-bar-chart
-          |  Deposit Reports
-    // Reports Dropdown
+        a.dropdown-item(href='#') Register Depositor
+        a.dropdown-item(href='#') Record Deposit
     li.nav-item
       button.dropdown-btn(onclick="toggleDropdown('reportsDropdown')")
         span.dropdown-title
@@ -115,22 +61,8 @@ head
           |  Reports
         i.bi.bi-chevron-down
       #reportsDropdown.dropdown-container
-        a.dropdown-item(href='#')
-          i.bi.bi-graph-up
-          |  Sales Report
-        a.dropdown-item(href='#')
-          i.bi.bi-box-seam
-          |  Stock Report
-        a.dropdown-item(href='#')
-          i.bi.bi-credit-card
-          |  Credit Report
-        a.dropdown-item(href='#')
-          i.bi.bi-piggy-bank
-          |  Deposit Report
-        a.dropdown-item(href='#')
-          i.bi.bi-calculator
-          |  Profit Report
-    // User Management Dropdown
+        a.dropdown-item(href='#') Sales Report
+        a.dropdown-item(href='#') Stock Report
     li.nav-item
       button.dropdown-btn(onclick="toggleDropdown('userDropdown')")
         span.dropdown-title
@@ -138,70 +70,46 @@ head
           |  User Management
         i.bi.bi-chevron-down
       #userDropdown.dropdown-container
-        a.dropdown-item(href='#')
-          i.bi.bi-person-plus
-          |  Add New User
-        a.dropdown-item(href='#')
-          i.bi.bi-list-ul
-          |  View All Users
-        a.dropdown-item(href='#')
-          i.bi.bi-person-badge
-          |  Manage Roles
+        a.dropdown-item(href='#') Add New User
+        a.dropdown-item(href='#') View All Users
   .sidebar-user
     .user-name 👤 Admin User
     .user-role System Administrator
-  // Logout button - aligned at bottom
   .logout-wrapper
     a(href="/")
       button.logout-btn(type="button")
         i.bi.bi-box-arrow-right
         |  Sign Out
-// ========== MAIN CONTENT ==========
+
 .main-content
   .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
     div
       h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Dashboard
-      p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Welcome back, Admin &mdash; full system overview.
-    .d-flex.gap-2.mt-2.mt-md-0
-      .search-bar
-        i.bi.bi-search.me-2
-        input(type='text' placeholder='Search...')
-      button.export-btn
-        i.bi.bi-file-earmark-excel
-        |  Export
-  // Stats Row - 6 Cards
+      p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Welcome back, Admin
+  
   .row.g-3.mb-4
-    .col-md-2.col-sm-4.col-6
+    .col-md-3.col-sm-4.col-6
       .stat-card
-        .stat-value UGX 48.2M
+        .stat-value UGX #{totalStockValue}
         .stat-label Stock Value
-    .col-md-2.col-sm-4.col-6
+    .col-md-3.col-sm-4.col-6
       .stat-card
-        .stat-value UGX 1.85M
+        .stat-value UGX #{todaysSalesTotal}
         .stat-label Today's Sales
-    .col-md-2.col-sm-4.col-6
+    .col-md-3.col-sm-4.col-6
       .stat-card
-        .stat-value UGX 6.63M
-        .stat-label Outstanding Credit
-    .col-md-2.col-sm-4.col-6
+        .stat-value UGX #{outstandingCredit}
+        .stat-label Supplier Credit
+    .col-md-3.col-sm-4.col-6
       .stat-card
-        .stat-value UGX 4.2M
+        .stat-value UGX #{totalDeposits}
         .stat-label Total Deposits
-    .col-md-2.col-sm-4.col-6
-      .stat-card
-        .stat-value 4
-        .stat-label Low Stock
-    .col-md-2.col-sm-4.col-6
-      .profit-card
-        .stat-label(style='color: rgba(255,255,255,0.7);') Today's Profit
-        .profit-value UGX 730K
-        small(style='color: rgba(255,255,255,0.5);') Margin: 39%
-  // Row 1: Low Stock + Supplier Credit
+  
   .row.g-3
     .col-lg-7
       .section-title
-        i.bi.bi-exclamation-triangle-fill(style='color: #C6A43F;')
-        |  Stock 
+        i.bi.bi-box-seam
+        |  Stock Inventory
       .table-responsive.custom-table.mb-4
         table.table.mb-0
           thead
@@ -211,22 +119,19 @@ head
               th Current Stock
               th Reorder Level
               th Selling Price
-              th Supplier
-              th Attendant
           tbody
             if stockItems && stockItems.length
               each item in stockItems
                 tr
-                  td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
-                  td #{item.productname || 'Unknown product'}
+                  td #{item.Date ? item.Date.toLocaleDateString() : 'No date'}
+                  td #{item.productname || 'Unknown'}
                   td #{item.quantity || 0}
                   td #{item.reorderlevel || 'N/A'}
-                  td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
-                  td #{item.supplier || 'N/A'}
-                  td #{item.attendant || 'unknown attendant'}
+                  td #{item.sellingprice ? 'UGX ' + item.sellingprice : 'N/A'}
             else
               tr
-                td.text-center(colspan='7') No stock items found
+                td.text-center(colspan='5') No stock items found
+    
     .col-lg-5
       .section-title
         i.bi.bi-credit-card
@@ -240,25 +145,22 @@ head
               th Due Date
               th Status
           tbody
-            tr
-              td Bamburi Cement Ltd
-              td UGX 2.45M
-              td May 30
-              td
-                span.badge-pending Pending
-            tr
-              td Rainbow Paints
-              td UGX 980K
-              td Jun 10
-              td
-                span.badge-paid On Track
-            tr
-              td Steel Masters Ltd
-              td UGX 3.2M
-              td May 25
-              td
-                span.badge-overdue Overdue
-  // Row 2: Recent Sales + Deposit Scheme
+            if creditStockItems && creditStockItems.length
+              each item in creditStockItems
+                if item.balance > 0
+                  tr
+                    td #{item.supplier || 'Unknown'}
+                    td UGX #{item.balance ? item.balance.toLocaleString() : '0'}
+                    td #{item.dueDate ? item.dueDate.toLocaleDateString() : 'Not set'}
+                    td
+                      if item.status === 'Overdue'
+                        span.badge-overdue Overdue
+                      else
+                        span.badge-pending Pending
+            else
+              tr
+                td.text-center(colspan='4') No credit records found
+  
   .row.g-3.mt-2
     .col-lg-7
       .section-title
@@ -275,16 +177,17 @@ head
               th Attendant
           tbody
             if sales && sales.length
-              each sale in sales
+              each sale in sales.slice(0, 10)
                 tr
-                  td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
-                  td #{sale.customername}
-                  td #{sale.productname || 'Unknown Product'}
-                  td #{sale.total ? 'UGX ' + sale.total.toLocaleString() : 'UGX 0'}
-                  td #{sale.attendant ? sale.attendant.fullname : 'unknown attendant'}
+                  td #{sale.Date ? sale.Date.toLocaleDateString() : 'No date'}
+                  td #{sale.customername || 'Walk-in Customer'}
+                  td #{sale.productname || 'Unknown'}
+                  td #{sale.total ? 'UGX ' + sale.total : 'UGX 0'}
+                  td #{sale.attendant ? sale.attendant.fullname : 'unknown'}
             else
               tr
                 td.text-center(colspan='5') No sales found
+    
     .col-lg-5
       .section-title
         i.bi.bi-piggy-bank
@@ -294,30 +197,22 @@ head
           thead
             tr
               th Depositor
-              th Total Deposits
-              th Withdrawals
+              th Latest Deposit
               th Balance
           tbody
-            tr
-              td James Mwangi
-              td UGX 1.2M
-              td UGX 200K
-              td UGX 1.0M
-            tr
-              td Mary Wanjiku
-              td UGX 850K
-              td UGX 150K
-              td UGX 700K
-            tr
-              td Peter Ochieng
-              td UGX 2.1M
-              td UGX 500K
-              td UGX 1.6M
-            tr
-              td Lucy Achieng
-              td UGX 450K
-              td UGX 0
-              td UGX 450K
+            if depositors && depositors.length
+              each depositor in depositors
+                - let latestDeposit = 0
+                if depositor.depositHistory && depositor.depositHistory.length
+                  - latestDeposit = depositor.depositHistory[depositor.depositHistory.length - 1].amount
+                tr
+                  td #{depositor.fullName || 'Unknown'}
+                  td UGX #{latestDeposit || 0}
+                  td UGX #{depositor.currentBalance || 0}
+            else
+              tr
+                td.text-center(colspan='3') No depositors found
+
 .footer
   i.bi.bi-shield-check
   |  NyondoStock &mdash; Enterprise Hardware Management System
