@@ -273,14 +273,6 @@ router.get('/logout', (req, res, next) => {
     });
 });
 
-router.get('/users', async (req, res) => {
-    try {
-        const users = await Registration.find();
-        res.render('user_mgt', { users: users });
-    } catch (error) {
-        console.log(error);
-        res.render('user_mgt', { users: [] });
-    }
-});
+
 
 module.exports = router;

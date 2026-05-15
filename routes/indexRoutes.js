@@ -87,27 +87,8 @@ router.post('/postlogin', passport.authenticate('local', {
     }
 })
 
-router.get("/admin", (req, res) => {
-    res.render('admin_dashboard')
-})
 
-router.get("/manager", (req, res) => {
-    res.render('manager_dashboard')
-})
 
-// Fixed: Removed duplicate route
-router.get("/salesattendant", async (req, res) => {
-    try {
-        const sales = await Sale.find()
-            .populate('attendant', 'fullname')
-            .sort({ Date: -1 })
-        
-        res.render('sales_dashboard', { sales })
-    } catch (error) {
-        console.log(error.message)
-        res.status(500).send('Cannot collect data from the database')
-    }
-})
 
 router.get('/logout', (req, res, next) => {
     req.logout((err) => {
@@ -127,5 +108,115 @@ router.get('/users', async (req, res) => {
         res.render('user_mgt', { users: [] });
     }
 })
+
+// GET route - Edit user form
+router.get('/edit-user/:id', async (req, res) => {
+    try {
+        const user = await Registration.findById(req.params.id);
+        if (!user) {
+            return res.redirect('/users');
+        }
+        res.render('edit_user', { user: user });
+    } catch (error) {
+        console.log(error);
+        res.redirect('/users');
+    }
+});
+
+// POST route - Update user
+router.post('/edit-user/:id', async (req, res) => {
+    try {
+        const { 
+            fullname, 
+            email, 
+            phonenumber, 
+            address,
+            nin,
+            nextOfKinName,
+            nextOfKinPhone,
+            nextOfKinRelationship,
+            role 
+        } = req.body;
+        
+        await Registration.findByIdAndUpdate(req.params.id, {
+            fullname: fullname,
+            email: email,
+            phonenumber: phonenumber,
+            address: address,
+            nin: nin,
+            nextOfKinName: nextOfKinName,
+            nextOfKinPhone: nextOfKinPhone,
+            nextOfKinRelationship: nextOfKinRelationship,
+            role: role
+        });
+        
+        console.log(`[${new Date().toLocaleString()}] User updated: ${fullname}`);
+        res.redirect('/users');
+        
+    } catch (error) {
+        console.log('Error updating user:', error);
+        res.redirect('/users');
+    }
+});
+
+// POST route - Delete user
+router.post('/delete-user/:id', async (req, res) => {
+    try {
+        const user = await Registration.findById(req.params.id);
+        if (!user) {
+            return res.redirect('/users');
+        }
+        
+        // Prevent deleting your own account
+        if (req.user && req.user._id.toString() === req.params.id) {
+            return res.redirect('/users');
+        }
+        
+        await Registration.findByIdAndDelete(req.params.id);
+        
+        console.log(`[${new Date().toLocaleString()}] User deleted: ${user.fullname} (${user.role})`);
+        res.redirect('/users');
+        
+    } catch (error) {
+        console.log('Error deleting user:', error);
+        res.redirect('/users');
+    }
+});
+
+// Update your existing /users route to include statistics
+router.get('/users', async (req, res) => {
+    try {
+        const users = await Registration.find().sort({ Date: -1 });
+        
+        // Calculate user statistics
+        let totalUsers = users.length;
+        let adminCount = 0;
+        let managerCount = 0;
+        let attendantCount = 0;
+        
+        users.forEach(user => {
+            if (user.role === 'admin') adminCount++;
+            else if (user.role === 'store_manager') managerCount++;
+            else if (user.role === 'sales_attendant') attendantCount++;
+        });
+        
+        res.render('user_mgt', { 
+            users: users,
+            totalUsers: totalUsers,
+            adminCount: adminCount,
+            managerCount: managerCount,
+            attendantCount: attendantCount
+        });
+    } catch (error) {
+        console.log(error);
+        res.render('user_mgt', { 
+            users: [],
+            totalUsers: 0,
+            adminCount: 0,
+            managerCount: 0,
+            attendantCount: 0
+        });
+    }
+});
 
 module.exports = router;

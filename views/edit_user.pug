@@ -1,0 +1,75 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0')
+  title NyondoStock - Edit User
+  // Bootstrap 5 CSS + Icons
+  link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
+  link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
+  link(rel='stylesheet' href='/css/registration.css')
+
+body
+  .register-card
+    img(src='/images/logo.png' alt='NyondoStock Logo')
+    h2 Edit User
+    p Update user information
+    
+    form(action=`/edit-user/${user._id}` method='post')
+      // Full Name
+      .mb-3.text-start
+        label.form-label Full Name
+        input.form-control(type='text' value=user.fullname name='fullname' required)
+      
+      // Email
+      .mb-3.text-start
+        label.form-label Email Address
+        input.form-control(type='email' value=user.email name='email' required)
+      
+      // Phone Number
+      .mb-3.text-start
+        label.form-label Phone Number
+        input.form-control(type='tel' value=user.phonenumber name='phonenumber' required)
+      
+      // Address
+      .mb-3.text-start
+        label.form-label Residential Address
+        input.form-control(type='text' value=user.address name='address' required)
+      
+      // NIN (National ID Number)
+      .mb-3.text-start
+        label.form-label National ID Number (NIN)
+        input.form-control(type='text' value=user.nin name='nin' required)
+      
+      // Next of Kin - Full Name
+      .mb-3.text-start
+        label.form-label Next of Kin - Full Name
+        input.form-control(type='text' value=user.nextOfKinName name='nextOfKinName' required)
+      
+      // Next of Kin - Phone Number
+      .mb-3.text-start
+        label.form-label Next of Kin - Phone Number
+        input.form-control(type='tel' value=user.nextOfKinPhone name='nextOfKinPhone' required)
+      
+      // Next of Kin - Relationship
+      .mb-3.text-start
+        label.form-label Next of Kin - Relationship
+        input.form-control(type='text' value=user.nextOfKinRelationship name='nextOfKinRelationship' required)
+      
+      // Role Selection
+      .mb-3.text-start
+        label.form-label Select Role
+        select.form-select(name='role' required)
+          option(value='admin' selected=user.role === 'admin') Administrator
+          option(value='store_manager' selected=user.role === 'store_manager') Store Manager
+          option(value='sales_attendant' selected=user.role === 'sales_attendant') Sales Attendant
+      
+      // Buttons
+      .d-flex.gap-3
+        button.btn-register(type='submit' style='flex: 1;')
+          i.bi.bi-save.me-2
+          | UPDATE USER
+        a.btn-register(href='/users' style='text-align: center; text-decoration: none; background: #6c757d;')
+          i.bi.bi-x-circle.me-2
+          | CANCEL
+
+  script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
