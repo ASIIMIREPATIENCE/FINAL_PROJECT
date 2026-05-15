@@ -22,6 +22,8 @@ router.get("/sale", async (req, res) => {
     }
 });
 
+
+
 router.post('/postSale', async (req, res) => {
     try {
         const {
@@ -37,6 +39,11 @@ router.post('/postSale', async (req, res) => {
         } = req.body;
 
         console.log('Product Name received:', productName);
+
+        // Get the logged-in user (attendant)
+        const attendant = req.user;
+        const attendantName = attendant ? attendant.fullname : 'Unknown Attendant';
+        const attendantId = attendant ? attendant._id : null;
 
         // Find product by NAME
         const product = await Stock.findOne({ productname: productName });
@@ -68,48 +75,65 @@ router.post('/postSale', async (req, res) => {
         // Calculate totals
         const subtotal = qty * parseFloat(unitprice);
         
-       // Transport calculation logic - BOTH conditions must be met for free
-let transport = 0;
-const distanceKm = parseInt(distance) || 0;
-const transportRate = 30000;
+        // Transport calculation logic
+        let transportFee = 0;
+        const distanceKm = parseInt(distance) || 0;
+        const transportRate = 30000;
+        let freeTransportApplied = false;
 
-// BOTH conditions must be TRUE for free transport
-const isWithinFreeDistance = distanceKm <= 10;      // Condition 1: Distance <= 10km
-const isAboveFreeAmount = subtotal >= 500000;    // Condition 2: Total >= 500,000
+        // Check if addTransport checkbox was checked
+        const needTransport = addTransport === 'true';
 
-if (isWithinFreeDistance && isAboveFreeAmount) {
-    transport = 0;  // Free transport
-    console.log('✓ Free transport - Distance:', distanceKm, 'km, Total: UGX', subtotal);
-} 
-else if (distanceKm > 0) {
-    transport = transportRate;  // Charge 30,000
-    console.log('✗ Transport charged UGX', transport, '- Distance:', distanceKm, 'km, Total: UGX', subtotal);
-}
+        if (needTransport && distanceKm > 0) {
+            // BOTH conditions must be TRUE for free transport
+            const isWithinFreeDistance = distanceKm <= 10;
+            const isAboveFreeAmount = subtotal >= 500000;
 
-const total = subtotal + transport;
+            if (isWithinFreeDistance && isAboveFreeAmount) {
+                transportFee = 0;
+                freeTransportApplied = true;
+                console.log('✓ Free transport - Distance:', distanceKm, 'km, Subtotal: UGX', subtotal);
+            } else {
+                transportFee = transportRate;
+                console.log('✗ Transport charged UGX', transportFee, '- Distance:', distanceKm, 'km, Subtotal: UGX', subtotal);
+            }
+        }
 
-        // Prepare sale data - NO attendant field
+        const total = subtotal + transportFee;
+
+        // Prepare sale data with attendant info
         const saleData = {
             customername,
             phonenumber,
             nin: nin || 'N/A',
-            paymentmethod,
+            paymentmethod: paymentmethod || 'Cash',
             productname: productName,
             quantity: qty,
             unitprice: parseFloat(unitprice),
-            distance: distanceKm,
-            rate: transport > 0 ? transportRate : 0,
             subtotal: subtotal,
-            transport: transport,
+            distance: distanceKm,
+            transportFee: transportFee,
             total: total,
-            date: new Date(),
-            free_transport_applied: transport === 0  && distanceKm > 0
+            free_transport_applied: freeTransportApplied,
+            attendant: attendantId,
+            attendantName: attendantName,
+            Date: new Date(),
+            items: [{
+                productName: productName,
+                quantity: qty,
+                price: parseFloat(unitprice),
+                subtotal: subtotal
+            }]
         };
 
         const newSale = new Sale(saleData);
         await newSale.save();
         
-        res.redirect('/sale?success=true');
+        // Render receipt page
+        res.render('receipt', { 
+            sale: newSale,
+            success: true 
+        });
 
     } catch (error) {
         console.log('Error details:', error);
@@ -140,5 +164,28 @@ const total = subtotal + transport;
         }
     }
 });
+
+
+// GET route - View receipt by ID
+router.get('/receipt/:id', async (req, res) => {
+    try {
+        const sale = await Sale.findById(req.params.id);
+        
+        if (!sale) {
+            return res.redirect('/salesattendant');
+        }
+        
+        res.render('receipt', { 
+            sale: sale,
+            success: true 
+        });
+        
+    } catch (error) {
+        console.error(error);
+        res.redirect('/salesattendant');
+    }
+});
+
+
 
 module.exports = router;

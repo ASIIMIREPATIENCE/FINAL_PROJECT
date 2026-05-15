@@ -1,0 +1,122 @@
+  style.
+    body {
+      background: #f4f7fc;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .receipt-container {
+      max-width: 500px;
+      margin: 2rem auto;
+    }
+    .receipt-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .receipt-header {
+      background: linear-gradient(135deg, #1e4a2f 0%, #0d361f 100%);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .receipt-header h2 {
+      margin: 0;
+      font-weight: 700;
+    }
+    .receipt-body {
+      padding: 1.5rem;
+    }
+    .receipt-footer {
+      background: #f8f9fa;
+      padding: 1rem;
+      text-align: center;
+      border-top: 1px solid #dee2e6;
+    }
+    .receipt-line {
+      border-top: 1px dashed #dee2e6;
+      margin: 1rem 0;
+    }
+    .company-info {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .company-info h4 {
+      color: #1e4a2f;
+      margin: 0;
+    }
+    .receipt-details {
+      margin: 1rem 0;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 2px solid #1e4a2f;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.8rem;
+    }
+    .btn-print {
+      background: #1e4a2f;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-right: 10px;
+      font-weight: 600;
+    }
+    .btn-back {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .btn-print:hover, .btn-back:hover {
+      opacity: 0.9;
+    }
+    .status-paid {
+      background: #28a745;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      display: inline-block;
+    }
+    .status-credit {
+      background: #C6A43F;
+      color: #0D3B2E;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      display: inline-block;
+    }
+    @media print {
+      .no-print {
+        display: none;
+      }
+      .receipt-container {
+        margin: 0;
+        box-shadow: none;
+      }
+      body {
+        background: white;
+      }
+    }

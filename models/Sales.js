@@ -7,8 +7,6 @@ const salesSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-
-
     phonenumber: {
         type: String,
         required: true,
@@ -19,12 +17,16 @@ const salesSchema = new mongoose.Schema({
         required: false,
         trim: true,
     },
+    paymentmethod: {
+        type: String,
+        enum: ['Cash', 'Mobile Money'],
+        default: 'Cash'
+    },
     productname: {
         type: String,
         required: true,
         trim: true,
     },
-   
     quantity: {
         type: Number,
         required: true
@@ -33,28 +35,39 @@ const salesSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    subtotal: {
+        type: Number,
+        required: true
+    },
     distance: {
         type: Number,
-        required: false
+        default: 0
     },
-    rate: {
+    transportFee: {
         type: Number,
-        required: false
+        default: 0
     },
     total: {
         type: Number,
-        required: true,
-        default:1500,
+        required: true
+    },
+    free_transport_applied: {
+        type: Boolean,
+        default: false
+    },
+    items: {
+        type: Array,
+        default: []
     },
     Date: {
         type: Date,
         default: Date.now
     },
-      attendant:{
+    attendant: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Registration',
         required: false
     }
-    });
+});
 
-module.exports = mongoose.model('Sales',salesSchema);
+module.exports = mongoose.model('Sales', salesSchema);
