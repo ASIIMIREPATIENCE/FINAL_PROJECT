@@ -3,10 +3,10 @@ const router = express.Router();
 const Depositor = require('../models/Depositor');
 const Registration = require('../models/Registration');
 
-// GET route - Display deposit scheme page (Auth removed for now)
+// GET route - Display deposit scheme page
 router.get('/scheme', async (req, res) => {
     try {
-        // Get current logged-in user from Registration model (will work without auth)
+        // Get current logged-in user from Registration model
         const userId = req.user?._id || req.session?.userId;
         let user = null;
         
@@ -63,12 +63,12 @@ router.get('/scheme', async (req, res) => {
         
         res.render('scheme', {
             depositors: depositors,
-            transactions: recentDeposits, // For the deposit history table
+            transactions: recentDeposits,
             totalDeposits: totalDeposits,
             currentBalance: currentBalance,
             depositorsCount: depositors.length,
             user: user || { fullname: 'Guest User', role: 'Guest' },
-            topBalanceDepositor: topBalanceDepositor, // ADD THIS LINE
+            topBalanceDepositor: topBalanceDepositor,
             messages: {
                 success: success_msg,
                 error: error_msg
@@ -81,21 +81,19 @@ router.get('/scheme', async (req, res) => {
     }
 });
 
-// POST route - Register new depositor (Auth removed for now)
+// POST route - Register new depositor
 router.post('/registerDepositor', async (req, res) => {
     try {
         const { fullName, phoneNumber, nin, employer } = req.body;
         
-        // Get current logged-in user (if any)
+        // Get current logged-in user
         const userId = req.user?._id || req.session?.userId;
-        let user = null;
+        let attendantName = 'System Admin';
         
         if (userId) {
-            user = await Registration.findById(userId).select('fullname');
+            const user = await Registration.findById(userId).select('fullname');
+            if (user) attendantName = user.fullname;
         }
-        
-        // If no user found, use a default attendant
-        const attendantName = user ? user.fullname : 'System Admin';
         
         // Check if NIN already exists
         const existingDepositor = await Depositor.findOne({ nin: nin });
@@ -117,6 +115,7 @@ router.post('/registerDepositor', async (req, res) => {
         });
         
         await newDepositor.save();
+        
         console.log(`[${new Date().toLocaleString()}] New depositor registered: ${fullName} by ${attendantName}`);
         if (req.flash) req.flash('success', `Depositor ${fullName} registered successfully`);
         res.redirect('/scheme');
@@ -128,12 +127,12 @@ router.post('/registerDepositor', async (req, res) => {
     }
 });
 
-// POST route - Record deposit (Auth removed for now)
+// POST route - Record deposit (with receipt)
 router.post('/recordDeposit', async (req, res) => {
     try {
         const { depositorId, amount, paymentMethod } = req.body;
         
-        // Get current logged-in user (if any)
+        // Get current logged-in user
         const userId = req.user?._id || req.session?.userId;
         let attendant = null;
         
@@ -142,7 +141,7 @@ router.post('/recordDeposit', async (req, res) => {
         }
         
         // If no user found, use a default attendant
-        const attendantName = attendant ? attendant.fullname : 'System Admin';
+        const attendantName = attendant ? attendant.fullname : 'Admin';
         const attendantId = attendant ? attendant._id : null;
         
         // Find the depositor
@@ -163,28 +162,37 @@ router.post('/recordDeposit', async (req, res) => {
         const oldBalance = depositor.currentBalance;
         const newBalance = oldBalance + depositAmount;
         
-        // Update depositor
-        depositor.currentBalance = newBalance;
-        depositor.totalDeposits += depositAmount;
-        
-        // Add to deposit history
-        depositor.depositHistory.push({
+        // Create deposit record
+        const depositRecord = {
             amount: depositAmount,
-            date: new Date(), // Auto-captures current date and time
+            date: new Date(),
             attendant: attendantId,
             attendantName: attendantName,
             paymentMethod: paymentMethod || 'Cash',
             balanceAfter: newBalance
-        });
+        };
+        
+        // Update depositor
+        depositor.currentBalance = newBalance;
+        depositor.totalDeposits += depositAmount;
+        depositor.depositHistory.push(depositRecord);
         
         await depositor.save();
         
+        // Get the index of the newly added deposit
+        const depositIndex = depositor.depositHistory.length - 1;
+        
         console.log(`[${new Date().toLocaleString()}] Deposit of UGX ${depositAmount.toLocaleString()} recorded for ${depositor.fullName}`);
         console.log(`   Attendant: ${attendantName}`);
-        console.log(`   Balance changed: UGX ${oldBalance.toLocaleString()} → UGX ${newBalance.toLocaleString()}`);
+        console.log(`   Balance was: UGX ${oldBalance.toLocaleString()} now → UGX ${newBalance.toLocaleString()}`);
         
-        if (req.flash) req.flash('success', `Deposit of UGX ${depositAmount.toLocaleString()} recorded for ${depositor.fullName}`);
-        res.redirect('/scheme');
+        // Render receipt page
+        res.render('deposit_receipt', { 
+            deposit: depositRecord,
+            depositor: depositor,
+            depositIndex: depositIndex,
+            success: true 
+        });
         
     } catch (error) {
         console.error('Error recording deposit:', error);
