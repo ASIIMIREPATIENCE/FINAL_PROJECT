@@ -27,25 +27,46 @@ router.get('/editStock/:id', async (req, res) => {
 });
 
 // POST route - Add new stock item
+// POST route - Add new stock item (with duplicate check)
 router.post('/postStock', async (req, res) => {
     try {
-        const { productname, category, quantity, costprice, sellingprice, supplier, reorderlevel, paymentMethod } = req.body; // Added paymentMethod
+        const { productname, category, quantity, costprice, sellingprice, supplier, reorderlevel, paymentMethod } = req.body;
         
-        const newStock = new Stock({
-            productname,
-            category,
-            quantity: Number(quantity),
+        // Check if product with same name, costprice, and sellingprice already exists
+        const existingStock = await Stock.findOne({
+            productname: productname,
             costprice: Number(costprice),
-            sellingprice: Number(sellingprice),
-            supplier,
-            reorderlevel: Number(reorderlevel),
-            paymentMethod: paymentMethod || 'Cash', // Add paymentMethod field
-            Date: new Date() // Add current date
+            sellingprice: Number(sellingprice)
         });
         
-        await newStock.save();
-        console.log("Stock saved:", req.body);
-        console.log("Payment Method:", paymentMethod); // Debug log
+        if (existingStock) {
+            // Update existing stock by adding to quantity
+            existingStock.quantity += Number(quantity);
+            existingStock.category = category;
+            existingStock.supplier = supplier;
+            existingStock.reorderlevel = Number(reorderlevel);
+            existingStock.paymentMethod = paymentMethod || 'Cash';
+            
+            await existingStock.save();
+            console.log("Stock updated (added to existing):", productname, "New quantity:", existingStock.quantity);
+        } else {
+            // Create new stock entry
+            const newStock = new Stock({
+                productname,
+                category,
+                quantity: Number(quantity),
+                costprice: Number(costprice),
+                sellingprice: Number(sellingprice),
+                supplier,
+                reorderlevel: Number(reorderlevel),
+                paymentMethod: paymentMethod || 'Cash',
+                Date: new Date()
+            });
+            
+            await newStock.save();
+            console.log("New stock saved:", req.body);
+        }
+        
         res.redirect('/addStock');
     } catch (error) {
         console.error(error);
