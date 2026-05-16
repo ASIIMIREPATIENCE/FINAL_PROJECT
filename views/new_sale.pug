@@ -1,17 +1,14 @@
-
 doctype html
 html(lang='en')
   head
     meta(charset='UTF-8')
     meta(name='viewport' content='width=device-width, initial-scale=1.0')
     title NyondoStock - Sales Recording
-    // Bootstrap 5 CSS + Icons
     link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
     link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
     link(rel='stylesheet' href='/css/new_sale.css')
   
   body
-    //  SIDEBAR 
     .sidebar
       .sidebar-logo
         img(src='/images/logo.png' alt='Logo')
@@ -61,23 +58,19 @@ html(lang='en')
           i.bi.bi-box-arrow-right
           |  Sign Out
 
-    // ========== MAIN CONTENT ==========
     .main-content
-      // Top Bar
       .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
         div
           h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Sales Recording
           p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;')
-            | Record customer sales — calculate transport, complete transaction.
+            | Add items to cart — complete multiple products in one transaction
       
-      // Success Message
       if success === true
         .alert.alert-success.alert-dismissible.fade.show(role='alert')
           i.bi.bi-check-circle-fill.me-2
           strong Sale completed successfully!
           button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
       
-      // Error Message
       if error
         .alert.alert-danger.alert-dismissible.fade.show(role='alert')
           i.bi.bi-exclamation-triangle-fill.me-2
@@ -85,14 +78,12 @@ html(lang='en')
           | #{error}
           button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
       
-      // Transport Info Banner
       .alert.alert-info.mb-3(role='alert')
         i.bi.bi-truck.me-2
         strong Transport Policy: 
         | Free delivery for purchases of UGX 500,000 or more within 10km radius. Otherwise, a fixed fee of UGX 30,000 applies.
       
-      // MAIN FORM
-      form(action='/postSale' method='POST')
+      form#saleForm(action='/postSale' method='POST')
         // Customer Information Section
         .form-card
           .form-title
@@ -102,74 +93,99 @@ html(lang='en')
           .row.g-3
             .col-md-4
               label.form-label Customer Name
-              input.form-control(type='text' placeholder='Enter customer name' name='customername' required)
+              input#customerName.form-control(type='text' placeholder='Enter customer name' name='customername' required)
             
             .col-md-3
               label.form-label Phone Number
-              input.form-control(type='tel' placeholder='07XX XXX XXX' name='phonenumber' required)
+              input#customerPhone.form-control(type='tel' placeholder='07XX XXX XXX' name='phonenumber' required)
             
             .col-md-3
               label.form-label NIN (Optional)
-              input.form-control(type='text' placeholder='National ID number' name='nin')
+              input#customerNin.form-control(type='text' placeholder='National ID number' name='nin')
             
             .col-md-2
               label.form-label Payment Method
-              select.form-select(name='paymentmethod' required)
+              select#paymentMethod.form-select(name='paymentmethod' required)
                 option(value='') Select payment method
                 option(value='Cash') Cash
                 option(value='Mobile Money') Mobile Money
-                option(value='Bank Transfer') Bank Transfer
         
-        // Product Selection Section
+        // Transport Section
         .form-card
-          .row.g-3
-            .col-md-4
-              label.form-label(for='productName') Product Name
-              select.form-select(name='productName' required)
-                option(value='' disabled selected) Select Product
-                each product in items 
-                  option(value=product.productname)= `${product.productname} (Stock: ${product.quantity} | Price: ${product.sellingprice} UGX)`
-            
-            .col-md-3
-              label.form-label Quantity
-              input.form-control(type='number' placeholder='Qty' name='quantity' required min='1')
-            
-            .col-md-3
-              label.form-label Unit Price (UGX)
-              input.form-control(type='number' placeholder='0' name='unitprice' required min='0')
-            
-            .col-md-2
-              label.form-label &nbsp;
-        
-        // Transport Charges Section
-        .form-card
+          .form-title
+            i.bi.bi-truck(style='color: #C6A43F;')
+            |  Transport Information
+          
           .row.g-3
             .col-md-4
               .form-check
-                input.form-check-input(type='checkbox' name='addTransport' value='true')
-                label.form-check-label(style='font-size: 0.85rem;')
-                  | Need Transport Delivery?
+                input#addTransport.form-check-input(type='checkbox' name='addTransport' value='true')
+                label.form-check-label Need Transport Delivery?
             
             .col-md-3
               label.form-label Distance (km)
-              input.form-control(type='number' placeholder='Enter distance' name='distance' value='0' min='0')
-            .col-md-5
-              small.text-muted
-                i.bi.bi-info-circle
-                
+              input#distance.form-control(type='number' name='distance' value='0' min='0')
         
-        // Submit Section - Button Centered
+        // Cart Section
+        .form-card
+          .form-title
+            i.bi.bi-cart(style='color: #C6A43F;')
+            |  Shopping Cart
+          
+          .table-responsive
+            table.table
+              thead
+                tr
+                  th Product
+                  th Quantity
+                  th Unit Price (UGX)
+                  th
+              tbody#cartBody
+                tr
+                  td(colspan='4' class='text-center text-muted') Cart is empty
+        
+        // Add Product to Cart
+        .form-card
+          .form-title
+            i.bi.bi-plus-circle(style='color: #C6A43F;')
+            |  Add Product to Cart
+          
+          .row.g-3
+            .col-md-4
+              label.form-label Product Name
+              select#productName.form-select
+                option(value='' disabled selected) Select Product
+                each product in items 
+                  option(value=product.productname data-price=product.sellingprice data-stock=product.quantity)= `${product.productname} (Stock: ${product.quantity} | Price: ${product.sellingprice} UGX)`
+            
+            .col-md-3
+              label.form-label Quantity
+              input#quantity.form-control(type='number' value='1' min='1')
+            
+            .col-md-3
+              label.form-label Unit Price (UGX)
+              input#unitPrice.form-control(type='number' )
+            
+            .col-md-2
+              label.form-label &nbsp;
+              button#addToCart.btn.btn-warning(type='button' style='background:#C6A43F; color:white; width:100%')
+                i.bi.bi-cart-plus
+                |  Add to Cart
+        
+        // Hidden input for cart items
+        input#cartItems(type='hidden' name='cartItems')
+        
+        // Submit Section
         .form-card
           .row
             .col-md-12.d-flex.justify-content-center
-              button.btn-success-custom.mt-3(type='submit' style='width: 50%;')
+              button#completeSale.btn-success-custom.mt-3(type='submit' style='width: 50%;')
                 i.bi.bi-check-circle
                 |  COMPLETE SALE
 
-    // Footer
     .footer
       i.bi.bi-shield-check
       |  NyondoStock — Enterprise Hardware Management System
 
-    // Scripts
     script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
+    script(src='/js/sale_cart.js')

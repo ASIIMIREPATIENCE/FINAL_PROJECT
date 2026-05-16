@@ -1,115 +1,128 @@
-//- 
 doctype html
-head
-  meta(charset='UTF-8')
-  meta(name='viewport' content='width=device-width, initial-scale=1.0')
-  title NyondoStock - Sales Attendant Dashboard
-  // Bootstrap 5 CSS + Icons
-  link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
-  link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
-  link(rel='stylesheet' href='/css/sales_dashboard.css')
-// SIDEBAR
-.sidebar
-  .logo
-    img(src='/images/logo.png' alt='Logo')
-    h4 NyondoStock
-    p Hardware Management
-  nav.nav.flex-column
-    a.nav-link.active(href='#')
-      i.bi.bi-speedometer2
-      |  Dashboard
-    a.nav-link(href='#')
-      i.bi.bi-cart-plus
-      |  New Sale
-    a.nav-link(href='#')
-      i.bi.bi-clock-history
-      |  Sales History
-    a.nav-link(href='#')
-      i.bi.bi-box-seam
-      |  View Stock
-  .user-section
-    .user-name 👤 Sarah Kamau
-    .user-role Sales Attendant
-    button.logout-btn 
-      i.bi.bi-box-arrow-right
-      |  Sign Out
-//MAIN CONTENT 
-.main-content
-  // Welcome Row
-  .row.mb-4
-    .col-12
-      h4(style='color: var(--nyondo-green);') Welcome back, Sarah! 👋
-      p(style='color: #6c757d;') Ready to serve customers today.
-  // Stats Row
-  .row.g-3.mb-4
-    .col-md-6
-      .stat-card
-        .stat-value UGX 1,850,000
-        .stat-label Today&apos;s Sales
-    .col-md-6
-      .stat-card
-        .stat-value 4
-        .stat-label Low Stock Alerts
-  // Quick Sale Button
-  .row.mb-4
-    .col-12
-      button.quick-sale-btn
-        i.bi.bi-cart-plus.fs-4.me-2
-        |  START NEW SALE
-  // Low Stock Alerts Table
-  .section-title
-    i.bi.bi-exclamation-triangle-fill(style='color: #C6A43F;')
-    |  Low Stock Alerts
-  .table-responsive.custom-table.mb-4
-    table.table.mb-0
-      thead
-        tr
-          th Date
-          th Product Name
-          th Current Stock
-          th Reorder Level
-          th Selling Price
-          th Supplier
-          th Attendant
-      tbody
-        each item in stockItems
-          tr
-            td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
-            td #{item.productname || 'Unknown product'}
-            td #{item.quantity || 0}
-            td #{item.reorderlevel || 'N/A'}
-            td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
-            td #{item.supplier || 'N/A'}
-            td #{item.attendant || 'unknown attendant'}
-        else
-          tr
-            td.text-center(colspan='7') No stock items found
-  // Recent Sales Table
-  .section-title
-    i.bi.bi-clock-history
-    |  Recent Sales
-  .table-responsive.custom-table
-    table.table.mb-0
-      thead
-        tr
-          th Date
-          th Customer Name
-          th Product Name
-          th Total
-          th Attendant
-      tbody
-        each sale in sales
-          tr
-            td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
-            td #{sale.customername}
-            td #{sale.productname || 'Unknown Product'}
-            td #{sale.total ? 'UGX ' + sale.total.toLocaleString() : 'UGX 0'}
-            td #{sale.attendant ? sale.attendant.fullname : 'unknown attendant'}
-        else
-          tr
-            td.text-center(colspan='5') No sales found
-// Footer
-.footer
-  i.bi.bi-shield-check
-  |  NyondoStock &mdash; Enterprise Hardware Management System
-script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    title NyondoStock - Sales Attendant Dashboard
+    link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
+    link(rel='stylesheet' href='/css/sales_dashboard.css')
+
+  body
+    // SIDEBAR
+    .sidebar
+      .logo
+        img(src='/images/logo.png' alt='Logo')
+        h4 NyondoStock
+        p Hardware Management
+      nav.nav.flex-column
+        a.nav-link.active(href='#')
+          i.bi.bi-speedometer2
+          |  Dashboard
+        a.nav-link(href='#')
+          i.bi.bi-cart-plus
+          |  New Sale
+        a.nav-link(href='#')
+          i.bi.bi-clock-history
+          |  Sales History
+        a.nav-link(href='#')
+          i.bi.bi-box-seam
+          |  View Stock
+      .user-section
+        .user-name 👤 Sarah Kamau
+        .user-role Sales Attendant
+        button.logout-btn 
+          i.bi.bi-box-arrow-right
+          |  Sign Out
+
+    // MAIN CONTENT 
+    .main-content
+      // Welcome Row
+      .row.mb-4
+        .col-12
+          h4(style='color: var(--nyondo-green);') Welcome back, Sarah! 👋
+          p(style='color: #6c757d;') Ready to serve customers today.
+      
+      // Stats Row
+      .row.g-3.mb-4
+        .col-md-6
+          .stat-card
+            .stat-value UGX 1,850,000
+            .stat-label Today's Sales
+        .col-md-6
+          .stat-card
+            .stat-value 4
+            .stat-label Low Stock Alerts
+      
+      // Quick Sale Button
+      .row.mb-4
+        .col-12
+          a(href='/sale' style='text-decoration: none;')
+            button.quick-sale-btn
+              i.bi.bi-cart-plus.fs-4.me-2
+              |  START NEW SALE
+      
+      // Low Stock Alerts Table
+      .section-title
+        i.bi.bi-exclamation-triangle-fill(style='color: #C6A43F;')
+        |  Low Stock Alerts
+      .table-responsive.custom-table.mb-4
+        table.table.mb-0
+          thead
+            tr
+              th Date
+              th Product Name
+              th Current Stock
+              th Reorder Level
+              th Selling Price
+              th Supplier
+              th Attendant
+          tbody
+            if stockItems && stockItems.length
+              each item in stockItems
+                tr
+                  td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
+                  td #{item.productname || 'Unknown product'}
+                  td #{item.quantity || 0}
+                  td #{item.reorderlevel || 'N/A'}
+                  td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
+                  td #{item.supplier || 'N/A'}
+                  td #{item.attendant || 'unknown attendant'}
+            else
+              tr
+                td.text-center(colspan='7') No stock items found
+      
+      // Recent Sales Table
+      .row.g-3.mt-2
+        .col-lg-7
+          .section-title
+            i.bi.bi-clock-history
+            |  Recent Sales
+          .custom-table
+            table.table.mb-0
+              thead
+                tr
+                  th Date
+                  th Customer Name
+                  th Products
+                  th Total
+                  th Attendant
+              tbody
+                if allSales && allSales.length
+                  each sale in allSales.slice(0, 10)
+                    tr
+                      td #{sale.Date ? sale.Date.toLocaleDateString() : 'No date'}
+                      td #{sale.customername || 'Walk-in Customer'}
+                      td #{sale.products ? sale.products.join(', ') : 'Unknown'}
+                      td UGX #{sale.grandTotal ? sale.grandTotal.toLocaleString() : '0'}
+                      td #{sale.attendantName || 'unknown'}
+                else
+                  tr
+                    td.text-center(colspan='5') No sales found
+
+    // Footer
+    .footer
+      i.bi.bi-shield-check
+      |  NyondoStock &mdash; Enterprise Hardware Management System
+
+    script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')

@@ -1,11 +1,9 @@
-//- 
 doctype html
 html(lang='en')
 head
   meta(charset='UTF-8')
   meta(name='viewport' content='width=device-width, initial-scale=1.0')
   title NyondoStock - Sales Receipt
-  // Bootstrap 5 CSS + Icons
   link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
   link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
   link(rel='stylesheet' href='/css/receipt.css')
@@ -61,19 +59,19 @@ body
             .col-2.text-end Price
             .col-3.text-end Total
           
-          if sale.items && sale.items.length
-            each item in sale.items
+          if allSales && allSales.length
+            each item in allSales
               .row.mb-2
-                .col-5 #{item.productName}
+                .col-5 #{item.productname}
                 .col-2.text-center #{item.quantity}
-                .col-2.text-end UGX #{item.price.toLocaleString()}
-                .col-3.text-end UGX #{item.subtotal.toLocaleString()}
+                .col-2.text-end UGX #{item.unitprice.toLocaleString()}
+                .col-3.text-end UGX #{(item.quantity * item.unitprice).toLocaleString()}
           else
             .row.mb-2
-              .col-5 #{sale.productname || 'Unknown'}
-              .col-2.text-center #{sale.quantity || 0}
-              .col-2.text-end UGX #{sale.unitprice ? sale.unitprice.toLocaleString() : '0'}
-              .col-3.text-end UGX #{sale.subtotal ? sale.subtotal.toLocaleString() : '0'}
+              .col-5 #{sale.productname}
+              .col-2.text-center #{sale.quantity}
+              .col-2.text-end UGX #{sale.unitprice.toLocaleString()}
+              .col-3.text-end UGX #{sale.subtotal.toLocaleString()}
         
         .receipt-line
         
@@ -81,7 +79,7 @@ body
         .receipt-details
           .detail-row
             span <strong>Subtotal (Items):</strong>
-            span UGX #{sale.subtotal ? sale.subtotal.toLocaleString() : '0'}
+            span UGX #{sale.subtotal.toLocaleString()}
           
           if sale.transportFee && sale.transportFee > 0
             .detail-row
@@ -94,7 +92,7 @@ body
           
           .total-row
             span <strong>TOTAL:</strong>
-            span <strong>UGX #{sale.total ? sale.total.toLocaleString() : '0'}</strong>
+            strong UGX #{grandTotal ? grandTotal.toLocaleString() : '0'}
         
         .receipt-line
         
@@ -113,6 +111,4 @@ body
           i.bi.bi-arrow-left.me-2
           | New Sale
 
-  // Bootstrap JS Bundle
   script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
-  

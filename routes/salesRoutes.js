@@ -1,5 +1,3 @@
-// 
-
 const express = require("express");
 const router = express.Router();
 const Sale = require('../models/Sales');
@@ -22,8 +20,6 @@ router.get("/sale", async (req, res) => {
     }
 });
 
-
-
 router.post('/postSale', async (req, res) => {
     try {
         const {
@@ -31,110 +27,143 @@ router.post('/postSale', async (req, res) => {
             phonenumber,
             nin,
             paymentmethod,
-            productName,
-            quantity,
-            unitprice,
+            cartItems,
             distance,
             addTransport
         } = req.body;
 
-        console.log('Product Name received:', productName);
+        // Parse cart items
+        let cart = [];
+        if (cartItems) {
+            cart = JSON.parse(cartItems);
+        }
 
-        // Get the logged-in user (attendant)
+        if (cart.length === 0) {
+            const items = await Stock.find({ quantity: { $gt: 0 } }).lean();
+            return res.render('new_sale', {
+                items: items,
+                error: 'Cart is empty. Add at least one product.',
+                success: false
+            });
+        }
+
         const attendant = req.user;
         const attendantName = attendant ? attendant.fullname : 'Unknown Attendant';
         const attendantId = attendant ? attendant._id : null;
-
-        // Find product by NAME
-        const product = await Stock.findOne({ productname: productName });
-        
-        if (!product) {
-            const items = await Stock.find({ quantity: { $gt: 0 } }).lean();
-            return res.render('new_sale', {
-                items: items,
-                error: 'Product not found',
-                success: false
-            });
-        }
-
-        // Check sufficient quantity
-        const qty = parseInt(quantity);
-        if (product.quantity < qty) {
-            const items = await Stock.find({ quantity: { $gt: 0 } }).lean();
-            return res.render('new_sale', {
-                items: items,
-                error: `Insufficient quantity in stock. Only ${product.quantity} available.`,
-                success: false
-            });
-        }
-
-        // Deduct quantity sold from stock quantity
-        product.quantity -= qty;
-        await product.save();
-
-        // Calculate totals
-        const subtotal = qty * parseFloat(unitprice);
-        
-        // Transport calculation logic
-        let transportFee = 0;
         const distanceKm = parseInt(distance) || 0;
-        const transportRate = 30000;
-        let freeTransportApplied = false;
-
-        // Check if addTransport checkbox was checked
         const needTransport = addTransport === 'true';
 
+        // Calculate cart subtotal (sum of all products)
+        let cartItemsWithSubtotals = [];
+        let cartSubtotal = 0;
+        
+        for (const item of cart) {
+            const itemSubtotal = parseInt(item.quantity) * parseFloat(item.unitPrice);
+            cartSubtotal += itemSubtotal;
+            cartItemsWithSubtotals.push({
+                productName: item.productName,
+                quantity: parseInt(item.quantity),
+                unitPrice: parseFloat(item.unitPrice),
+                subtotal: itemSubtotal
+            });
+        }
+        
+        // Calculate transport fee based on cart subtotal
+        let transportFee = 0;
+        let freeTransportApplied = false;
+        
         if (needTransport && distanceKm > 0) {
-            // BOTH conditions must be TRUE for free transport
             const isWithinFreeDistance = distanceKm <= 10;
-            const isAboveFreeAmount = subtotal >= 500000;
-
+            const isAboveFreeAmount = cartSubtotal >= 500000;
+            
             if (isWithinFreeDistance && isAboveFreeAmount) {
                 transportFee = 0;
                 freeTransportApplied = true;
-                console.log('✓ Free transport - Distance:', distanceKm, 'km, Subtotal: UGX', subtotal);
             } else {
-                transportFee = transportRate;
-                console.log('✗ Transport charged UGX', transportFee, '- Distance:', distanceKm, 'km, Subtotal: UGX', subtotal);
+                transportFee = 30000;
             }
         }
-
-        const total = subtotal + transportFee;
-
-        // Prepare sale data with attendant info
-        const saleData = {
-            customername,
-            phonenumber,
-            nin: nin || 'N/A',
-            paymentmethod: paymentmethod || 'Cash',
-            productname: productName,
-            quantity: qty,
-            unitprice: parseFloat(unitprice),
-            subtotal: subtotal,
-            distance: distanceKm,
-            transportFee: transportFee,
-            total: total,
-            free_transport_applied: freeTransportApplied,
-            attendant: attendantId,
-            attendantName: attendantName,
-            Date: new Date(),
-            items: [{
-                productName: productName,
-                quantity: qty,
-                price: parseFloat(unitprice),
-                subtotal: subtotal
-            }]
-        };
-
-        const newSale = new Sale(saleData);
-        await newSale.save();
         
-        // Render receipt page
+        // Grand total = cart subtotal + transport fee
+        const grandTotal = cartSubtotal + transportFee;
+        
+        // Save each item as separate sale record with transport fee
+        let allSales = [];
+        let firstSale = null;
+        
+        for (let i = 0; i < cart.length; i++) {
+            const item = cart[i];
+            const product = await Stock.findOne({ productname: item.productName });
+            
+            if (!product) {
+                const items = await Stock.find({ quantity: { $gt: 0 } }).lean();
+                return res.render('new_sale', {
+                    items: items,
+                    error: `Product "${item.productName}" not found`,
+                    success: false
+                });
+            }
+            
+            const qty = parseInt(item.quantity);
+            if (product.quantity < qty) {
+                const items = await Stock.find({ quantity: { $gt: 0 } }).lean();
+                return res.render('new_sale', {
+                    items: items,
+                    error: `Insufficient stock for ${product.productname}. Only ${product.quantity} available.`,
+                    success: false
+                });
+            }
+            
+            // Deduct from stock
+            product.quantity -= qty;
+            await product.save();
+            
+            const itemSubtotal = qty * parseFloat(item.unitPrice);
+            
+            const saleData = {
+                customername,
+                phonenumber,
+                nin: nin || 'N/A',
+                paymentmethod: paymentmethod || 'Cash',
+                productname: item.productName,
+                quantity: qty,
+                unitprice: parseFloat(item.unitPrice),
+                subtotal: itemSubtotal,
+                distance: distanceKm,
+                transportFee: i === 0 ? transportFee : 0,
+                total: itemSubtotal + (i === 0 ? transportFee : 0),
+                freeTransportApplied: freeTransportApplied,
+                needTransport: needTransport,
+                attendant: attendantId,
+                attendantName: attendantName,
+                Date: new Date(),
+                items: [{
+                    productName: item.productName,
+                    quantity: qty,
+                    price: parseFloat(item.unitPrice)
+                }]
+            };
+            
+            const newSale = new Sale(saleData);
+            await newSale.save();
+            allSales.push(newSale);
+            if (i === 0) firstSale = newSale;
+        }
+        
+        // Pass calculated totals to receipt - CORRECTED
         res.render('receipt', { 
-            sale: newSale,
+            sale: firstSale,
+            allSales: allSales,
+            cartItems: cartItemsWithSubtotals,
+            cartSubtotal: cartSubtotal,
+            transportFee: transportFee,
+            grandTotal: grandTotal,
+            freeTransportApplied: freeTransportApplied,
+            distance: distanceKm,
+            needTransport: needTransport,
             success: true 
         });
-
+        
     } catch (error) {
         console.log('Error details:', error);
         
@@ -165,8 +194,6 @@ router.post('/postSale', async (req, res) => {
     }
 });
 
-
-// GET route - View receipt by ID
 router.get('/receipt/:id', async (req, res) => {
     try {
         const sale = await Sale.findById(req.params.id);
@@ -175,8 +202,53 @@ router.get('/receipt/:id', async (req, res) => {
             return res.redirect('/salesattendant');
         }
         
+        // Find all sales with same customer and date (for multi-item receipts)
+        const startOfDay = new Date(sale.Date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(sale.Date);
+        endOfDay.setHours(23, 59, 59, 999);
+        
+        const allCustomerSales = await Sale.find({
+            customername: sale.customername,
+            phonenumber: sale.phonenumber,
+            Date: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            }
+        });
+        
+        // Recalculate totals for receipt display
+        let cartItems = [];
+        let cartSubtotal = 0;
+        
+        for (const item of allCustomerSales) {
+            const itemSubtotal = item.quantity * item.unitprice;
+            cartSubtotal += itemSubtotal;
+            cartItems.push({
+                productName: item.productname,
+                quantity: item.quantity,
+                unitPrice: item.unitprice,
+                subtotal: itemSubtotal
+            });
+        }
+        
+        // Get transport fee from the first sale (it's the same for all items in the cart)
+        const transportFee = sale.transportFee || 0;
+        const freeTransportApplied = sale.freeTransportApplied || false;
+        const needTransport = sale.needTransport || false;
+        const distanceKm = sale.distance || 0;
+        const grandTotal = cartSubtotal + transportFee;
+        
         res.render('receipt', { 
             sale: sale,
+            allSales: allCustomerSales,
+            cartItems: cartItems,
+            cartSubtotal: cartSubtotal,
+            transportFee: transportFee,
+            grandTotal: grandTotal,
+            freeTransportApplied: freeTransportApplied,
+            distance: distanceKm,
+            needTransport: needTransport,
             success: true 
         });
         
@@ -185,7 +257,5 @@ router.get('/receipt/:id', async (req, res) => {
         res.redirect('/salesattendant');
     }
 });
-
-
 
 module.exports = router;
