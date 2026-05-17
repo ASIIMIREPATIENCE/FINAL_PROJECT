@@ -9,17 +9,21 @@ const depositorSchema = new mongoose.Schema({
     phoneNumber: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        match: /^\+256[0-9]{9}$/,
+        default: '+256'
     },
     nin: {
         type: String,
         required: true,
         trim: true,
-        unique: true
+        unique: true,
+        match: /^(CF|CM).{12}$/
     },
     employer: {
         type: String,
-        trim: true
+        trim: true,
+        required:true
     },
     joinDate: {
         type: Date,
