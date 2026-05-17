@@ -79,12 +79,12 @@ body
         .receipt-details
           .detail-row
             span <strong>Subtotal (Items):</strong>
-            span UGX #{sale.subtotal.toLocaleString()}
+            span UGX #{cartSubtotal.toLocaleString()}
           
-          if sale.transportFee && sale.transportFee > 0
+          if transportFee && transportFee > 0
             .detail-row
               span <strong>Transport Fee:</strong>
-              span UGX #{sale.transportFee.toLocaleString()}
+              span UGX #{transportFee.toLocaleString()}
           else
             .detail-row
               span <strong>Transport Fee:</strong>
