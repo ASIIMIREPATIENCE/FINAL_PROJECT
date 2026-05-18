@@ -59,19 +59,25 @@ body
             .col-2.text-end Price
             .col-3.text-end Total
           
-          if allSales && allSales.length
-            each item in allSales
+          // Check if using new schema with items array
+          if sale.items && sale.items.length
+            each item in sale.items
               .row.mb-2
                 .col-5 #{item.productname}
                 .col-2.text-center #{item.quantity}
                 .col-2.text-end UGX #{item.unitprice.toLocaleString()}
-                .col-3.text-end UGX #{(item.quantity * item.unitprice).toLocaleString()}
+                .col-3.text-end UGX #{item.subtotal.toLocaleString()}
           else
-            .row.mb-2
-              .col-5 #{sale.productname}
-              .col-2.text-center #{sale.quantity}
-              .col-2.text-end UGX #{sale.unitprice.toLocaleString()}
-              .col-3.text-end UGX #{sale.subtotal.toLocaleString()}
+            // Fallback for old schema (single product)
+            if sale.productname
+              .row.mb-2
+                .col-5 #{sale.productname}
+                .col-2.text-center #{sale.quantity}
+                .col-2.text-end UGX #{sale.unitprice.toLocaleString()}
+                .col-3.text-end UGX #{sale.subtotal.toLocaleString()}
+            else
+              .row.mb-2
+                .col-12.text-center No items found
         
         .receipt-line
         
@@ -79,9 +85,13 @@ body
         .receipt-details
           .detail-row
             span <strong>Subtotal (Items):</strong>
-            span UGX #{cartSubtotal.toLocaleString()}
+            span UGX #{(sale.cartSubtotal || cartSubtotal || 0).toLocaleString()}
           
-          if transportFee && transportFee > 0
+          if sale.transportFee && sale.transportFee > 0
+            .detail-row
+              span <strong>Transport Fee:</strong>
+              span UGX #{sale.transportFee.toLocaleString()}
+          else if transportFee && transportFee > 0
             .detail-row
               span <strong>Transport Fee:</strong>
               span UGX #{transportFee.toLocaleString()}
@@ -92,7 +102,7 @@ body
           
           .total-row
             span <strong>TOTAL:</strong>
-            strong UGX #{grandTotal ? grandTotal.toLocaleString() : '0'}
+            strong UGX #{(sale.grandTotal || grandTotal || 0).toLocaleString()}
         
         .receipt-line
         

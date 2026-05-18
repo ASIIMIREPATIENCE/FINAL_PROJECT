@@ -8,40 +8,26 @@ const Depositor = require('../models/Depositor');
 
 router.get("/admin", async (req, res) => {
     try {
+        // Get all sales using the NEW schema structure (same as manager)
         const sales = await Sale.find()
             .populate('attendant', 'fullname')
             .sort({ Date: -1 });
+        
         const stockItems = await Stock.find();
         const depositors = await Depositor.find();
         
-        // Group sales by transaction (same date, customer name, phone number)
-        const groupedTransactions = {};
-        
-        for (const sale of sales) {
-            const key = `${sale.Date ? new Date(sale.Date).toDateString() : ''}_${sale.customername}_${sale.phonenumber}`;
-            
-            if (!groupedTransactions[key]) {
-                groupedTransactions[key] = {
-                    Date: sale.Date,
-                    customername: sale.customername,
-                    phonenumber: sale.phonenumber,
-                    products: [],
-                    grandTotal: 0,
-                    attendantName: sale.attendantName,
-                    paymentmethod: sale.paymentmethod,
-                    transportFee: 0
-                };
-            }
-            
-            groupedTransactions[key].products.push(sale.productname);
-            groupedTransactions[key].grandTotal += sale.total;
-            
-            if (sale.transportFee > 0) {
-                groupedTransactions[key].transportFee = sale.transportFee;
-            }
-        }
-        
-        const groupedSales = Object.values(groupedTransactions);
+        // Use sales directly since each sale already contains all items (same as manager)
+        const allSales = sales.map(sale => ({
+            _id: sale._id,
+            Date: sale.Date,
+            customername: sale.customername,
+            phonenumber: sale.phonenumber,
+            items: sale.items || [],  // Array of products in this sale
+            grandTotal: sale.grandTotal || 0,
+            paymentmethod: sale.paymentmethod,
+            transportFee: sale.transportFee || 0,
+            attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
+        }));
         
         // Get credit stock items
         let creditStockItems = await Stock.find({ paymentMethod: 'Credit' });
@@ -81,12 +67,12 @@ router.get("/admin", async (req, res) => {
             totalStockValue += (stockItems[i].quantity || 0) * (stockItems[i].sellingprice || 0);
         }
         
-        // Calculate Today's Sales
+        // Calculate Today's Sales using grandTotal (same as manager)
         const today = new Date().toDateString();
         let todaysSalesTotal = 0;
-        for (let i = 0; i < groupedSales.length; i++) {
-            if (groupedSales[i].Date && new Date(groupedSales[i].Date).toDateString() === today) {
-                todaysSalesTotal += groupedSales[i].grandTotal;
+        for (let i = 0; i < allSales.length; i++) {
+            if (allSales[i].Date && new Date(allSales[i].Date).toDateString() === today) {
+                todaysSalesTotal += allSales[i].grandTotal || 0;
             }
         }
         
@@ -105,10 +91,10 @@ router.get("/admin", async (req, res) => {
         }
         
         res.render('admin_dashboard', { 
-            allSales: groupedSales,  // ← Pass grouped sales
-            stockItems,
-            creditStockItems,
-            depositors,
+            allSales: allSales,  // ← Now using the same format as manager
+            stockItems: stockItems,
+            creditStockItems: creditStockItems,
+            depositors: depositors,
             totalStockValue: totalStockValue.toLocaleString(),
             todaysSalesTotal: todaysSalesTotal.toLocaleString(),
             outstandingCredit: outstandingCredit.toLocaleString(),
@@ -138,34 +124,22 @@ router.get("/manager", async (req, res) => {
         // Get all stock items
         const stockItems = await Stock.find().sort({ Date: -1 });
         
-        // Get all sales
+        // Get all sales using the NEW schema structure
         const sales = await Sale.find()
             .populate('attendant', 'fullname')
             .sort({ Date: -1 });
         
-        // Group sales by transaction (same as admin route)
-        const groupedTransactions = {};
-        
-        for (const sale of sales) {
-            const key = `${sale.Date ? new Date(sale.Date).toDateString() : ''}_${sale.customername}_${sale.phonenumber}`;
-            
-            if (!groupedTransactions[key]) {
-                groupedTransactions[key] = {
-                    Date: sale.Date,
-                    customername: sale.customername,
-                    phonenumber: sale.phonenumber,
-                    products: [],
-                    grandTotal: 0,
-                    attendantName: sale.attendantName,
-                    paymentmethod: sale.paymentmethod
-                };
-            }
-            
-            groupedTransactions[key].products.push(sale.productname);
-            groupedTransactions[key].grandTotal += sale.total;
-        }
-        
-        const allSales = Object.values(groupedTransactions);
+        // Use sales directly since each sale already contains all items
+        const allSales = sales.map(sale => ({
+            _id: sale._id,
+            Date: sale.Date,
+            customername: sale.customername,
+            phonenumber: sale.phonenumber,
+            items: sale.items,  // Array of products in this sale
+            grandTotal: sale.grandTotal,
+            paymentmethod: sale.paymentmethod,
+            attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
+        }));
         
         // Get credit stock items (for supplier credit table)
         let creditStockItems = await Stock.find({ paymentMethod: 'Credit' });
@@ -209,12 +183,12 @@ router.get("/manager", async (req, res) => {
             totalStockValue += (stockItems[i].quantity || 0) * (stockItems[i].sellingprice || 0);
         }
         
-        // Calculate Today's Sales using grouped sales
+        // Calculate Today's Sales using grandTotal
         const today = new Date().toDateString();
         let todaySales = 0;
         for (let i = 0; i < allSales.length; i++) {
             if (allSales[i].Date && new Date(allSales[i].Date).toDateString() === today) {
-                todaySales += allSales[i].grandTotal;
+                todaySales += allSales[i].grandTotal || 0;
             }
         }
         
@@ -229,12 +203,13 @@ router.get("/manager", async (req, res) => {
         // Get unique credit suppliers count
         const creditSuppliersCount = uniqueSuppliers.size;
         
-        // Get top selling products
+        // Get top selling products from the items array
         const topProducts = await Sale.aggregate([
+            { $unwind: '$items' },
             {
                 $group: {
-                    _id: '$productname',
-                    totalSold: { $sum: '$quantity' }
+                    _id: '$items.productname',
+                    totalSold: { $sum: '$items.quantity' }
                 }
             },
             { $sort: { totalSold: -1 } },
@@ -244,7 +219,7 @@ router.get("/manager", async (req, res) => {
         res.render('manager_dashboard', {
             currentUser: currentUser,
             stockItems: stockItems,
-            allSales: allSales,  // ← Pass grouped sales
+            allSales: allSales,
             creditStockItems: creditStockItems,
             totalStockValue: totalStockValue.toLocaleString(),
             todaySales: todaySales.toLocaleString(),
@@ -260,7 +235,7 @@ router.get("/manager", async (req, res) => {
         res.render('manager_dashboard', {
             currentUser: { fullname: 'Store Manager' },
             stockItems: [],
-            allSales: [],  // ← Empty array for grouped sales
+            allSales: [],
             creditStockItems: [],
             totalStockValue: '0',
             todaySales: '0',
@@ -275,45 +250,65 @@ router.get("/salesattendant", async (req, res) => {
     try {
         console.log("=== /salesattendant route hit ===");
         
-        // Fetch sales
+        // Get all sales using the NEW schema structure (same as manager)
         const sales = await Sale.find()
             .populate('attendant', 'fullname')
             .sort({ Date: -1 });
         
         const stockItems = await Stock.find();
         
-        // Group sales by transaction (same as admin route)
-        const groupedTransactions = {};
+        // Use sales directly since each sale already contains all items (same as manager)
+        const allSales = sales.map(sale => ({
+            _id: sale._id,
+            Date: sale.Date,
+            customername: sale.customername,
+            phonenumber: sale.phonenumber,
+            items: sale.items || [],  // Array of products in this sale
+            grandTotal: sale.grandTotal || 0,
+            paymentmethod: sale.paymentmethod,
+            attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
+        }));
         
-        for (const sale of sales) {
-            const key = `${sale.Date ? new Date(sale.Date).toDateString() : ''}_${sale.customername}_${sale.phonenumber}`;
-            
-            if (!groupedTransactions[key]) {
-                groupedTransactions[key] = {
-                    Date: sale.Date,
-                    customername: sale.customername,
-                    phonenumber: sale.phonenumber,
-                    products: [],
-                    grandTotal: 0,
-                    attendantName: sale.attendantName,
-                    paymentmethod: sale.paymentmethod
-                };
+        // Calculate today's sales total
+        const today = new Date().toDateString();
+        let todaysSalesTotal = 0;
+        let todaysTransactions = 0;
+        
+        for (let i = 0; i < allSales.length; i++) {
+            if (allSales[i].Date && new Date(allSales[i].Date).toDateString() === today) {
+                todaysSalesTotal += allSales[i].grandTotal || 0;
+                todaysTransactions++;
             }
-            
-            groupedTransactions[key].products.push(sale.productname);
-            groupedTransactions[key].grandTotal += sale.total;
         }
         
-        const allSales = Object.values(groupedTransactions);
+        // Count low stock items
+        let lowStockCount = 0;
+        let criticalStockCount = 0;
+        for (let i = 0; i < stockItems.length; i++) {
+            if (stockItems[i].reorderlevel) {
+                if (stockItems[i].quantity <= stockItems[i].reorderlevel / 2) {
+                    criticalStockCount++;
+                } else if (stockItems[i].quantity <= stockItems[i].reorderlevel) {
+                    lowStockCount++;
+                }
+            }
+        }
         
-        console.log("Sales count:", sales.length);
-        console.log("Grouped sales count:", allSales.length);
+        console.log("Sales count:", allSales.length);
         console.log("Stock items count:", stockItems.length);
         
-        // Render template with grouped sales
+        // Get current attendant name from session
+        const attendantName = req.user ? req.user.fullname : 'Sales Attendant';
+        
+        // Render template with sales data
         return res.render('sales_dashboard', { 
-            allSales: allSales,  // ← Pass grouped sales as allSales
-            stockItems: stockItems 
+            allSales: allSales,
+            stockItems: stockItems,
+            attendantName: attendantName,
+            todaysSalesTotal: todaysSalesTotal,
+            todaysTransactions: todaysTransactions,
+            lowStockCount: lowStockCount,
+            criticalStockCount: criticalStockCount
         });
         
     } catch (error) {
@@ -321,10 +316,16 @@ router.get("/salesattendant", async (req, res) => {
         console.error(error.stack);
         return res.render('sales_dashboard', { 
             allSales: [], 
-            stockItems: [] 
+            stockItems: [],
+            attendantName: 'Sales Attendant',
+            todaysSalesTotal: 0,
+            todaysTransactions: 0,
+            lowStockCount: 0,
+            criticalStockCount: 0
         });
     }
 });
+
 router.get('/logout', (req, res, next) => {
     req.logout((err) => {
         if (err) {
@@ -333,7 +334,6 @@ router.get('/logout', (req, res, next) => {
         res.redirect('/');
     });
 });
-
 
 
 module.exports = router;

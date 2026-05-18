@@ -60,7 +60,8 @@ router.post('/postStock', async (req, res) => {
                 supplier,
                 reorderlevel: Number(reorderlevel),
                 paymentMethod: paymentMethod || 'Cash',
-                Date: new Date()
+                Date: new Date(),
+                // Assuming req.user is populated by authentication middleware
             });
             
             await newStock.save();

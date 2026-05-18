@@ -15,7 +15,10 @@ html(lang='en')
         h3 NyondoStock
         p Hardware Management
       
-
+    if message
+      .alert.alert-danger(role='alert') #{message}
+    if error
+      .alert.alert-danger(role='alert') #{error}
       
       .sidebar-user
         .user-name
@@ -65,7 +68,7 @@ html(lang='en')
             
             .col-md-3
               label.form-label Phone Number
-              input#customerPhone.form-control(type='tel' placeholder='07XX XXX XXX' name='phonenumber' required)
+              input#customerPhone.form-control(type='tel' value='+256' name='phonenumber' required)
             
             .col-md-3
               label.form-label NIN (Optional)

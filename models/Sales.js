@@ -1,3 +1,4 @@
+// 
 const mongoose = require('mongoose');
 
 const salesSchema = new mongoose.Schema({
@@ -24,25 +25,32 @@ const salesSchema = new mongoose.Schema({
         default: 'Cash',
         required: [true]
     },
-    productname: {
-        type: String,
-        required: [true],
-        trim: true
-    },
-    quantity: {
-        type: Number,
-        required: [true],
-        min: [1]
-    },
-    unitprice: {
-        type: Number,
-        required: [true],
-        min: [0]
-    },
-    subtotal: {
+    // Array of items purchased in this transaction
+    items: [{
+        productname: {
+            type: String,
+            required: true
+        },
+        quantity: {
+            type: Number,
+            required: true,
+            min: 1
+        },
+        unitprice: {
+            type: Number,
+            required: true,
+            min: 0
+        },
+        subtotal: {
+            type: Number,
+            required: true
+        }
+    }],
+    // Totals for the entire transaction
+    cartSubtotal: {
         type: Number,
         required: true,
-        min: [0]
+        min: 0
     },
     distance: {
         type: Number,
@@ -54,18 +62,18 @@ const salesSchema = new mongoose.Schema({
         default: 0,
         min: [0]
     },
-    total: {
+    grandTotal: {
         type: Number,
         required: true,
-        min: [0,]
+        min: 0
     },
-    free_transport_applied: {
+    freeTransportApplied: {
         type: Boolean,
         default: false
     },
-    items: {
-        type: Array,
-        default: []
+    needTransport: {
+        type: Boolean,
+        default: false
     },
     Date: {
         type: Date,
@@ -75,11 +83,8 @@ const salesSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Registration',
         required: false
-    },
-    attendantName: {
-        type: String,
-        required: false
     }
+
 });
 
 module.exports = mongoose.model('Sales', salesSchema);

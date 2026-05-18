@@ -28,42 +28,42 @@ body
       // Full Name
       .mb-3.text-start
         label.form-label Full Name
-        input.form-control(type='text' placeholder='Enter your full name' name='fullname' required)
+        input.form-control(type='text' placeholder='Enter your full name' name='fullname')
       
       // Email
       .mb-3.text-start
         label.form-label Email Address
-        input.form-control(type='email' placeholder='Enter your email' name='email' required)
+        input.form-control(type='email' placeholder='Enter your email' name='email' )
       
       // Phone Number
       .mb-3.text-start
         label.form-label Phone Number
-        input.form-control(type='tel' placeholder='e.g., 07XX XXX XXX' name='phonenumber' required)
+        input.form-control(type='tel' value='+256' name='phonenumber' )
       
       // Address
       .mb-3.text-start
         label.form-label Residential Address
-        input.form-control(type='text' placeholder='Enter your physical address' name='address' required)
+        input.form-control(type='text' placeholder='Enter your physical address' name='address' )
       
       // NIN (National ID Number)
       .mb-3.text-start
         label.form-label National ID Number (NIN)
-        input.form-control(type='text' placeholder='e.g., CM1234567890AB' name='nin' required)
+        input.form-control(type='text' placeholder='e.g., CM1234567890AB' name='nin' )
       
       // Next of Kin - Full Name
       .mb-3.text-start
         label.form-label Next of Kin - Full Name
-        input.form-control(type='text' placeholder='Full name of next of kin' name='nextOfKinName' required)
+        input.form-control(type='text' placeholder='Full name of next of kin' name='nextOfKinName' r)
       
       // Next of Kin - Phone Number
       .mb-3.text-start
         label.form-label Next of Kin - Phone Number
-        input.form-control(type='tel' placeholder='Next of kin phone number' name='nextOfKinPhone' required)
+        input.form-control(type='tel' value='+256' name='nextOfKinPhone' )
       
       // Next of Kin - Relationship
       .mb-3.text-start
         label.form-label Next of Kin - Relationship
-        input.form-control(type='text' placeholder='e.g., Spouse, Parent, Sibling' name='nextOfKinRelationship' required)
+        input.form-control(type='text' placeholder='enter relationship' name='nextOfKinRelationship' required)
       
       // Password
       .mb-3.text-start
@@ -78,7 +78,7 @@ body
       // Role Selection
       .mb-3.text-start
         label.form-label Select Role
-        select.form-select(name='role' required)
+        select.form-select(name='role' )
           option(selected disabled) Select your role
           option(value='admin') Administrator
           option(value='store_manager') Store Manager

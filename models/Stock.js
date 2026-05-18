@@ -47,6 +47,11 @@ const stockSchema = new mongoose.Schema({
     amountPaid: {
         type: Number,
         default: 0
+    },
+    attendant: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Registration',
+    
     }
 });
 

@@ -79,13 +79,13 @@ body
         .row.g-3
           .col-md-3
             label.form-label Full Name
-            input.form-control(type='text' name='fullName' placeholder='Enter full name' required)
+            input.form-control(type='text' name='fullName' placeholder='Enter full name')
           .col-md-2
             label.form-label Phone Number
-            input.form-control(type='tel' name='phoneNumber' placeholder='07XX XXX XXX' required)
+            input.form-control(type='tel' name='phoneNumber' value='+256' )
           .col-md-2
             label.form-label NIN
-            input.form-control(type='text' name='nin' placeholder='National ID' required)
+            input.form-control(type='text' name='nin' placeholder='Enter NIN' )
           .col-md-3
             label.form-label Employer (Optional)
             input.form-control(type='text' name='employer' placeholder='Company name')
@@ -110,7 +110,7 @@ body
                 option(value=depositor._id) #{depositor.fullName} - Current Balance: UGX #{depositor.currentBalance.toLocaleString()}
           .col-md-3
             label.form-label Deposit Amount (UGX)
-            input.form-control(type='number' name='amount' placeholder='Amount' required)
+            input.form-control(type='number' name='amount' placeholder='Amount')
           .col-md-2
             label.form-label Payment Method
             select.form-select(name='paymentMethod')
