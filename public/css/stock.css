@@ -356,3 +356,48 @@
             margin-left: 8px;
         }
   
+    /* Additional styles for low stock highlighting */
+    .low-stock-row {
+      background-color: #fff3cd !important;
+      border-left: 3px solid #C6A43F;
+    }
+    
+    .low-stock-row td {
+      background-color: #fff3cd !important;
+    }
+    
+    .critical-stock-row {
+      background-color: #f8d7da !important;
+      border-left: 3px solid #9E3C2A;
+    }
+    
+    .critical-stock-row td {
+      background-color: #f8d7da !important;
+    }
+    
+    .custom-table tr.low-stock-row:hover td,
+    .custom-table tr.critical-stock-row:hover td {
+      filter: brightness(0.98);
+    }
+    
+    .stock-number-critical {
+      color: #9E3C2A;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    
+    .stock-number-low {
+      color: #C6A43F;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    
+    .stock-number-normal {
+      color: #2E7D64;
+      font-weight: 600;
+    }
+    
+    .warning-icon {
+      margin-left: 5px;
+      font-size: 0.7rem;
+    }

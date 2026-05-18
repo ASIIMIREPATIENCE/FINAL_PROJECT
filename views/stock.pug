@@ -1,132 +1,164 @@
-
-
 doctype html
+html(lang='en')
 head
   meta(charset='UTF-8')
   meta(name='viewport' content='width=device-width, initial-scale=1.0')
   title NyondoStock - Stock Management
-  // Bootstrap 5 CSS + Icons
   link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
   link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
   link(rel='stylesheet' href='/css/stock.css')
-  
-// ========== SIDEBAR ==========
-.sidebar
-  .sidebar-logo
-    img(src='/images/logo.png' alt='Logo')
-    h3 NyondoStock
-    p Hardware Management
 
-  .sidebar-user
-    .user-name
-      | 👤 Admin User 
-      span.role-badge Admin
-    .user-role System Administrator
-    button.logout-btn
-      i.bi.bi-box-arrow-right
-      |  Sign Out
+body
+  .sidebar
+    .sidebar-logo
+      img(src='/images/logo.png' alt='Logo')
+      h3 NyondoStock
+      p Hardware Management
+    
+    .sidebar-user
+      .user-name 👤 Admin User
+      .user-role System Administrator
+      button.logout-btn(onclick="window.location.href='/logout'")
+        i.bi.bi-box-arrow-right
+        |  Sign Out
 
-// ========== MAIN CONTENT ==========
-.main-content
-  // Top Bar
-  .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
-    div
-      h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Stock Management
-      p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Manage your inventory &mdash; add, edit, or view stock levels.
+  .main-content
+    .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
+      div
+        h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Stock Management
+        p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Manage your inventory &mdash; add, edit, or view stock levels.
 
-  
-  // Add New Stock Form (Visible to Admin & Manager only)
-  form(action='/postStock' method='post')
-    .form-card
-      .form-title
-        i.bi.bi-plus-circle(style='color: #C6A43F;')
-        |  Register New Stock
-        span.role-badge(style='background: #0D3B2E; color: white;') Admin/Manager Only
-      .row.g-3
-        .col-md-3
-          label.form-label Product Name
-          input.form-control(type='text' placeholder='Enter product name' name='productname')
-        .col-md-2
-          label.form-label Category
-          select.form-select(name='category')
-            option Cement
-            option Pipes
-            option Paint
-            option Tools
-            option Nails
-            option Electrical
-        .col-md-2
-          label.form-label Quantity
-          input.form-control(type='number' placeholder='0' name='quantity')
-        .col-md-2
-          label.form-label Cost Price (UGX)
-          input.form-control(type='number' placeholder='Cost price' name='costprice')
-        .col-md-2
-          label.form-label Selling Price (UGX)
-          input.form-control(type='number' placeholder='Selling price' name='sellingprice')
-        .col-md-3
-          label.form-label Supplier
-          input.form-control(type='text' placeholder='Supplier name' name='supplier')
-        .col-md-2
-          label.form-label Reorder Level
-          input.form-control(type='number' placeholder='Min stock alert' name='reorderlevel')
-        .col-md-2
-          label.form-label Payment Method
-          select.form-select(name='paymentMethod')
-            option(value='Cash') Cash
-            option(value='Credit') Credit (Supplier Credit)
-        .col-md-2.d-flex.align-items-end
-          button.btn-save.w-100(type='submit')
-            i.bi.bi-save
-            |  Save Stock
+    // Add New Stock Form
+    form(action='/postStock' method='post')
+      .form-card
+        .form-title
+          i.bi.bi-plus-circle(style='color: #C6A43F;')
+          |  Register New Stock
+          span.role-badge Admin/Manager Only
+        .row.g-3
+          .col-md-3
+            label.form-label Product Name
+            input.form-control(type='text' placeholder='Enter product name' name='productname' required)
+          .col-md-2
+            label.form-label Category
+            select.form-select(name='category' required)
+              option Cement
+              option Pipes
+              option Paint
+              option Tools
+              option Nails
+              option Electrical
+          .col-md-2
+            label.form-label Quantity
+            input.form-control(type='number' placeholder='0' name='quantity' required)
+          .col-md-2
+            label.form-label Cost Price (UGX)
+            input.form-control(type='number' placeholder='Cost price' name='costprice' required)
+          .col-md-2
+            label.form-label Selling Price (UGX)
+            input.form-control(type='number' placeholder='Selling price' name='sellingprice' required)
+          .col-md-3
+            label.form-label Supplier
+            input.form-control(type='text' placeholder='Supplier name' name='supplier' required)
+          .col-md-2
+            label.form-label Reorder Level
+            input.form-control(type='number' placeholder='Min stock alert' name='reorderlevel' required)
+          .col-md-2
+            label.form-label Payment Method
+            select.form-select(name='paymentMethod')
+              option(value='Cash') Cash
+              option(value='Credit') Credit (Supplier Credit)
+          .col-md-2.d-flex.align-items-end
+            button.btn-save.w-100(type='submit')
+              i.bi.bi-save
+              |  Save Stock
 
-  // Current Stock Table
-  .section-title
-    i.bi.bi-list-ul
-    |  Current Stock Inventory
-  .custom-table
-    table
-      thead
-        tr
-          th Date
-          th Product Name
-          th Current Stock
-          th Reorder Level
-          th Selling Price
-          th Supplier
-          th Payment Method
-          th Attendant
-          th(style='text-align: center;') Actions
-      tbody
-        each item in stockItems
+    // Current Stock Table
+    .section-title
+      i.bi.bi-list-ul
+      |  Current Stock Inventory
+      - var lowCount = 0
+      - var criticalCount = 0
+      each item in stockItems
+        if item.quantity <= item.reorderlevel / 2
+          - criticalCount++
+        else if item.quantity <= item.reorderlevel
+          - lowCount++
+      if lowCount > 0
+        span.badge-low.ms-2 #{lowCount} Low Stock Items
+      if criticalCount > 0
+        span.badge-critical.ms-2 #{criticalCount} Critical Items
+
+    .custom-table
+      table
+        thead
           tr
-            td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
-            td #{item.productname || 'Unknown product'}
-            td #{item.quantity || 0}
-            td #{item.reorderlevel || 'N/A'}
-            td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
-            td #{item.supplier || 'N/A'}
-            td 
-              if item.paymentMethod
-                | #{item.paymentMethod}
-              else
-                | Cash
-            td #{item.attendant || 'unknown attendant'}
-            td(style='text-align: center;')
-              a.btn-edit(href=`/editStock/${item._id}` style='text-decoration: none; display: inline-block; margin-right: 5px;')
-                i.bi.bi-pencil
-                |  Edit
-              form(action=`/deleteStock/${item._id}` method='POST' style='display: inline;')
-                button.btn-delete(type='submit' onclick='return confirm("Are you sure you want to delete this item?")')
-                  i.bi.bi-trash
-                  |  Delete
-        else
-          tr
-            td.text-center(colspan='9') No stock items found
+            th Date
+            th Product Name
+            th Category
+            th Current Stock
+            th Reorder Level
+            th Selling Price
+            th Supplier
+            th Payment Method
+            th(style='text-align: center;') Actions
+        tbody
+          if stockItems && stockItems.length
+            each item in stockItems
+              - var isLowStock = item.quantity <= item.reorderlevel
+              - var isCriticalStock = item.quantity <= (item.reorderlevel / 2)
+              - var rowClass = ''
+              - var stockNumberClass = 'stock-number-normal'
+              
+              if isCriticalStock
+                - rowClass = 'critical-stock-row'
+                - stockNumberClass = 'stock-number-critical'
+              else if isLowStock
+                - rowClass = 'low-stock-row'
+                - stockNumberClass = 'stock-number-low'
+              
+              tr(class=rowClass)
+                td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
+                td 
+                  strong #{item.productname || 'Unknown product'}
+                  if isCriticalStock
+                    span.badge-critical.ms-2 CRITICAL!
+                  else if isLowStock
+                    span.badge-low.ms-2 LOW STOCK!
+                td #{item.category || 'N/A'}
+                td
+                  span(class=stockNumberClass) #{item.quantity || 0}
+                  if isCriticalStock
+                    i.bi.bi-exclamation-triangle.warning-icon(style='color: #9E3C2A;')
+                  else if isLowStock
+                    i.bi.bi-exclamation-circle.warning-icon(style='color: #C6A43F;')
+                td 
+                  if item.reorderlevel
+                    span #{item.reorderlevel}
+                    if item.quantity <= item.reorderlevel
+                      br
+                      small(style='color: #9E3C2A;') Order more!
+                  else
+                    | N/A
+                td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
+                td #{item.supplier || 'N/A'}
+                td 
+                  if item.paymentMethod
+                    | #{item.paymentMethod}
+                  else
+                    | Cash
+                td(style='text-align: center;')
+                  a.btn-edit(href=`/editStock/${item._id}`)
+                    i.bi.bi-pencil
+                    |  Edit
+                  form(action=`/deleteStock/${item._id}` method='POST' style='display: inline;')
+                    button.btn-delete(type='submit' onclick='return confirm("Are you sure you want to delete this item?")')
+                      i.bi.bi-trash
+                      |  Delete
+          else
+            tr
+              td.text-center(colspan='9') No stock items found
 
-  
-.footer
-  i.bi.bi-shield-check
-  |  NyondoStock &mdash; Enterprise Hardware Management System
-
-script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
+  .footer
+    i.bi.bi-shield-check
+    |  NyondoStock &mdash; Enterprise Hardware Management System
