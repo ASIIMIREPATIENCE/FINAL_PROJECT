@@ -1,0 +1,459 @@
+doctype html
+html(lang='en')
+  head
+    meta(charset='UTF-8')
+    meta(name='viewport' content='width=device-width, initial-scale=1.0')
+    title NyondoStock - Reports Dashboard
+    link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
+    link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
+    link(rel='stylesheet' href='/css/reports.css')
+  
+  body
+    .sidebar
+      .sidebar-logo
+        img(src='/images/logo.png' alt='Logo')
+        h3 NyondoStock
+        p Hardware Management
+
+      .sidebar-user
+        .user-name 👤 Admin User
+        .user-role System Administrator
+        button.logout-btn(onclick="window.location.href='/logout'")
+          i.bi.bi-box-arrow-right
+          | Sign Out
+
+    .main-content
+      .d-flex.justify-content-between.align-items-center.mb-4
+        div
+          h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Reports Dashboard
+          p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') View sales, stock, deposit scheme, supplier credit, and financial reports
+        .no-print
+          button.btn-print(onclick='window.print()')
+            i.bi.bi-printer.me-2
+            | Print Report
+      
+      // Report Type Selector
+      .filter-card.no-print
+        form(method='GET' action='/reports')
+          .row.g-3
+            .col-md-3
+              .filter-label Report Type
+              select.form-control-custom.w-100(name='reportType' onchange='this.form.submit()')
+                option(value='sales' selected=selectedReport === 'sales') Sales Report
+                option(value='stock' selected=selectedReport === 'stock') Stock Report
+                option(value='scheme' selected=selectedReport === 'scheme') Deposit Scheme Report
+                option(value='supplier-credit' selected=selectedReport === 'supplier-credit') Supplier Credit Report
+                option(value='financial' selected=selectedReport === 'financial') Financial Report
+            .col-md-3
+              .filter-label From Date
+              input.form-control-custom.w-100(type='date' name='startDate' value=startDate)
+            .col-md-3
+              .filter-label To Date
+              input.form-control-custom.w-100(type='date' name='endDate' value=endDate)
+            .col-md-3
+              .filter-label &nbsp;
+              button.btn-report.w-100(type='submit')
+                i.bi.bi-search.me-2
+                | Generate Report
+      
+      if error
+        .alert.alert-danger(style='border-radius: 16px;') #{error}
+      
+      // ========== SALES REPORT ==========
+      if selectedReport === 'sales'
+        .row.g-3.mb-4
+          .col-md-3
+            .stat-box
+              .stat-value UGX #{summary.totalSales ? summary.totalSales.toLocaleString() : '0'}
+              .stat-label Total Sales
+          .col-md-3
+            .stat-box
+              .stat-value #{summary.totalTransactions || 0}
+              .stat-label Transactions
+          .col-md-3
+            .stat-box
+              .stat-value UGX #{summary.avgTransactionValue ? summary.avgTransactionValue.toLocaleString() : '0'}
+              .stat-label Average per Sale
+          .col-md-3
+            .stat-box
+              .stat-value #{salesData.length || 0}
+              .stat-label Transactions in Period
+        
+        .row.g-3.mb-4
+          .col-md-4
+            .report-card
+              .section-title
+                i.bi.bi-pie-chart
+                | Payment Method Breakdown
+              canvas#paymentChart(style='max-height: 200px; width: 100%;')
+              .mt-3
+                .d-flex.justify-content-between.mb-1
+                  span 💵 Cash:
+                  strong UGX #{summary.cashSales ? summary.cashSales.toLocaleString() : '0'}
+                .d-flex.justify-content-between.mb-1
+                  span 📱 Mobile Money:
+                  strong UGX #{summary.mobileSales ? summary.mobileSales.toLocaleString() : '0'}
+                .d-flex.justify-content-between
+                  span 💳 Bank Transfer:
+                  strong UGX #{summary.bankSales ? summary.bankSales.toLocaleString() : '0'}
+          
+          .col-md-8
+            .report-card
+              .section-title
+                i.bi.bi-trophy
+                | Top Selling Products
+              .custom-table
+                table
+                  thead
+                    tr
+                      th Product
+                      th Quantity Sold
+                      th Revenue
+                  tbody
+                    if summary.topProducts && summary.topProducts.length
+                      each product in summary.topProducts
+                        tr
+                          td #{product.name}
+                          td #{product.quantity}
+                          td UGX #{product.revenue.toLocaleString()}
+                    else
+                      tr
+                        td.text-center(colspan='3') No data available
+        
+        .report-card
+          .section-title
+            i.bi.bi-receipt
+            | Sales Transactions
+          .custom-table
+            table
+              thead
+                tr
+                  th Date
+                  th Customer
+                  th Products
+                  th Total
+                  th Payment Method
+                  th Attendant
+              tbody
+                if salesData && salesData.length
+                  each sale in salesData
+                    tr
+                      td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
+                      td #{sale.customername || 'Walk-in Customer'}
+                      td #{sale.products ? sale.products.join(', ') : 'Unknown'}
+                      td UGX #{sale.grandTotal ? sale.grandTotal.toLocaleString() : '0'}
+                      td #{sale.paymentmethod || 'Cash'}
+                      td #{sale.attendantName || 'unknown'}
+                else
+                  tr
+                    td.text-center(colspan='6') No sales found for selected period
+      
+      // ========== STOCK REPORT ==========
+      if selectedReport === 'stock'
+        .row.g-3.mb-4
+          .col-md-3
+            .stat-box
+              .stat-value #{summary.totalProducts || 0}
+              .stat-label Total Products
+          .col-md-3
+            .stat-box
+              .stat-value UGX #{summary.totalStockValue ? summary.totalStockValue.toLocaleString() : '0'}
+              .stat-label Stock Value
+          .col-md-3
+            .stat-box
+              .stat-value #{summary.lowStockCount || 0}
+              .stat-label Low Stock Items
+        
+        .report-card
+          .section-title
+            i.bi.bi-box-seam
+            | Current Stock Inventory
+          .custom-table
+            table
+              thead
+                tr
+                  th Date
+                  th Product Name
+                  th Quantity
+                  th Reorder Level
+                  th Cost Price
+                  th Selling Price
+                  th Supplier
+              tbody
+                if stockData && stockData.length
+                  each item in stockData
+                    tr(class=item.quantity <= item.reorderlevel ? 'table-warning' : '')
+                      td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
+                      td #{item.productname || 'Unknown'}
+                      td 
+                        strong #{item.quantity || 0}
+                        if item.quantity <= item.reorderlevel
+                          i.bi.bi-exclamation-triangle.ms-2(style='color: #9E3C2A;')
+                      td #{item.reorderlevel || 'N/A'}
+                      td UGX #{item.costprice ? item.costprice.toLocaleString() : '0'}
+                      td UGX #{item.sellingprice ? item.sellingprice.toLocaleString() : '0'}
+                      td #{item.supplier || 'N/A'}
+                else
+                  tr
+                    td.text-center(colspan='7') No stock items found
+      
+      // ========== DEPOSIT SCHEME REPORT ==========
+      if selectedReport === 'scheme'
+        .row.g-3.mb-4
+          .col-md-3
+            .stat-box
+              .stat-value #{summary.totalDepositors || 0}
+              .stat-label Total Depositors
+          .col-md-3
+            .stat-box
+              .stat-value UGX #{summary.totalDepositAmount ? summary.totalDepositAmount.toLocaleString() : '0'}
+              .stat-label Total Deposits
+          .col-md-3
+            .stat-box
+              .stat-value UGX #{summary.totalCurrentBalance ? summary.totalCurrentBalance.toLocaleString() : '0'}
+              .stat-label Current Balance
+          .col-md-3
+            .stat-box
+              .stat-value UGX #{summary.totalDepositsInRange ? summary.totalDepositsInRange.toLocaleString() : '0'}
+              .stat-label Deposits in Period
+        
+        .row.g-3.mb-4
+          .col-md-6
+            .report-card
+              .section-title
+                i.bi.bi-trophy
+                | Top Depositors (by Balance)
+              .custom-table
+                table
+                  thead
+                    tr
+                      th Depositor Name
+                      th Current Balance
+                      th Total Deposits
+                  tbody
+                    if summary.topDepositors && summary.topDepositors.length
+                      each depositor in summary.topDepositors
+                        tr
+                          td #{depositor.fullName}
+                          td UGX #{depositor.currentBalance.toLocaleString()}
+                          td UGX #{depositor.totalDeposits.toLocaleString()}
+                    else
+                      tr
+                        td.text-center(colspan='3') No data available
+          
+          .col-md-6
+            .report-card
+              .section-title
+                i.bi.bi-clock-history
+                | Recent Deposits
+              .custom-table
+                table
+                  thead
+                    tr
+                      th Date
+                      th Depositor
+                      th Amount
+                      th Attendant
+                  tbody
+                    if summary.recentDeposits && summary.recentDeposits.length
+                      each deposit in summary.recentDeposits.slice(0, 10)
+                        tr
+                          td #{deposit.date ? new Date(deposit.date).toLocaleDateString() : 'No date'}
+                          td #{deposit.depositorName}
+                          td UGX #{deposit.amount.toLocaleString()}
+                          td #{deposit.attendantName || 'unknown'}
+                    else
+                      tr
+                        td.text-center(colspan='4') No deposits found
+        
+        .report-card
+          .section-title
+            i.bi.bi-people
+            | All Depositors
+          .custom-table
+            table
+              thead
+                tr
+                  th Join Date
+                  th Full Name
+                  th Phone Number
+                  th NIN
+                  th Employer
+                  th Total Deposits
+                  th Current Balance
+                  th # Deposits
+              tbody
+                if schemeData && schemeData.length
+                  each depositor in schemeData
+                    tr
+                      td #{depositor.joinDate ? new Date(depositor.joinDate).toLocaleDateString() : 'No date'}
+                      td #{depositor.fullName}
+                      td #{depositor.phoneNumber}
+                      td #{depositor.nin || 'N/A'}
+                      td #{depositor.employer || 'N/A'}
+                      td UGX #{depositor.totalDeposits.toLocaleString()}
+                      td UGX #{depositor.currentBalance.toLocaleString()}
+                      td #{depositor.depositCount}
+                else
+                  tr
+                    td.text-center(colspan='8') No depositors found
+      
+      // ========== SUPPLIER CREDIT REPORT ==========
+      if selectedReport === 'supplier-credit'
+        .row.g-3.mb-4
+          .col-md-3
+            .stat-box
+              .stat-value UGX #{summary.totalOutstanding ? summary.totalOutstanding.toLocaleString() : '0'}
+              .stat-label Total Outstanding
+          .col-md-3
+            .stat-box
+              .stat-value #{summary.uniqueSuppliersCount || 0}
+              .stat-label Suppliers with Credit
+          .col-md-3
+            .stat-box
+              .stat-value UGX #{summary.dueWithin7Days ? summary.dueWithin7Days.toLocaleString() : '0'}
+              .stat-label Due in 7 Days
+          .col-md-3
+            .stat-box
+              .stat-value UGX #{summary.overdueTotal ? summary.overdueTotal.toLocaleString() : '0'}
+              .stat-label Overdue
+        
+        .row.g-3.mb-4
+          .col-md-12
+            .report-card
+              .section-title
+                i.bi.bi-building
+                | Supplier Credit Summary
+              .custom-table
+                table
+                  thead
+                    tr
+                      th Supplier
+                      th Total Balance
+                      th Number of Items
+                  tbody
+                    if summary.supplierSummary && summary.supplierSummary.length
+                      each supplier in summary.supplierSummary
+                        tr
+                          td #{supplier.supplier}
+                          td UGX #{supplier.totalBalance.toLocaleString()}
+                          td #{supplier.items.length}
+                    else
+                      tr
+                        td.text-center(colspan='3') No suppliers found
+        
+        .report-card
+          .section-title
+            i.bi.bi-credit-card
+            | Credit Purchases Details
+          .custom-table
+            table
+              thead
+                tr
+                  th Purchase Date
+                  th Product Name
+                  th Supplier
+                  th Quantity
+                  th Cost Price
+                  th Total Owed
+                  th Paid
+                  th Balance
+                  th Due Date
+                  th Status
+              tbody
+                if supplierCreditData && supplierCreditData.length
+                  each item in supplierCreditData
+                    tr
+                      td #{item.purchaseDate ? new Date(item.purchaseDate).toLocaleDateString() : 'No date'}
+                      td #{item.productname}
+                      td #{item.supplier}
+                      td #{item.quantity}
+                      td UGX #{item.costprice ? item.costprice.toLocaleString() : '0'}
+                      td UGX #{item.totalOwed.toLocaleString()}
+                      td UGX #{item.paidAmount.toLocaleString()}
+                      td UGX #{item.balance.toLocaleString()}
+                      td #{item.dueDate ? new Date(item.dueDate).toLocaleDateString() : 'N/A'}
+                      td
+                        if item.status === 'Overdue'
+                          span.badge-overdue Overdue
+                        else if item.status === 'Paid'
+                          span.badge-paid Paid
+                        else
+                          span.badge-pending Pending
+                else
+                  tr
+                    td.text-center(colspan='10') No credit purchases found
+      
+      // ========== FINANCIAL REPORT ==========
+      if selectedReport === 'financial'
+        .row.g-3.mb-4
+          .col-md-3
+            .stat-box
+              .stat-value UGX #{summary.totalRevenue ? summary.totalRevenue.toLocaleString() : '0'}
+              .stat-label Total Revenue
+          .col-md-3
+            .stat-box
+              .stat-value UGX #{summary.totalCost ? summary.totalCost.toLocaleString() : '0'}
+              .stat-label Total Cost
+          .col-md-3
+            .stat-box
+              .stat-value UGX #{summary.profit ? summary.profit.toLocaleString() : '0'}
+              .stat-label Profit
+          .col-md-3
+            .stat-box
+              .stat-value #{summary.profitMargin || 0}%
+              .stat-label Profit Margin
+        
+        .row.g-3.mb-4
+          .col-md-6
+            .report-card
+              .section-title
+                i.bi.bi-exclamation-triangle
+                | Outstanding Credit
+              .stat-value(style='color: #9E3C2A; font-size: 2rem; margin: 1rem 0;') UGX #{summary.outstandingCredit ? summary.outstandingCredit.toLocaleString() : '0'}
+              p.mt-2.mb-0(style='color: #6c757d; font-size: 0.8rem;') Total amount owed by credit customers
+          
+          .col-md-6
+            .report-card
+              .section-title
+                i.bi.bi-piggy-bank
+                | Total Customer Deposits
+              .stat-value(style='color: var(--nyondo-green); font-size: 2rem; margin: 1rem 0;') UGX #{summary.totalDeposits ? summary.totalDeposits.toLocaleString() : '0'}
+              p.mt-2.mb-0(style='color: #6c757d; font-size: 0.8rem;') Total balance in deposit scheme
+
+    .footer
+      i.bi.bi-shield-check
+      |  NyondoStock &mdash; Enterprise Hardware Management System
+
+    script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
+    script(src='https://cdn.jsdelivr.net/npm/chart.js')
+    script.
+      function toggleDropdown(id) {
+        const dropdown = document.getElementById(id);
+        dropdown.classList.toggle('show');
+      }
+      
+      if (document.getElementById('paymentChart')) {
+        const ctx = document.getElementById('paymentChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Cash', 'Mobile Money', 'Bank Transfer'],
+            datasets: [{
+              data: [#{summary.cashSales || 0}, #{summary.mobileSales || 0}, #{summary.bankSales || 0}],
+              backgroundColor: ['#0D3B2E', '#C6A43F', '#2E7D64'],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: { 
+                position: 'bottom',
+                labels: { font: { size: 11 } }
+              }
+            }
+          }
+        });
+      }

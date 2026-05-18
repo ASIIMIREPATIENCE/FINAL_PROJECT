@@ -18,7 +18,7 @@ const depositorSchema = new mongoose.Schema({
         required: true,
         trim: true,
         unique: true,
-        match: /^(CF|CM).{12}$/
+        match: /^(CF|CM).{12}$/,
     },
     employer: {
         type: String,

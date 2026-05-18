@@ -49,7 +49,7 @@ app.use('/', require('./routes/salesRoutes'));
 app.use('/', require('./routes/stockRoutes'));
 app.use('/', require('./routes/supplierRoutes'));
 app.use('/', require('./routes/schemeRoutes'));
-
+app.use('/', require('./routes/reportsRoutes')); 
 // Handling non-existent routes
 app.use((req, res) => {
   res.status(404).send('Oops! Route not found.');
