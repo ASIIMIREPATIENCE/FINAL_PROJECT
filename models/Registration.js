@@ -56,10 +56,21 @@ const registrationSchema = new mongoose.Schema({
         enum: ['admin', 'store_manager', 'sales_attendant'],
         default: 'sales_attendant'
     },
+ 
+
+    resetPasswordToken:{
+        type: String,
+        trim: true
+    },
+    resetPasswordExpires:{
+        type: Date
+    },
+
     Date: {
         type: Date,
         default: Date.now
-    }
+    },
+    
 });
 
 if (typeof passportLocalMongoose === 'function') {

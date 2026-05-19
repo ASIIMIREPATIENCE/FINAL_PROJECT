@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Stock = require('../models/Stock');
+const StockTransaction = require('../models/StockTransaction');
 
 // ========== AUTHENTICATION MIDDLEWARE ==========
 function isAuthenticated(req, res, next) {
@@ -13,12 +14,16 @@ function isAuthenticated(req, res, next) {
 // GET route - Display stock page with all stock items
 router.get('/addStock', isAuthenticated, async (req, res) => {
     try {
-        // Populate the attendant field to get full user details
         const stockItems = await Stock.find()
-            .populate('attendant', 'fullname') // This populates the attendant with fullname
+            .populate('attendant', 'fullname')
             .sort({ Date: -1 });
         
-        // Transform the data to ensure attendantName is available
+        // Get stock transaction history
+        const stockTransactions = await StockTransaction.find()
+            .populate('attendant', 'fullname')
+            .sort({ Date: -1 })
+            .limit(100);
+        
         const transformedStock = stockItems.map(item => ({
             ...item.toObject(),
             attendantName: item.attendantName || (item.attendant ? item.attendant.fullname : 'Unknown')
@@ -26,12 +31,14 @@ router.get('/addStock', isAuthenticated, async (req, res) => {
         
         res.render('stock', { 
             stockItems: transformedStock,
+            stockTransactions: stockTransactions,
             currentUser: req.user 
         });
     } catch (error) {
         console.error(error);
         res.render('stock', { 
             stockItems: [],
+            stockTransactions: [],
             currentUser: req.user 
         });
     }
@@ -56,7 +63,6 @@ router.post('/postStock', isAuthenticated, async (req, res) => {
     try {
         const { productname, category, quantity, costprice, sellingprice, supplier, reorderlevel, paymentMethod } = req.body;
         
-        // Get attendant info
         const attendantName = req.user ? req.user.fullname : 'Unknown';
         const attendantId = req.user ? req.user._id : null;
         
@@ -68,15 +74,41 @@ router.post('/postStock', isAuthenticated, async (req, res) => {
         });
         
         if (existingStock) {
-            // Update existing stock by adding to quantity
-            existingStock.quantity += Number(quantity);
+            // RECORD OLD QUANTITY BEFORE UPDATE
+            const oldQuantity = existingStock.quantity;
+            const addedQty = Number(quantity);
+            const newQty = oldQuantity + addedQty;
+            
+            // Update existing stock
+            existingStock.quantity = newQty;
             existingStock.category = category;
             existingStock.supplier = supplier;
             existingStock.reorderlevel = Number(reorderlevel);
             existingStock.paymentMethod = paymentMethod || 'Cash';
             
             await existingStock.save();
-            console.log(`[${new Date().toLocaleString()}] Stock updated by ${attendantName}:`, productname, "New quantity:", existingStock.quantity);
+            
+            // CREATE TRANSACTION RECORD for quantity update
+            const transaction = new StockTransaction({
+                productname: productname,
+                category: category,
+                transactionType: 'UPDATE_QUANTITY',
+                previousQuantity: oldQuantity,
+                addedQuantity: addedQty,
+                newQuantity: newQty,
+                costprice: Number(costprice),
+                sellingprice: Number(sellingprice),
+                supplier: supplier,
+                reorderlevel: Number(reorderlevel),
+                paymentMethod: paymentMethod || 'Cash',
+                attendant: attendantId,
+                attendantName: attendantName,
+                Date: new Date(),
+                notes: `Added ${addedQty} units to existing stock`
+            });
+            
+            await transaction.save();
+            console.log(`[${new Date().toLocaleString()}] Stock updated by ${attendantName}:`, productname, "Old:", oldQuantity, "Added:", addedQty, "New:", newQty);
         } else {
             // Create new stock entry
             const newStock = new Stock({
@@ -90,10 +122,31 @@ router.post('/postStock', isAuthenticated, async (req, res) => {
                 paymentMethod: paymentMethod || 'Cash',
                 Date: new Date(),
                 attendant: attendantId,
-                attendantName: attendantName  // Store the name directly
+                attendantName: attendantName
             });
             
             await newStock.save();
+            
+            // CREATE TRANSACTION RECORD for new stock
+            const transaction = new StockTransaction({
+                productname: productname,
+                category: category,
+                transactionType: 'ADD_NEW',
+                previousQuantity: 0,
+                addedQuantity: Number(quantity),
+                newQuantity: Number(quantity),
+                costprice: Number(costprice),
+                sellingprice: Number(sellingprice),
+                supplier: supplier,
+                reorderlevel: Number(reorderlevel),
+                paymentMethod: paymentMethod || 'Cash',
+                attendant: attendantId,
+                attendantName: attendantName,
+                Date: new Date(),
+                notes: `New product added to inventory`
+            });
+            
+            await transaction.save();
             console.log(`[${new Date().toLocaleString()}] New stock added by ${attendantName}:`, productname);
         }
         
@@ -108,6 +161,33 @@ router.post('/postStock', isAuthenticated, async (req, res) => {
 router.post('/deleteStock/:id', isAuthenticated, async (req, res) => {
     try {
         const attendantName = req.user ? req.user.fullname : 'Unknown';
+        const attendantId = req.user ? req.user._id : null;
+        
+        const deletedItem = await Stock.findById(req.params.id);
+        
+        if (deletedItem) {
+            // CREATE TRANSACTION RECORD for deletion
+            const transaction = new StockTransaction({
+                productname: deletedItem.productname,
+                category: deletedItem.category,
+                transactionType: 'DELETE',
+                previousQuantity: deletedItem.quantity,
+                addedQuantity: 0,
+                newQuantity: 0,
+                costprice: deletedItem.costprice,
+                sellingprice: deletedItem.sellingprice,
+                supplier: deletedItem.supplier,
+                reorderlevel: deletedItem.reorderlevel,
+                paymentMethod: deletedItem.paymentMethod,
+                attendant: attendantId,
+                attendantName: attendantName,
+                Date: new Date(),
+                notes: `Product deleted from inventory`
+            });
+            
+            await transaction.save();
+        }
+        
         await Stock.findByIdAndDelete(req.params.id);
         console.log(`[${new Date().toLocaleString()}] Stock deleted by ${attendantName} with ID:`, req.params.id);
         res.redirect('/addStock');
@@ -122,15 +202,41 @@ router.post('/editStock/:id', isAuthenticated, async (req, res) => {
     try {
         const { quantity, costprice, sellingprice, supplier, reorderlevel, paymentMethod } = req.body;
         const attendantName = req.user ? req.user.fullname : 'Unknown';
+        const attendantId = req.user ? req.user._id : null;
+        
+        const existingItem = await Stock.findById(req.params.id);
+        const oldQuantity = existingItem ? existingItem.quantity : 0;
+        const newQuantity = Number(quantity);
         
         await Stock.findByIdAndUpdate(req.params.id, {
-            quantity: Number(quantity),
+            quantity: newQuantity,
             costprice: Number(costprice),
             sellingprice: Number(sellingprice),
             supplier,
             reorderlevel: Number(reorderlevel),
             paymentMethod: paymentMethod || 'Cash'
         });
+        
+        // CREATE TRANSACTION RECORD for edit
+        const transaction = new StockTransaction({
+            productname: existingItem.productname,
+            category: existingItem.category,
+            transactionType: 'UPDATE_QUANTITY',
+            previousQuantity: oldQuantity,
+            addedQuantity: newQuantity - oldQuantity,
+            newQuantity: newQuantity,
+            costprice: Number(costprice),
+            sellingprice: Number(sellingprice),
+            supplier: supplier,
+            reorderlevel: Number(reorderlevel),
+            paymentMethod: paymentMethod || 'Cash',
+            attendant: attendantId,
+            attendantName: attendantName,
+            Date: new Date(),
+            notes: `Stock quantity updated from ${oldQuantity} to ${newQuantity}`
+        });
+        
+        await transaction.save();
         
         console.log(`[${new Date().toLocaleString()}] Stock updated by ${attendantName} with ID:`, req.params.id);
         res.redirect('/addStock');

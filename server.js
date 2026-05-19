@@ -20,12 +20,17 @@ app.set('views', path.join(__dirname, 'views'));
 // SECTION 4: Middleware
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
-app.use(express.json()); // Essential for handling modern form/data requests
+app.use(express.json());
 
+// Updated Session Configuration - Add cookie settings here
 app.use(expressSession({
   secret: "secret",
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 60 * 60 * 1000, // 1 hour
+    httpOnly: true
+  }
 }));
 
 // Passport initialization
@@ -50,6 +55,8 @@ app.use('/', require('./routes/stockRoutes'));
 app.use('/', require('./routes/supplierRoutes'));
 app.use('/', require('./routes/schemeRoutes'));
 app.use('/', require('./routes/reportsRoutes')); 
+app.use('/', require('./routes/passwordRoutes'));
+
 // Handling non-existent routes
 app.use((req, res) => {
   res.status(404).send('Oops! Route not found.');

@@ -7,6 +7,13 @@ head
   link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
   link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
   link(rel='stylesheet' href='/css/stock.css')
+  style.
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+    }
 
 body
   .sidebar
@@ -103,7 +110,7 @@ body
             th Supplier
             th Payment Method
             th Attendant
-            th(style='text-align: center;') Actions
+            th(style='text-align: center; width: 140px;') Actions
         tbody
           if stockItems && stockItems.length
             each item in stockItems
@@ -149,16 +156,74 @@ body
                     | Cash
                 td #{item.attendantName || (item.attendant ? item.attendant.fullname : 'unknown')}
                 td(style='text-align: center;')
-                  a.btn-edit(href=`/editStock/${item._id}`)
-                    i.bi.bi-pencil
-                    |  Edit
-                  form(action=`/deleteStock/${item._id}` method='POST' style='display: inline;')
-                    button.btn-delete(type='submit' onclick='return confirm("Are you sure you want to delete this item?")')
-                      i.bi.bi-trash
-                      |  Delete
+                  .action-buttons
+                    a.btn-edit(href=`/editStock/${item._id}`)
+                      i.bi.bi-pencil
+                      | Edit
+                    form(action=`/deleteStock/${item._id}` method='POST' style='display: inline; margin: 0;')
+                      button.btn-delete(type='submit' onclick='return confirm("Are you sure you want to delete this item?")')
+                        i.bi.bi-trash
+                        | Delete
           else
             tr
               td.text-center(colspan='11') No stock items found
+
+    // Stock Transaction History Table
+    .section-title.mt-4
+      i.bi.bi-clock-history
+      |  Stock Transaction History
+    .custom-table
+      table
+        thead
+          tr
+            th Date & Time
+            th Product Name
+            th Transaction Type
+            th Previous Qty
+            th Added Qty
+            th New Qty
+            th Cost Price
+            th Selling Price
+            th Supplier
+            th Attendant
+            th Notes
+        tbody
+          if stockTransactions && stockTransactions.length
+            each transaction in stockTransactions
+              tr
+                td #{transaction.Date ? new Date(transaction.Date).toLocaleString() : 'No date'}
+                td 
+                  strong #{transaction.productname || 'Unknown'}
+                td
+                  if transaction.transactionType === 'ADD_NEW'
+                    span.badge(style='background: #28a745; color: white; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem;')
+                      i.bi.bi-plus-circle.me-1
+                      | New Stock
+                  else if transaction.transactionType === 'UPDATE_QUANTITY'
+                    span.badge(style='background: #ffc107; color: black; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem;')
+                      i.bi.bi-arrow-repeat.me-1
+                      | Quantity Update
+                  else if transaction.transactionType === 'DELETE'
+                    span.badge(style='background: #dc3545; color: white; padding: 3px 8px; border-radius: 20px; font-size: 0.7rem;')
+                      i.bi.bi-trash.me-1
+                      | Deleted
+                td #{transaction.previousQuantity || 0}
+                td 
+                  if transaction.addedQuantity > 0
+                    span(style='color: #28a745; font-weight: bold;') +#{transaction.addedQuantity}
+                  else if transaction.addedQuantity < 0
+                    span(style='color: #dc3545; font-weight: bold;') #{transaction.addedQuantity}
+                  else
+                    | 0
+                td #{transaction.newQuantity || 0}
+                td UGX #{transaction.costprice ? transaction.costprice.toLocaleString() : '0'}
+                td UGX #{transaction.sellingprice ? transaction.sellingprice.toLocaleString() : '0'}
+                td #{transaction.supplier || 'N/A'}
+                td #{transaction.attendantName || 'unknown'}
+                td #{transaction.notes || '-'}
+          else
+            tr
+              td.text-center(colspan='11') No stock transaction records found
 
   .footer
     i.bi.bi-shield-check
