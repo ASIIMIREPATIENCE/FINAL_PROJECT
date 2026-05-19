@@ -52,6 +52,10 @@ const stockSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Registration',
     
+    },
+    attendantName: {
+        type: String,
+        trim: true
     }
 });
 

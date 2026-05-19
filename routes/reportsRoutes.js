@@ -4,8 +4,16 @@ const Sale = require('../models/Sales');
 const Stock = require('../models/Stock');
 const Depositor = require('../models/Depositor');
 
+// ========== AUTHENTICATION MIDDLEWARE ==========
+function isAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/');
+}
+
 // GET route - Main reports page
-router.get('/reports', async (req, res) => {
+router.get('/reports', isAuthenticated, async (req, res) => {
     try {
         const { reportType, startDate, endDate } = req.query;
         
@@ -33,52 +41,57 @@ router.get('/reports', async (req, res) => {
         const lowStockItems = allStock.filter(item => item.quantity <= (item.reorderlevel || 0));
         const totalProducts = allStock.length;
         
-        // ========== SALES REPORT ==========
+        // ========== SALES REPORT (FIXED FOR NEW SCHEMA) ==========
         if (selectedReport === 'sales') {
+            // Get all sales within date range - using the NEW schema structure
             const sales = await Sale.find({
                 Date: { $gte: start, $lte: end }
             }).populate('attendant', 'fullname').sort({ Date: -1 });
             
-            // Group sales by transaction
-            const groupedTransactions = {};
+            // Transform sales data for the report
+            salesData = sales.map(sale => ({
+                _id: sale._id,
+                Date: sale.Date,
+                customername: sale.customername,
+                phonenumber: sale.phonenumber,
+                products: sale.items ? sale.items.map(item => item.productname) : [],
+                grandTotal: sale.grandTotal || 0,
+                paymentmethod: sale.paymentmethod,
+                attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
+            }));
             
-            for (const sale of sales) {
-                const key = `${sale.Date ? new Date(sale.Date).toDateString() : ''}_${sale.customername}_${sale.phonenumber}`;
-                
-                if (!groupedTransactions[key]) {
-                    groupedTransactions[key] = {
-                        Date: sale.Date,
-                        customername: sale.customername,
-                        phonenumber: sale.phonenumber,
-                        products: [],
-                        grandTotal: 0,
-                        attendantName: sale.attendantName,
-                        paymentmethod: sale.paymentmethod
-                    };
-                }
-                
-                groupedTransactions[key].products.push(sale.productname);
-                groupedTransactions[key].grandTotal += sale.total;
-            }
-            
-            salesData = Object.values(groupedTransactions);
-            
+            // Calculate summary statistics
             const totalSales = salesData.reduce((sum, sale) => sum + sale.grandTotal, 0);
             const totalTransactions = salesData.length;
             const avgTransactionValue = totalTransactions > 0 ? totalSales / totalTransactions : 0;
             
-            const cashSales = sales.filter(s => s.paymentmethod === 'Cash').reduce((sum, s) => sum + s.total, 0);
-            const mobileSales = sales.filter(s => s.paymentmethod === 'Mobile Money').reduce((sum, s) => sum + s.total, 0);
-            const bankSales = sales.filter(s => s.paymentmethod === 'Bank Transfer').reduce((sum, s) => sum + s.total, 0);
+            // Calculate payment method breakdown from sales data
+            let cashSales = 0;
+            let mobileSales = 0;
+            let bankSales = 0;
             
-            // Get top selling products
+            for (const sale of sales) {
+                if (sale.paymentmethod === 'Cash') {
+                    cashSales += sale.grandTotal || 0;
+                } else if (sale.paymentmethod === 'Mobile Money') {
+                    mobileSales += sale.grandTotal || 0;
+                } else if (sale.paymentmethod === 'Bank Transfer') {
+                    bankSales += sale.grandTotal || 0;
+                }
+            }
+            
+            // Get top selling products from the items array
             const productSales = {};
             for (const sale of sales) {
-                if (!productSales[sale.productname]) {
-                    productSales[sale.productname] = { quantity: 0, revenue: 0 };
+                if (sale.items && sale.items.length) {
+                    for (const item of sale.items) {
+                        if (!productSales[item.productname]) {
+                            productSales[item.productname] = { quantity: 0, revenue: 0 };
+                        }
+                        productSales[item.productname].quantity += item.quantity || 0;
+                        productSales[item.productname].revenue += item.subtotal || (item.quantity * item.unitprice) || 0;
+                    }
                 }
-                productSales[sale.productname].quantity += sale.quantity;
-                productSales[sale.productname].revenue += sale.total;
             }
             
             const topProducts = Object.entries(productSales)
@@ -160,7 +173,20 @@ router.get('/reports', async (req, res) => {
             const totalDepositors = depositors.length;
             const totalDepositAmount = schemeData.reduce((sum, d) => sum + d.totalDeposits, 0);
             const totalCurrentBalance = schemeData.reduce((sum, d) => sum + d.currentBalance, 0);
-            const totalDepositsInRange = schemeData.reduce((sum, d) => sum + d.depositsWithinRange, 0);
+            
+            // Calculate TOTAL NUMBER OF DEPOSITS in the period (count, not amount)
+            let totalDepositsCount = 0;
+            for (const depositor of depositors) {
+                if (depositor.depositHistory && depositor.depositHistory.length) {
+                    let depositsToCount = depositor.depositHistory;
+                    if (startDate && endDate) {
+                        depositsToCount = depositor.depositHistory.filter(deposit => 
+                            deposit.date >= start && deposit.date <= end
+                        );
+                    }
+                    totalDepositsCount += depositsToCount.length;
+                }
+            }
             
             // Get top depositors by balance
             const topDepositors = [...schemeData]
@@ -194,7 +220,7 @@ router.get('/reports', async (req, res) => {
                 totalDepositors: totalDepositors,
                 totalDepositAmount: totalDepositAmount,
                 totalCurrentBalance: totalCurrentBalance,
-                totalDepositsInRange: totalDepositsInRange,
+                totalDepositsCount: totalDepositsCount,  // Changed from totalDepositsInRange to count
                 topDepositors: topDepositors,
                 recentDeposits: allDeposits.slice(0, 20)
             };
@@ -297,20 +323,24 @@ router.get('/reports', async (req, res) => {
         
         // ========== FINANCIAL REPORT ==========
         if (selectedReport === 'financial') {
-            // Get sales within date range
+            // Get sales within date range using NEW schema
             const sales = await Sale.find({
                 Date: { $gte: start, $lte: end }
             });
             
-            // Calculate TOTAL REVENUE
-            const totalRevenue = sales.reduce((sum, sale) => sum + (sale.total || 0), 0);
+            // Calculate TOTAL REVENUE from grandTotal
+            const totalRevenue = sales.reduce((sum, sale) => sum + (sale.grandTotal || 0), 0);
             
-            // Calculate TOTAL COST OF GOODS SOLD (only items sold in this period)
+            // Calculate TOTAL COST OF GOODS SOLD (from items in each sale)
             let totalCost = 0;
             for (const sale of sales) {
-                const product = await Stock.findOne({ productname: sale.productname });
-                if (product && product.costprice) {
-                    totalCost += product.costprice * sale.quantity;
+                if (sale.items && sale.items.length) {
+                    for (const item of sale.items) {
+                        const product = await Stock.findOne({ productname: item.productname });
+                        if (product && product.costprice) {
+                            totalCost += product.costprice * (item.quantity || 0);
+                        }
+                    }
                 }
             }
             
@@ -363,6 +393,7 @@ router.get('/reports', async (req, res) => {
         }
         
         res.render('reports', {
+            currentUser: req.user,
             selectedReport: selectedReport,
             startDate: start.toISOString().split('T')[0],
             endDate: end.toISOString().split('T')[0],
@@ -379,6 +410,7 @@ router.get('/reports', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.render('reports', {
+            currentUser: req.user,
             selectedReport: 'sales',
             startDate: '',
             endDate: '',

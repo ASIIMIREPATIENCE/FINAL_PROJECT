@@ -17,14 +17,13 @@ body
       img(src='/images/logo.png' alt='Logo')
       h3 NyondoStock
       p Hardware Management
-  
     
     .sidebar-user
       .user-name
-        | 👤 Admin User 
-        span.role-badge Admin
-      .user-role System Administrator
-      button.logout-btn
+        | 👤 #{currentUser ? currentUser.fullname : 'Admin User'} 
+        span.role-badge #{currentUser ? (currentUser.role === 'admin' ? 'Admin' : (currentUser.role === 'store_manager' ? 'Manager' : 'Staff')) : 'Admin'}
+      .user-role #{currentUser ? (currentUser.role === 'admin' ? 'System Administrator' : (currentUser.role === 'store_manager' ? 'Store Manager' : 'Sales Attendant')) : 'System Administrator'}
+      button.logout-btn(onclick="window.location.href='/logout'")
         i.bi.bi-box-arrow-right
         |  Sign Out
 
@@ -36,7 +35,7 @@ body
         h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Supplier Credit Management
         p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Track credit given to suppliers and manage payment schedules.
       div
-        a(href='/stock' style='text-decoration: none;')
+        a(href='/addStock' style='text-decoration: none;')
           button.btn-save(style='padding: 8px 20px;')
             i.bi.bi-box-seam
             |  View Stock
@@ -75,6 +74,7 @@ body
             th Due Date
             th Status
             th Action
+            th Attendant
         tbody
           if creditStockItems && creditStockItems.length
             each item in creditStockItems
@@ -101,9 +101,10 @@ body
                     button.btn-pay(disabled style='opacity: 0.5;')
                       i.bi.bi-check
                       |  Paid
+                td #{item.attendantName || 'unknown'}
           else
             tr
-              td.text-center(colspan='8') No credit stock found. Stock purchased on credit will appear here.
+              td.text-center(colspan='9') No credit stock found. Stock purchased on credit will appear here.
     
   .footer
     i.bi.bi-shield-check

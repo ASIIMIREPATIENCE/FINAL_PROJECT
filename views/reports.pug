@@ -16,8 +16,8 @@ html(lang='en')
         p Hardware Management
 
       .sidebar-user
-        .user-name 👤 Admin User
-        .user-role System Administrator
+        .user-name 👤 #{currentUser ? currentUser.fullname : 'Admin User'}
+        .user-role #{currentUser ? (currentUser.role === 'admin' ? 'System Administrator' : (currentUser.role === 'store_manager' ? 'Store Manager' : 'Sales Attendant')) : 'System Administrator'}
         button.logout-btn(onclick="window.location.href='/logout'")
           i.bi.bi-box-arrow-right
           | Sign Out
@@ -214,8 +214,8 @@ html(lang='en')
               .stat-label Current Balance
           .col-md-3
             .stat-box
-              .stat-value UGX #{summary.totalDepositsInRange ? summary.totalDepositsInRange.toLocaleString() : '0'}
-              .stat-label Deposits in Period
+              .stat-value #{summary.totalDepositsCount || 0}
+              .stat-label Number of Deposits
         
         .row.g-3.mb-4
           .col-md-6
@@ -428,19 +428,21 @@ html(lang='en')
     script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
     script(src='https://cdn.jsdelivr.net/npm/chart.js')
     script.
-      function toggleDropdown(id) {
-        const dropdown = document.getElementById(id);
-        dropdown.classList.toggle('show');
-      }
+      // Pass data from Pug to JavaScript safely
+      const salesData = {
+        cashSales: #{summary.cashSales || 0},
+        mobileSales: #{summary.mobileSales || 0},
+        bankSales: #{summary.bankSales || 0}
+      };
       
-      if (document.getElementById('paymentChart')) {
+      if (document.getElementById('paymentChart') && (salesData.cashSales > 0 || salesData.mobileSales > 0 || salesData.bankSales > 0)) {
         const ctx = document.getElementById('paymentChart').getContext('2d');
         new Chart(ctx, {
           type: 'doughnut',
           data: {
             labels: ['Cash', 'Mobile Money', 'Bank Transfer'],
             datasets: [{
-              data: [#{summary.cashSales || 0}, #{summary.mobileSales || 0}, #{summary.bankSales || 0}],
+              data: [salesData.cashSales, salesData.mobileSales, salesData.bankSales],
               backgroundColor: ['#0D3B2E', '#C6A43F', '#2E7D64'],
               borderWidth: 0
             }]

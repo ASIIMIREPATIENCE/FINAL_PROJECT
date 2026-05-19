@@ -1,36 +1,64 @@
-// 
 const express = require("express");
 const router = express.Router();
 const Stock = require('../models/Stock');
-// const passport = require('passport');
+
+// ========== AUTHENTICATION MIDDLEWARE ==========
+function isAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/');
+}
 
 // GET route - Display stock page with all stock items
-router.get('/addStock', async (req, res) => {
+router.get('/addStock', isAuthenticated, async (req, res) => {
     try {
-        const stockItems = await Stock.find(); // Fetch all stock items
-        res.render('stock', { stockItems: stockItems }); // Pass stockItems to the template
+        // Populate the attendant field to get full user details
+        const stockItems = await Stock.find()
+            .populate('attendant', 'fullname') // This populates the attendant with fullname
+            .sort({ Date: -1 });
+        
+        // Transform the data to ensure attendantName is available
+        const transformedStock = stockItems.map(item => ({
+            ...item.toObject(),
+            attendantName: item.attendantName || (item.attendant ? item.attendant.fullname : 'Unknown')
+        }));
+        
+        res.render('stock', { 
+            stockItems: transformedStock,
+            currentUser: req.user 
+        });
     } catch (error) {
         console.error(error);
-        res.render('stock', { stockItems: [] }); // Pass empty array if error
+        res.render('stock', { 
+            stockItems: [],
+            currentUser: req.user 
+        });
     }
 });
 
 // GET route - Show edit form
-router.get('/editStock/:id', async (req, res) => {
+router.get('/editStock/:id', isAuthenticated, async (req, res) => {
     try {
-        const item = await Stock.findById(req.params.id);
-        res.render('stock_edit', { item: item });
+        const item = await Stock.findById(req.params.id).populate('attendant', 'fullname');
+        res.render('stock_edit', { 
+            item: item,
+            currentUser: req.user 
+        });
     } catch (error) {
         console.error(error);
         res.redirect('/addStock');
     }
 });
 
-// POST route - Add new stock item
 // POST route - Add new stock item (with duplicate check)
-router.post('/postStock', async (req, res) => {
+router.post('/postStock', isAuthenticated, async (req, res) => {
     try {
         const { productname, category, quantity, costprice, sellingprice, supplier, reorderlevel, paymentMethod } = req.body;
+        
+        // Get attendant info
+        const attendantName = req.user ? req.user.fullname : 'Unknown';
+        const attendantId = req.user ? req.user._id : null;
         
         // Check if product with same name, costprice, and sellingprice already exists
         const existingStock = await Stock.findOne({
@@ -48,7 +76,7 @@ router.post('/postStock', async (req, res) => {
             existingStock.paymentMethod = paymentMethod || 'Cash';
             
             await existingStock.save();
-            console.log("Stock updated (added to existing):", productname, "New quantity:", existingStock.quantity);
+            console.log(`[${new Date().toLocaleString()}] Stock updated by ${attendantName}:`, productname, "New quantity:", existingStock.quantity);
         } else {
             // Create new stock entry
             const newStock = new Stock({
@@ -61,11 +89,12 @@ router.post('/postStock', async (req, res) => {
                 reorderlevel: Number(reorderlevel),
                 paymentMethod: paymentMethod || 'Cash',
                 Date: new Date(),
-                // Assuming req.user is populated by authentication middleware
+                attendant: attendantId,
+                attendantName: attendantName  // Store the name directly
             });
             
             await newStock.save();
-            console.log("New stock saved:", req.body);
+            console.log(`[${new Date().toLocaleString()}] New stock added by ${attendantName}:`, productname);
         }
         
         res.redirect('/addStock');
@@ -76,10 +105,11 @@ router.post('/postStock', async (req, res) => {
 });
 
 // DELETE route - Delete stock item
-router.post('/deleteStock/:id', async (req, res) => {
+router.post('/deleteStock/:id', isAuthenticated, async (req, res) => {
     try {
+        const attendantName = req.user ? req.user.fullname : 'Unknown';
         await Stock.findByIdAndDelete(req.params.id);
-        console.log("Stock deleted with ID:", req.params.id);
+        console.log(`[${new Date().toLocaleString()}] Stock deleted by ${attendantName} with ID:`, req.params.id);
         res.redirect('/addStock');
     } catch (error) {
         console.error(error);
@@ -88,9 +118,10 @@ router.post('/deleteStock/:id', async (req, res) => {
 });
 
 // EDIT route - Update stock item
-router.post('/editStock/:id', async (req, res) => {
+router.post('/editStock/:id', isAuthenticated, async (req, res) => {
     try {
-        const { quantity, costprice, sellingprice, supplier, reorderlevel, paymentMethod } = req.body; // Added paymentMethod
+        const { quantity, costprice, sellingprice, supplier, reorderlevel, paymentMethod } = req.body;
+        const attendantName = req.user ? req.user.fullname : 'Unknown';
         
         await Stock.findByIdAndUpdate(req.params.id, {
             quantity: Number(quantity),
@@ -98,11 +129,10 @@ router.post('/editStock/:id', async (req, res) => {
             sellingprice: Number(sellingprice),
             supplier,
             reorderlevel: Number(reorderlevel),
-            paymentMethod: paymentMethod || 'Cash' // Add paymentMethod field to update
+            paymentMethod: paymentMethod || 'Cash'
         });
         
-        console.log("Stock updated with ID:", req.params.id);
-        console.log("Updated Payment Method:", paymentMethod); // Debug log
+        console.log(`[${new Date().toLocaleString()}] Stock updated by ${attendantName} with ID:`, req.params.id);
         res.redirect('/addStock');
     } catch (error) {
         console.error(error);

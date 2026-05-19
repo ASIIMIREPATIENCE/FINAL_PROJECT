@@ -20,7 +20,7 @@ const registrationSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        match: /^\+256[0-9]{9}$/,
+        // match:/^(?:\+256|0)?[7-9][0-9]{8}$/,
     },
     address: {
         type: String,
@@ -32,7 +32,7 @@ const registrationSchema = new mongoose.Schema({
         required: true,
         unique: true,
         trim: true,
-        match: /^(CF|CM).{12}$/
+        // match: /^(CF|CM).{12}$/
     },
     nextOfKinName: {
         type: String,
@@ -43,7 +43,7 @@ const registrationSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        match: /^\+256[0-9]{9}$/,
+        //   match: /^(?:\+256|0)?[7-9][0-9]{8}$/,
     },
     nextOfKinRelationship: {
         type: String,

@@ -3,16 +3,21 @@ const router = express.Router();
 const Depositor = require('../models/Depositor');
 const Registration = require('../models/Registration');
 
+// ========== AUTHENTICATION MIDDLEWARE ==========
+function isAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/');
+}
+
+// ========== DEPOSIT SCHEME ROUTES ==========
+
 // GET route - Display deposit scheme page
-router.get('/scheme', async (req, res) => {
+router.get('/scheme', isAuthenticated, async (req, res) => {
     try {
         // Get current logged-in user from Registration model
-        const userId = req.user?._id || req.session?.userId;
-        let user = null;
-        
-        if (userId) {
-            user = await Registration.findById(userId).select('fullname email role');
-        }
+        const user = req.user;
         
         // Get all depositors
         const depositors = await Depositor.find().sort({ joinDate: -1 });
@@ -68,6 +73,7 @@ router.get('/scheme', async (req, res) => {
             currentBalance: currentBalance,
             depositorsCount: depositors.length,
             user: user || { fullname: 'Guest User', role: 'Guest' },
+            currentUser: user,  // Added for consistency
             topBalanceDepositor: topBalanceDepositor,
             messages: {
                 success: success_msg,
@@ -82,18 +88,13 @@ router.get('/scheme', async (req, res) => {
 });
 
 // POST route - Register new depositor
-router.post('/registerDepositor', async (req, res) => {
+router.post('/registerDepositor', isAuthenticated, async (req, res) => {
     try {
         const { fullName, phoneNumber, nin, employer } = req.body;
         
         // Get current logged-in user
-        const userId = req.user?._id || req.session?.userId;
-        let attendantName = 'System Admin';
-        
-        if (userId) {
-            const user = await Registration.findById(userId).select('fullname');
-            if (user) attendantName = user.fullname;
-        }
+        const user = req.user;
+        let attendantName = user ? user.fullname : 'System Admin';
         
         // Check if NIN already exists
         const existingDepositor = await Depositor.findOne({ nin: nin });
@@ -128,21 +129,16 @@ router.post('/registerDepositor', async (req, res) => {
 });
 
 // POST route - Record deposit (with receipt)
-router.post('/recordDeposit', async (req, res) => {
+router.post('/recordDeposit', isAuthenticated, async (req, res) => {
     try {
         const { depositorId, amount, paymentMethod } = req.body;
         
         // Get current logged-in user
-        const userId = req.user?._id || req.session?.userId;
-        let attendant = null;
-        
-        if (userId) {
-            attendant = await Registration.findById(userId).select('fullname');
-        }
+        const user = req.user;
         
         // If no user found, use a default attendant
-        const attendantName = attendant ? attendant.fullname : 'Admin';
-        const attendantId = attendant ? attendant._id : null;
+        const attendantName = user ? user.fullname : 'Admin';
+        const attendantId = user ? user._id : null;
         
         // Find the depositor
         const depositor = await Depositor.findById(depositorId);
@@ -186,11 +182,12 @@ router.post('/recordDeposit', async (req, res) => {
         console.log(`   Attendant: ${attendantName}`);
         console.log(`   Balance was: UGX ${oldBalance.toLocaleString()} now → UGX ${newBalance.toLocaleString()}`);
         
-        // Render receipt page
+        // Render receipt page with user data
         res.render('deposit_receipt', { 
             deposit: depositRecord,
             depositor: depositor,
             depositIndex: depositIndex,
+            currentUser: user,  // Added for consistency
             success: true 
         });
         

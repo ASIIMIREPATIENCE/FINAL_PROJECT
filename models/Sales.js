@@ -83,6 +83,11 @@ const salesSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Registration',
         required: false
+    },
+    attendantName: {
+        type: String,
+        required: false,
+        trim: true
     }
 
 });

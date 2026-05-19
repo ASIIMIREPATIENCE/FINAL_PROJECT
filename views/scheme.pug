@@ -19,13 +19,12 @@ body
 
     .sidebar-user
       .user-name
-        | 👤 #{user ? user.fullname : 'Guest User'}
-        span.role-badge #{user ? user.role : 'Guest'}
-      .user-role System User
-      a(href='/logout')
-        button.logout-btn
-          i.bi.bi-box-arrow-right
-          |  Sign Out
+        | 👤 #{user ? user.fullname : (currentUser ? currentUser.fullname : 'Guest User')}
+        span.role-badge #{user ? (user.role === 'admin' ? 'Admin' : (user.role === 'store_manager' ? 'Manager' : 'Staff')) : (currentUser ? (currentUser.role === 'admin' ? 'Admin' : (currentUser.role === 'store_manager' ? 'Manager' : 'Staff')) : 'Guest')}
+      .user-role #{user ? (user.role === 'admin' ? 'System Administrator' : (user.role === 'store_manager' ? 'Store Manager' : 'Sales Attendant')) : (currentUser ? (currentUser.role === 'admin' ? 'System Administrator' : (currentUser.role === 'store_manager' ? 'Store Manager' : 'Sales Attendant')) : 'Guest User')}
+      button.logout-btn(onclick="window.location.href='/logout'")
+        i.bi.bi-box-arrow-right
+        |  Sign Out
 
   // ========== MAIN CONTENT ==========
   .main-content
@@ -75,17 +74,17 @@ body
         .form-title
           i.bi.bi-person-plus(style='color: #C6A43F;')
           |  Register New Depositor
-          span.role-badge(style='background: #0D3B2E; color: white;') #{user ? user.role : 'Admin'} Only
+          span.role-badge(style='background: #0D3B2E; color: white;') #{user ? (user.role === 'admin' ? 'Admin' : (user.role === 'store_manager' ? 'Manager' : 'Staff')) : (currentUser ? (currentUser.role === 'admin' ? 'Admin' : (currentUser.role === 'store_manager' ? 'Manager' : 'Staff')) : 'Staff')} Only
         .row.g-3
           .col-md-3
             label.form-label Full Name
-            input.form-control(type='text' name='fullName' placeholder='Enter full name')
+            input.form-control(type='text' name='fullName' placeholder='Enter full name' required)
           .col-md-2
             label.form-label Phone Number
-            input.form-control(type='tel' name='phoneNumber' value='+256' )
+            input.form-control(type='tel' name='phoneNumber' placeholder='+256XXXXXXXXX' required)
           .col-md-2
             label.form-label NIN
-            input.form-control(type='text' name='nin' placeholder='Enter NIN' )
+            input.form-control(type='text' name='nin' placeholder='Enter NIN' required)
           .col-md-3
             label.form-label Employer (Optional)
             input.form-control(type='text' name='employer' placeholder='Company name')
@@ -100,7 +99,7 @@ body
         .form-title
           i.bi.bi-cash(style='color: #C6A43F;')
           |  Record New Deposit
-          span.role-badge(style='background: #0D3B2E; color: white;') #{user ? user.role : 'Admin'} Only
+          span.role-badge(style='background: #0D3B2E; color: white;') #{user ? (user.role === 'admin' ? 'Admin' : (user.role === 'store_manager' ? 'Manager' : 'Staff')) : (currentUser ? (currentUser.role === 'admin' ? 'Admin' : (currentUser.role === 'store_manager' ? 'Manager' : 'Staff')) : 'Staff')} Only
         .row.g-3
           .col-md-5
             label.form-label Select Depositor
@@ -110,7 +109,7 @@ body
                 option(value=depositor._id) #{depositor.fullName} - Current Balance: UGX #{depositor.currentBalance.toLocaleString()}
           .col-md-3
             label.form-label Deposit Amount (UGX)
-            input.form-control(type='number' name='amount' placeholder='Amount')
+            input.form-control(type='number' name='amount' placeholder='Amount' required min='1000' step='1000')
           .col-md-2
             label.form-label Payment Method
             select.form-select(name='paymentMethod')
