@@ -15,19 +15,17 @@ html(lang='en')
         h3 NyondoStock
         p Hardware Management
       
-      // Back Button
       .sidebar-back-btn
         button.btn-back(onclick="history.back()")
           i.bi.bi-arrow-left
           | Back
       
       .sidebar-user
-        .user-name
-          | 👤 #{currentUser ? currentUser.fullname : 'Admin User'}
+        .user-name 👤 #{currentUser ? currentUser.fullname : 'Admin User'}
         .user-role #{currentUser ? (currentUser.role === 'admin' ? 'Administrator' : (currentUser.role === 'store_manager' ? 'Store Manager' : 'Sales Attendant')) : 'System Administrator'}
         button.logout-btn(onclick="window.location.href='/logout'")
           i.bi.bi-box-arrow-right
-          |  Sign Out
+          | Sign Out
 
     .main-content
       .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
@@ -40,14 +38,13 @@ html(lang='en')
         .alert.alert-success.alert-dismissible.fade.show(role='alert')
           i.bi.bi-check-circle-fill.me-2
           strong Sale completed successfully!
-          button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+          button.btn-close(type='button' data-bs-dismiss='alert')
       
       if error
         .alert.alert-danger.alert-dismissible.fade.show(role='alert')
           i.bi.bi-exclamation-triangle-fill.me-2
-          strong Error: 
-          | #{error}
-          button.btn-close(type='button' data-bs-dismiss='alert' aria-label='Close')
+          strong Error: #{error}
+          button.btn-close(type='button' data-bs-dismiss='alert')
       
       .alert.alert-info.mb-3(role='alert')
         i.bi.bi-truck.me-2
@@ -55,25 +52,21 @@ html(lang='en')
         | Free delivery for purchases of UGX 500,000 or more within 10km radius. Otherwise, a fixed fee of UGX 30,000 applies.
       
       form#saleForm(action='/postSale' method='POST')
-        // Customer Information Section
         .form-card
           .form-title
             i.bi.bi-person(style='color: #C6A43F;')
-            |  Customer Information
+            | Customer Information
           
           .row.g-3
             .col-md-4
               label.form-label Customer Name
               input#customerName.form-control(type='text' placeholder='Enter customer name' name='customername' required)
-            
             .col-md-3
               label.form-label Phone Number
               input#customerPhone.form-control(type='tel' placeholder='+256' name='phonenumber' required)
-            
             .col-md-3
               label.form-label NIN (Optional)
               input#customerNin.form-control(type='text' placeholder='National ID number' name='nin')
-            
             .col-md-2
               label.form-label Payment Method
               select#paymentMethod.form-select(name='paymentmethod' required)
@@ -81,27 +74,24 @@ html(lang='en')
                 option(value='Cash') Cash
                 option(value='Mobile Money') Mobile Money
         
-        // Transport Section
         .form-card
           .form-title
             i.bi.bi-truck(style='color: #C6A43F;')
-            |  Transport Information
+            | Transport Information
           
           .row.g-3
             .col-md-4
               .form-check
                 input#addTransport.form-check-input(type='checkbox' name='addTransport' value='true')
                 label.form-check-label Need Transport Delivery?
-            
             .col-md-3
               label.form-label Distance (km)
               input#distance.form-control(type='number' name='distance' value='0' min='0')
         
-        // Cart Section
         .form-card
           .form-title
             i.bi.bi-cart(style='color: #C6A43F;')
-            |  Shopping Cart
+            | Shopping Cart
           
           .table-responsive
             table.table
@@ -110,16 +100,35 @@ html(lang='en')
                   th Product
                   th Quantity
                   th Unit Price (UGX)
+                  th Subtotal (UGX)
                   th
               tbody#cartBody
                 tr
-                  td(colspan='4' class='text-center text-muted') Cart is empty
+                  td(colspan='5' class='text-center text-muted') Cart is empty
         
-        // Add Product to Cart
+        .form-card
+          .form-title
+            i.bi.bi-calculator(style='color: #C6A43F;')
+            | Sale Summary
+          .row
+            .col-md-6.offset-md-6
+              table.table.table-borderless
+                tr
+                  td Subtotal:
+                  td.text-end UGX <span id="displaySubtotal">0</span>
+                tr
+                  td Transport Fee:
+                  td.text-end UGX <span id="displayTransport">0</span>
+                tr(style='border-top: 2px solid #dee2e6;')
+                  td 
+                    strong GRAND TOTAL:
+                  td.text-end
+                    strong UGX <span id="displayTotal">0</span>
+        
         .form-card
           .form-title
             i.bi.bi-plus-circle(style='color: #C6A43F;')
-            |  Add Product to Cart
+            | Add Product to Cart
           
           .row.g-3
             .col-md-4
@@ -128,35 +137,30 @@ html(lang='en')
                 option(value='' disabled selected) Select Product
                 each product in items 
                   option(value=product.productname data-price=product.sellingprice data-stock=product.quantity)= `${product.productname} (Stock: ${product.quantity} | Price: ${product.sellingprice} UGX)`
-            
             .col-md-3
               label.form-label Quantity
               input#quantity.form-control(type='number' value='1' min='1')
-            
             .col-md-3
               label.form-label Unit Price (UGX)
               input#unitPrice.form-control(type='number')
-            
             .col-md-2
               label.form-label &nbsp;
               button#addToCart.btn.btn-warning(type='button' style='background:#C6A43F; color:white; width:100%')
                 i.bi.bi-cart-plus
-                |  Add to Cart
+                | Add to Cart
         
-        // Hidden input for cart items
         input#cartItems(type='hidden' name='cartItems')
         
-        // Submit Section
         .form-card
           .row
             .col-md-12.d-flex.justify-content-center
               button#completeSale.btn-success-custom.mt-3(type='submit' style='width: 50%;')
                 i.bi.bi-check-circle
-                |  COMPLETE SALE
+                | COMPLETE SALE
 
     .footer
       i.bi.bi-shield-check
-      |  NyondoStock — Enterprise Hardware Management System
+      | NyondoStock — Enterprise Hardware Management System
 
     script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
     script(src='/js/sale_cart.js')

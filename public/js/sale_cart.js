@@ -7,8 +7,12 @@ const addBtn = document.getElementById('addToCart');
 const cartBody = document.getElementById('cartBody');
 const cartItemsInput = document.getElementById('cartItems');
 const completeBtn = document.getElementById('completeSale');
+const transportCheck = document.getElementById('addTransport');
+const distanceInput = document.getElementById('distance');
+const displaySubtotal = document.getElementById('displaySubtotal');
+const displayTransport = document.getElementById('displayTransport');
+const displayTotal = document.getElementById('displayTotal');
 
-// Auto-fill price when product is selected
 productSelect.addEventListener('change', function() {
     const selected = productSelect.options[productSelect.selectedIndex];
     if (selected && selected.dataset.price) {
@@ -16,7 +20,24 @@ productSelect.addEventListener('change', function() {
     }
 });
 
-// Add to cart button click
+function updateTotals() {
+    const subtotal = cart.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+    const distance = parseInt(distanceInput ? distanceInput.value : 0) || 0;
+    const needTransport = transportCheck ? transportCheck.checked : false;
+    
+    let transportFee = 0;
+    if (needTransport && distance > 0) {
+        const isFree = (subtotal >= 500000 && distance <= 10);
+        if (!isFree) transportFee = 30000;
+    }
+    
+    const total = subtotal + transportFee;
+    
+    if (displaySubtotal) displaySubtotal.textContent = subtotal.toLocaleString();
+    if (displayTransport) displayTransport.textContent = transportFee.toLocaleString();
+    if (displayTotal) displayTotal.textContent = total.toLocaleString();
+}
+
 addBtn.addEventListener('click', function() {
     const selected = productSelect.options[productSelect.selectedIndex];
     
@@ -45,7 +66,6 @@ addBtn.addEventListener('click', function() {
         return;
     }
     
-    // Check if product already in cart
     const existingIndex = cart.findIndex(item => item.productName === productName);
     
     if (existingIndex !== -1) {
@@ -64,19 +84,19 @@ addBtn.addEventListener('click', function() {
     }
     
     renderCart();
+    updateTotals();
     qtyInput.value = 1;
 });
 
-// Remove from cart
 function removeFromCart(index) {
     cart.splice(index, 1);
     renderCart();
+    updateTotals();
 }
 
-// Render cart table
 function renderCart() {
     if (cart.length === 0) {
-        cartBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Cart is empty</td></tr>';
+        cartBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Cart is empty<\/td><\/tr>';
         cartItemsInput.value = JSON.stringify(cart);
         return;
     }
@@ -84,18 +104,32 @@ function renderCart() {
     let html = '';
     for (let i = 0; i < cart.length; i++) {
         const item = cart[i];
+        const subtotal = item.quantity * item.unitPrice;
         html += '<tr>' +
-            '<td>' + item.productName + '</td>' +
-            '<td>' + item.quantity + '</td>' +
-            '<td>' + item.unitPrice.toLocaleString() + '</td>' +
-            '<td><button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(' + i + ')">Remove</button></td>' +
-        '</tr>';
+            '<td>' + escapeHtml(item.productName) + '<\/td>' +
+            '<td>' + item.quantity + '<\/td>' +
+            '<td>UGX ' + item.unitPrice.toLocaleString() + '<\/td>' +
+            '<td>UGX ' + subtotal.toLocaleString() + '<\/td>' +
+            '<td><button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(' + i + ')">Remove<\/button><\/td>' +
+        '<\/tr>';
     }
     cartBody.innerHTML = html;
     cartItemsInput.value = JSON.stringify(cart);
 }
 
-// Validate before submit
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+if (transportCheck) transportCheck.addEventListener('change', updateTotals);
+if (distanceInput) distanceInput.addEventListener('input', updateTotals);
+
 completeBtn.addEventListener('click', function(e) {
     const custName = document.getElementById('customerName').value.trim();
     const custPhone = document.getElementById('customerPhone').value.trim();
@@ -124,4 +158,31 @@ completeBtn.addEventListener('click', function(e) {
         alert('Cart is empty. Add at least one product.');
         return;
     }
+    
+    const subtotal = cart.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
+    const distance = parseInt(distanceInput ? distanceInput.value : 0) || 0;
+    const needTransport = transportCheck ? transportCheck.checked : false;
+    let transportFee = 0;
+    if (needTransport && distance > 0) {
+        const isFree = (subtotal >= 500000 && distance <= 10);
+        if (!isFree) transportFee = 30000;
+    }
+    const total = subtotal + transportFee;
+    
+    const confirmMsg = '--------------------------\n' +
+        '       CONFIRM SALE DETAILS\n' +
+        '------------------------------\n\n' +
+        'Subtotal:      UGX ' + subtotal.toLocaleString() + '\n' +
+        'Transport Fee: UGX ' + transportFee.toLocaleString() + '\n' +
+        '───────────────────────────────\n' +
+        'GRAND TOTAL:   UGX ' + total.toLocaleString() + '\n\n' +
+        '--------------------------\n' +
+        'Click OK to complete this sale.\n' +
+        'Click Cancel to review your cart.';
+    
+    if (!confirm(confirmMsg)) {
+        e.preventDefault();
+    }
 });
+
+updateTotals();
