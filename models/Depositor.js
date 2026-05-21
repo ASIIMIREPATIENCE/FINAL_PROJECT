@@ -4,57 +4,118 @@ const depositorSchema = new mongoose.Schema({
     fullName: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
     },
     phoneNumber: {
         type: String,
         required: true,
         trim: true,
-        match: /^\+256[0-9]{9}$/,
-        default: '+256'
     },
     nin: {
         type: String,
         required: true,
-        trim: true,
         unique: true,
-        match: /^(CF|CM).{12}$/,
+        trim: true,
     },
     employer: {
         type: String,
+        default: '',
         trim: true,
-        required:true
     },
     joinDate: {
         type: Date,
-        default: Date.now
+        default: Date.now,
     },
     currentBalance: {
         type: Number,
-        default: 0
+        default: 0,
     },
     totalDeposits: {
         type: Number,
-        default: 0
+        default: 0,
     },
-    // Optional: Track deposit history as an array
     depositHistory: [{
-        amount: Number,
+        amount: {
+            type: Number,
+            default: 0,
+        },
         date: {
             type: Date,
-            default: Date.now
+            default: Date.now,
         },
         attendant: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Registration'
+            ref: 'Registration',
         },
-        attendantName: String,
+        attendantName: {
+            type: String,
+            trim: true,
+        },
         paymentMethod: {
             type: String,
             enum: ['Cash', 'Bank Transfer', 'Mobile Money'],
-            default: 'Cash'
+            default: 'Cash',
         },
-        balanceAfter: Number
+        balanceAfter: {
+            type: Number,
+            default: 0,
+        },
+        // New fields for item purchases
+        items: [{
+            productname: {
+                type: String,
+                trim: true,
+            },
+            quantity: {
+                type: Number,
+                default: 0,
+            },
+            unitprice: {
+                type: Number,
+                default: 0,
+            },
+            subtotal: {
+                type: Number,
+                default: 0,
+            }
+        }],
+        cartSubtotal: {
+            type: Number,
+            default: 0,
+        },
+        distance: {
+            type: Number,
+            default: 0,
+        },
+        transportFee: {
+            type: Number,
+            default: 0,
+        },
+        grandTotal: {
+            type: Number,
+            default: 0,
+        },
+        freeTransportApplied: {
+            type: Boolean,
+            default: false,
+        },
+        needTransport: {
+            type: Boolean,
+            default: false,
+        },
+        paymentStatus: {
+            type: String,
+            enum: ['pending', 'partial', 'completed'],
+            default: 'pending',
+        },
+        amountPaid: {
+            type: Number,
+            default: 0,
+        },
+        remainingBalance: {
+            type: Number,
+            default: 0,
+        }
     }]
 });
 

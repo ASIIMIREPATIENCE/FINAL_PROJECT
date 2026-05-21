@@ -4,42 +4,35 @@ head
   meta(charset='UTF-8')
   meta(name='viewport' content='width=device-width, initial-scale=1.0')
   title NyondoStock - Deposit Scheme Management
-  // Bootstrap 5 CSS + Icons
   link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
   link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
   link(rel='stylesheet' href='/css/scheme.css')
 
 body
-  // ========== SIDEBAR ==========
   .sidebar
     .sidebar-logo
       img(src='/images/logo.png' alt='Logo')
       h3 NyondoStock
       p Hardware Management
 
-    // Back Button
     .sidebar-back-btn
       button.btn-back(onclick="history.back()")
         i.bi.bi-arrow-left
         | Back
 
     .sidebar-user
-      .user-name
-        | 👤 #{user ? user.fullname : (currentUser ? currentUser.fullname : 'Guest User')}
-        span.role-badge #{user ? (user.role === 'admin' ? 'Admin' : (user.role === 'store_manager' ? 'Manager' : 'Staff')) : (currentUser ? (currentUser.role === 'admin' ? 'Admin' : (currentUser.role === 'store_manager' ? 'Manager' : 'Staff')) : 'Guest')}
-      .user-role #{user ? (user.role === 'admin' ? 'System Administrator' : (user.role === 'store_manager' ? 'Store Manager' : 'Sales Attendant')) : (currentUser ? (currentUser.role === 'admin' ? 'System Administrator' : (currentUser.role === 'store_manager' ? 'Store Manager' : 'Sales Attendant')) : 'Guest User')}
+      .user-name 👤 #{currentUser ? currentUser.fullname : 'Guest User'}
+      .user-role #{currentUser ? (currentUser.role === 'admin' ? 'System Administrator' : (currentUser.role === 'store_manager' ? 'Store Manager' : 'Sales Attendant')) : 'Guest User'}
       button.logout-btn(onclick="window.location.href='/logout'")
         i.bi.bi-box-arrow-right
-        |  Sign Out
+        | Sign Out
 
-  // ========== MAIN CONTENT ==========
   .main-content
     .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
       div
         h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Deposit Scheme Management
-        p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Manage customer deposits and track savings balances.
-    
-    // Display Flash Messages
+        p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Select depositor first, then select items to purchase
+
     if messages && messages.success
       .alert.alert-success.alert-dismissible.fade.show(role='alert')
         i.bi.bi-check-circle-fill.me-2
@@ -51,36 +44,30 @@ body
         | #{messages.error}
         button.btn-close(type='button' data-bs-dismiss='alert')
     
-    // Summary Cards
     .row.g-3.mb-4
       .col-md-4
         .summary-card
           div(style='font-size: 0.7rem; opacity: 0.8;') Top Depositor
           if topBalanceDepositor
             .summary-value #{topBalanceDepositor.fullName}
-            small(style='opacity: 0.7;') 
-              | Balance: UGX #{topBalanceDepositor.currentBalance.toLocaleString()}
+            small(style='opacity: 0.7;') Balance: UGX #{topBalanceDepositor.currentBalance.toLocaleString()}
           else
             .summary-value(style='font-size: 1.2rem;') No deposits yet
-            small(style='opacity: 0.7;') Waiting for first deposit
       .col-md-4
         .summary-card(style='background: linear-gradient(135deg, #C6A43F 0%, #B8922E 100%);')
           div(style='font-size: 0.7rem; opacity: 0.8;') Active Depositors
           .summary-value(style='color: #0D3B2E;') #{depositorsCount}
-          small(style='opacity: 0.8;') Registered members
       .col-md-4
         .summary-card(style='background: linear-gradient(135deg, #2E7D64 0%, #236854 100%);')
           div(style='font-size: 0.7rem; opacity: 0.8;') Total Savings Balance
           .summary-value UGX #{currentBalance ? currentBalance.toLocaleString() : '0'}
-          small(style='opacity: 0.8;') All depositors combined
-    
+
     // Register New Depositor Form
     form(action='/registerDepositor' method='post')
       .form-card
         .form-title
           i.bi.bi-person-plus(style='color: #C6A43F;')
-          |  Register New Depositor
-          span.role-badge(style='background: #0D3B2E; color: white;') #{user ? (user.role === 'admin' ? 'Admin' : (user.role === 'store_manager' ? 'Manager' : 'Staff')) : (currentUser ? (currentUser.role === 'admin' ? 'Admin' : (currentUser.role === 'store_manager' ? 'Manager' : 'Staff')) : 'Staff')} Only
+          | Register New Depositor
         .row.g-3
           .col-md-3
             label.form-label Full Name
@@ -97,98 +84,346 @@ body
           .col-md-2.d-flex.align-items-end
             button.btn-save.w-100(type='submit')
               i.bi.bi-save
-              |  Register
-    
-    // Record Deposit Form (No date field - captured automatically)
-    form(action='/recordDeposit' method='post')
+              | Register
+
+    // Record Deposit with Items Form - Depositor selected first
+    form(action='/recordDepositWithItems' method='post')
+      // Step 1: Select Depositor
       .form-card
         .form-title
-          i.bi.bi-cash(style='color: #C6A43F;')
-          |  Record New Deposit
-          span.role-badge(style='background: #0D3B2E; color: white;') #{user ? (user.role === 'admin' ? 'Admin' : (user.role === 'store_manager' ? 'Manager' : 'Staff')) : (currentUser ? (currentUser.role === 'admin' ? 'Admin' : (currentUser.role === 'store_manager' ? 'Manager' : 'Staff')) : 'Staff')} Only
+          i.bi.bi-person(style='color: #C6A43F;')
+          | Step 1: Select Depositor
+        
         .row.g-3
-          .col-md-5
+          .col-md-6
             label.form-label Select Depositor
-            select.form-select(name='depositorId' required)
+            select#depositorSelect.form-select(name='depositorId' required)
               option(value='') Select depositor...
               each depositor in depositors
-                option(value=depositor._id) #{depositor.fullName} - Current Balance: UGX #{depositor.currentBalance.toLocaleString()}
-          .col-md-3
-            label.form-label Deposit Amount (UGX)
-            input.form-control(type='number' name='amount' placeholder='Amount' required min='1000' step='1000')
+                option(value=depositor._id) #{depositor.fullName} - Current Savings: UGX #{depositor.currentBalance.toLocaleString()}
+      
+      // Step 2: Items Selection Section
+      .form-card
+        .form-title
+          i.bi.bi-cart(style='color: #C6A43F;')
+          | Step 2: Select Items Being Purchased
+        
+        .row.g-3
+          .col-md-4
+            label.form-label Select Item
+            select#itemSelect.form-select
+              option(value='' disabled selected) Select an item
+              each item in stockItems
+                option(value=item.productname data-price=item.sellingprice)= `${item.productname} (UGX ${item.sellingprice.toLocaleString()})`
+          
           .col-md-2
+            label.form-label Quantity
+            input#itemQuantity.form-control(type='number' value='1' min='1')
+          
+          .col-md-2
+            label.form-label Unit Price (UGX)
+            input#itemPrice.form-control(type='number' placeholder='Enter price')
+          
+          .col-md-2
+            label.form-label &nbsp;
+            button#addItemBtn.btn.btn-warning(type='button' style='background:#C6A43F; color:white; width:100%')
+              i.bi.bi-cart-plus
+              | Add Item
+        
+        .table-responsive.mt-3
+          table.table
+            thead
+              tr
+                th Item
+                th Qty
+                th Price
+                th Subtotal
+                th
+            tbody#itemsCartBody
+              tr
+                td(colspan='5' class='text-center text-muted') No items added
+        
+        // Transport Section
+        .row.g-3.mt-3
+          .col-md-4
+            .form-check
+              input#needTransport.form-check-input(type='checkbox')
+              label.form-check-label Need Transport Delivery?
+          .col-md-3
+            label.form-label Distance (km)
+            input#distanceKm.form-control(type='number' value='0' min='0')
+        
+        // Amount Owed Summary
+        .row.g-3.mt-3
+          .col-md-6.offset-md-6
+            table.table.table-borderless
+              tr
+                td Item Subtotal:
+                td.text-end UGX <span id="itemsSubtotal">0</span>
+              tr
+                td Transport Fee:
+                td.text-end UGX <span id="transportFee">0</span>
+              tr(style='border-top: 2px solid #dee2e6;')
+                td 
+                  strong TOTAL AMOUNT OWED:
+                td.text-end
+                  strong UGX <span id="grandTotal">0</span>
+          
+          // Confirm Cart Button
+          .row.mt-3
+            .col-md-12
+              button#confirmCartBtn.btn.btn-success(type='button' style='background:#2E7D64; width:100%; padding:12px;')
+                i.bi.bi-check-circle.me-2
+                | CONFIRM CART & PROCEED TO PAYMENT
+      
+      // Step 3: Deposit Payment Section
+      .form-card#paymentSection
+        .form-title
+          i.bi.bi-cash(style='color: #C6A43F;')
+          | Step 3: Make Deposit Payment
+        
+        .alert.alert-info
+          i.bi.bi-info-circle.me-2
+          | Total Amount Owed: UGX <strong id="confirmedGrandTotal">0</strong>
+        
+        .row.g-3
+          .col-md-4
+            label.form-label Amount Paying (UGX)
+            input#amountPaying.form-control(type='number' name='amount' placeholder='Amount' required min='1000')
+          
+          .col-md-3
             label.form-label Payment Method
             select.form-select(name='paymentMethod')
               option(value='Cash') Cash
               option(value='Bank Transfer') Bank Transfer
               option(value='Mobile Money') Mobile Money
+          
+          .col-md-3
+            label.form-label &nbsp;
+          
           .col-md-2.d-flex.align-items-end
             button.btn-save.w-100(type='submit')
               i.bi.bi-check-circle
-              |  Record Deposit
-    
-    // Depositors Table
+              | RECORD DEPOSIT
+        
+        input#cartItemsData(type='hidden' name='cartItems')
+        input#needTransportData(type='hidden' name='needTransport')
+        input#distanceData(type='hidden' name='distance')
+        input#depositorIdHidden(type='hidden' name='depositorId')
+        input#confirmedGrandTotalInput(type='hidden' name='grandTotal')
+
+    // Depositors Table with Amount Owed
     .section-title
       i.bi.bi-people
-      |  Registered Depositors
+      | Registered Depositors
     .custom-table
       table
         thead
           tr
-            th Name
+            th Customer Name
             th Phone
             th NIN
-            th Employer
             th Date Joined
-            th Current Balance
+            th Items Purchased
+            th Total Amount Owed (UGX)
+            th Total Paid (UGX)
+            th Remaining Balance (UGX)
+            th Status
+            th Actions
         tbody
           if depositors && depositors.length
             each depositor in depositors
+              - var totalOwed = 0
+              - var totalPaid = 0
+              - var allItems = []
+              - var remainingBalance = 0
+              if depositor.depositHistory && depositor.depositHistory.length
+                for transaction in depositor.depositHistory
+                  if transaction.grandTotal && transaction.grandTotal > 0
+                    totalOwed += transaction.grandTotal
+                    totalPaid += transaction.amountPaid || transaction.amount || 0
+                  if transaction.items && transaction.items.length
+                    for item in transaction.items
+                      - var itemDisplay = item.productname + ' (x' + item.quantity + ')'
+                      - allItems.push(itemDisplay)
+                - remainingBalance = totalOwed - totalPaid
               tr
                 td #{depositor.fullName}
                 td #{depositor.phoneNumber}
                 td #{depositor.nin}
-                td #{depositor.employer || 'N/A'}
                 td #{depositor.joinDate ? new Date(depositor.joinDate).toLocaleDateString() : 'N/A'}
-                td.balance-positive UGX #{depositor.currentBalance.toLocaleString()}
+                td 
+                  if allItems.length > 0
+                    | #{allItems.slice(0, 3).join(', ')}
+                    if allItems.length > 3
+                      |  +#{allItems.length - 3} more
+                  else
+                    | -
+                td 
+                  strong UGX #{totalOwed.toLocaleString()}
+                td UGX #{totalPaid.toLocaleString()}
+                td 
+                  if remainingBalance <= 0
+                    span(style='color: #28a745; font-weight: bold;') PAID
+                  else
+                    span(style='color: #dc3545; font-weight: bold;') UGX #{remainingBalance.toLocaleString()}
+                td
+                  if remainingBalance <= 0
+                    span.badge(style='background: #28a745; color: white;') Completed
+                  else if totalPaid > 0
+                    span.badge(style='background: #ffc107; color: black;') Partial
+                  else
+                    span.badge(style='background: #dc3545; color: white;') Pending
+                td
+                  button.btn-sm.btn-info(type='button' data-bs-toggle='modal' data-bs-target=`#historyModal${depositor._id}`)
+                    i.bi.bi-clock-history
+                    | View History
           else
             tr
-              td.text-center(colspan='6') No depositors registered yet
-    
-    // Deposit History Table
-    .section-title
+              td.text-center(colspan='10') No depositors registered yet
+
+    // Recent Transactions Table
+    .section-title.mt-4
       i.bi.bi-clock-history
-      |  Recent Deposit History
+      | Recent Deposit Transactions
     .custom-table
       table
         thead
           tr
             th Date
             th Depositor
-            th Amount
-            th Balance After
+            th Items Purchased
+            th Grand Total (UGX)
+            th Amount Paid (UGX)
+            th Remaining Balance (UGX)
             th Payment Method
+            th Status
             th Attendant
         tbody
-          if transactions && transactions.length
-            each transaction in transactions
+          if recentTransactions && recentTransactions.length
+            each transaction in recentTransactions
               tr
-                td #{transaction.date ? new Date(transaction.date).toLocaleDateString() : 'N/A'}
+                td #{transaction.date ? new Date(transaction.date).toLocaleString() : 'N/A'}
                 td #{transaction.depositorName}
-                td.balance-positive UGX #{transaction.amount.toLocaleString()}
-                td UGX #{transaction.balanceAfter.toLocaleString()}
-                td #{transaction.paymentMethod || 'Cash'}
                 td 
-                  if transaction.attendantName
-                    | #{transaction.attendantName}
+                  if transaction.items && transaction.items.length
+                    each item, idx in transaction.items.slice(0, 2)
+                      | #{item.productname} (x#{item.quantity})
+                      if idx < transaction.items.slice(0, 2).length - 1
+                        | , 
+                    if transaction.items.length > 2
+                      |  +#{transaction.items.length - 2} more
                   else
-                    span.text-muted Unknown User
+                    | -
+                td UGX #{transaction.grandTotal ? transaction.grandTotal.toLocaleString() : '0'}
+                td UGX #{transaction.amount ? transaction.amount.toLocaleString() : '0'}
+                td 
+                  if transaction.remainingBalance <= 0
+                    span(style='color: #28a745; font-weight: bold;') PAID
+                  else
+                    span(style='color: #dc3545; font-weight: bold;') UGX #{transaction.remainingBalance.toLocaleString()}
+                td #{transaction.paymentMethod || 'Cash'}
+                td
+                  if transaction.paymentStatus === 'completed'
+                    span.badge(style='background: #28a745; color: white;') Completed
+                  else if transaction.paymentStatus === 'partial'
+                    span.badge(style='background: #ffc107; color: black;') Partial
+                  else
+                    span.badge(style='background: #dc3545; color: white;') Pending
+                td #{transaction.attendantName || 'unknown'}
           else
             tr
-              td.text-center(colspan='6') No deposits recorded yet
+              td.text-center(colspan='9') No transactions recorded yet
+
+  // Payment History Modals - Transaction details
+  each depositor in depositors
+    .modal.fade(id=`historyModal${depositor._id}` tabindex='-1')
+      .modal-dialog.modal-xl
+        .modal-content
+          .modal-header
+            h5.modal-title Deposit Transaction History - #{depositor.fullName}
+            button.btn-close(type='button' data-bs-dismiss='modal')
+          .modal-body
+            .table-responsive
+              table.table
+                thead
+                  tr
+                    th Deposit Date
+                    th Items Purchased
+                    th Quantity
+                    th Unit Price
+                    th Subtotal
+                    th Distance
+                    th Transport Fee
+                    th Total Owed
+                    th Amount Paid
+                    th Remaining Balance
+                    th Payment Method
+                    th Attendant
+                    th Status
+                tbody
+                  if depositor.depositHistory && depositor.depositHistory.length
+                    each transaction in depositor.depositHistory.slice().reverse()
+                      - var remainingBal = (transaction.grandTotal || transaction.amount) - (transaction.amountPaid || transaction.amount)
+                      tr
+                        td #{transaction.date ? new Date(transaction.date).toLocaleString() : 'N/A'}
+                        td 
+                          if transaction.items && transaction.items.length
+                            each item, idx in transaction.items
+                              | #{item.productname}
+                              if idx < transaction.items.length - 1
+                                | , 
+                          else
+                            | -
+                        td 
+                          if transaction.items && transaction.items.length
+                            each item, idx in transaction.items
+                              | #{item.quantity}
+                              if idx < transaction.items.length - 1
+                                | , 
+                          else
+                            | -
+                        td 
+                          if transaction.items && transaction.items.length
+                            each item, idx in transaction.items
+                              | UGX #{item.unitprice ? item.unitprice.toLocaleString() : '0'}
+                              if idx < transaction.items.length - 1
+                                | , 
+                          else
+                            | -
+                        td 
+                          if transaction.items && transaction.items.length
+                            each item, idx in transaction.items
+                              | UGX #{item.subtotal ? item.subtotal.toLocaleString() : '0'}
+                              if idx < transaction.items.length - 1
+                                | , 
+                          else
+                            | -
+                        td #{transaction.distance || 0} km
+                        td UGX #{transaction.transportFee ? transaction.transportFee.toLocaleString() : '0'}
+                        td UGX #{transaction.grandTotal ? transaction.grandTotal.toLocaleString() : transaction.amount.toLocaleString()}
+                        td UGX #{transaction.amountPaid ? transaction.amountPaid.toLocaleString() : transaction.amount.toLocaleString()}
+                        td 
+                          if remainingBal <= 0
+                            span(style='color: #28a745; font-weight: bold;') PAID
+                          else
+                            span(style='color: #dc3545; font-weight: bold;') UGX #{remainingBal.toLocaleString()}
+                        td #{transaction.paymentMethod || 'Cash'}
+                        td #{transaction.attendantName || 'unknown'}
+                        td
+                          if remainingBal <= 0
+                            span.badge(style='background: #28a745; color: white;') Completed
+                          else if (transaction.amountPaid || transaction.amount) > 0
+                            span.badge(style='background: #ffc107; color: black;') Partial
+                          else
+                            span.badge(style='background: #dc3545; color: white;') Pending
+                  else
+                    tr
+                      td.text-center(colspan='13') No deposit history
 
   .footer
     i.bi.bi-shield-check
-    |  NyondoStock &mdash; Enterprise Hardware Management System
+    | NyondoStock — Enterprise Hardware Management System
 
   script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
+  script(src='/js/scheme_cart.js')

@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Depositor = require('../models/Depositor');
 const Registration = require('../models/Registration');
+const Stock = require('../models/Stock');
 
-// ========== AUTHENTICATION MIDDLEWARE ==========
 function isAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
@@ -11,18 +11,13 @@ function isAuthenticated(req, res, next) {
     res.redirect('/');
 }
 
-// ========== DEPOSIT SCHEME ROUTES ==========
-
 // GET route - Display deposit scheme page
 router.get('/scheme', isAuthenticated, async (req, res) => {
     try {
-        // Get current logged-in user from Registration model
         const user = req.user;
-        
-        // Get all depositors
         const depositors = await Depositor.find().sort({ joinDate: -1 });
+        const stockItems = await Stock.find({ quantity: { $gt: 0 } });
         
-        // Calculate summary totals
         let totalDeposits = 0;
         let currentBalance = 0;
         
@@ -31,7 +26,6 @@ router.get('/scheme', isAuthenticated, async (req, res) => {
             currentBalance += depositor.currentBalance || 0;
         });
         
-        // Find depositor with highest current balance (Top Depositor)
         let topBalanceDepositor = null;
         let highestBalance = 0;
         
@@ -42,43 +36,15 @@ router.get('/scheme', isAuthenticated, async (req, res) => {
             }
         });
         
-        // Collect all deposit history from all depositors for the transaction history table
-        let allDeposits = [];
-        depositors.forEach(depositor => {
-            if (depositor.depositHistory && depositor.depositHistory.length) {
-                const depositsWithInfo = depositor.depositHistory.map(deposit => ({
-                    date: deposit.date,
-                    depositorName: depositor.fullName,
-                    amount: deposit.amount,
-                    balanceAfter: deposit.balanceAfter,
-                    paymentMethod: deposit.paymentMethod,
-                    attendantName: deposit.attendantName
-                }));
-                allDeposits.push(...depositsWithInfo);
-            }
-        });
-        
-        // Sort by date, most recent first
-        allDeposits.sort((a, b) => new Date(b.date) - new Date(a.date));
-        const recentDeposits = allDeposits.slice(0, 50);
-        
-        // Set flash messages if they exist
-        const success_msg = req.flash ? req.flash('success')[0] : null;
-        const error_msg = req.flash ? req.flash('error')[0] : null;
-        
         res.render('scheme', {
             depositors: depositors,
-            transactions: recentDeposits,
+            stockItems: stockItems,
             totalDeposits: totalDeposits,
             currentBalance: currentBalance,
             depositorsCount: depositors.length,
-            user: user || { fullname: 'Guest User', role: 'Guest' },
-            currentUser: user,  // Added for consistency
+            currentUser: user,
             topBalanceDepositor: topBalanceDepositor,
-            messages: {
-                success: success_msg,
-                error: error_msg
-            }
+            messages: { success: null, error: null }
         });
         
     } catch (error) {
@@ -91,19 +57,15 @@ router.get('/scheme', isAuthenticated, async (req, res) => {
 router.post('/registerDepositor', isAuthenticated, async (req, res) => {
     try {
         const { fullName, phoneNumber, nin, employer } = req.body;
-        
-        // Get current logged-in user
         const user = req.user;
-        let attendantName = user ? user.fullname : 'System Admin';
+        const attendantName = user ? user.fullname : 'System Admin';
         
-        // Check if NIN already exists
         const existingDepositor = await Depositor.findOne({ nin: nin });
         if (existingDepositor) {
             if (req.flash) req.flash('error', 'Depositor with this NIN already exists');
             return res.redirect('/scheme');
         }
         
-        // Create new depositor
         const newDepositor = new Depositor({
             fullName: fullName,
             phoneNumber: phoneNumber,
@@ -116,7 +78,6 @@ router.post('/registerDepositor', isAuthenticated, async (req, res) => {
         });
         
         await newDepositor.save();
-        
         console.log(`[${new Date().toLocaleString()}] New depositor registered: ${fullName} by ${attendantName}`);
         if (req.flash) req.flash('success', `Depositor ${fullName} registered successfully`);
         res.redirect('/scheme');
@@ -128,66 +89,94 @@ router.post('/registerDepositor', isAuthenticated, async (req, res) => {
     }
 });
 
-// POST route - Record deposit (with receipt)
-router.post('/recordDeposit', isAuthenticated, async (req, res) => {
+// POST route - Record deposit with items
+router.post('/recordDepositWithItems', isAuthenticated, async (req, res) => {
     try {
-        const { depositorId, amount, paymentMethod } = req.body;
-        
-        // Get current logged-in user
+        const { depositorId, amount, paymentMethod, cartItems, distance, needTransport } = req.body;
         const user = req.user;
-        
-        // If no user found, use a default attendant
         const attendantName = user ? user.fullname : 'Admin';
         const attendantId = user ? user._id : null;
         
-        // Find the depositor
         const depositor = await Depositor.findById(depositorId);
         if (!depositor) {
             if (req.flash) req.flash('error', 'Depositor not found');
             return res.redirect('/scheme');
         }
         
-        const depositAmount = Number(amount);
-        
-        if (depositAmount <= 0) {
-            if (req.flash) req.flash('error', 'Deposit amount must be greater than 0');
-            return res.redirect('/scheme');
+        // Parse cart items
+        let items = [];
+        let itemsSubtotal = 0;
+        if (cartItems && cartItems !== '[]') {
+            items = JSON.parse(cartItems);
+            items = items.map(item => ({
+                productname: item.productName,
+                quantity: item.quantity,
+                unitprice: item.unitPrice,
+                subtotal: item.quantity * item.unitPrice
+            }));
+            itemsSubtotal = items.reduce((sum, item) => sum + item.subtotal, 0);
         }
         
-        // Calculate new balance
-        const oldBalance = depositor.currentBalance;
-        const newBalance = oldBalance + depositAmount;
+        const distanceKm = parseInt(distance) || 0;
+        const needTrans = needTransport === 'true';
         
-        // Create deposit record
+        let transportFee = 0;
+        if (needTrans && distanceKm > 0) {
+            const isFree = (itemsSubtotal >= 500000 && distanceKm <= 10);
+            if (!isFree) transportFee = 30000;
+        }
+        
+        const grandTotal = itemsSubtotal + transportFee;
+        const amountPaid = Number(amount);
+        
+        let paymentStatus = 'pending';
+        let remainingBalance = grandTotal - amountPaid;
+        
+        if (remainingBalance <= 0) {
+            paymentStatus = 'completed';
+            remainingBalance = 0;
+        } else if (amountPaid > 0 && amountPaid < grandTotal) {
+            paymentStatus = 'partial';
+        }
+        
         const depositRecord = {
-            amount: depositAmount,
+            amount: amountPaid,
             date: new Date(),
             attendant: attendantId,
             attendantName: attendantName,
             paymentMethod: paymentMethod || 'Cash',
-            balanceAfter: newBalance
+            balanceAfter: depositor.currentBalance,
+            items: items,
+            cartSubtotal: itemsSubtotal,
+            distance: distanceKm,
+            transportFee: transportFee,
+            grandTotal: grandTotal,
+            needTransport: needTrans,
+            paymentStatus: paymentStatus,
+            amountPaid: amountPaid,
+            remainingBalance: remainingBalance
         };
         
-        // Update depositor
-        depositor.currentBalance = newBalance;
-        depositor.totalDeposits += depositAmount;
         depositor.depositHistory.push(depositRecord);
+        
+        // Update depositor balance
+        if (paymentStatus === 'completed') {
+            depositor.currentBalance += grandTotal;
+            depositor.totalDeposits += grandTotal;
+        } else {
+            depositor.currentBalance += amountPaid;
+            depositor.totalDeposits += amountPaid;
+        }
         
         await depositor.save();
         
-        // Get the index of the newly added deposit
-        const depositIndex = depositor.depositHistory.length - 1;
+        console.log(`[${new Date().toLocaleString()}] Deposit recorded for ${depositor.fullName}`);
+        console.log(`   Amount: UGX ${amountPaid.toLocaleString()}, Grand Total: UGX ${grandTotal.toLocaleString()}, Status: ${paymentStatus}`);
         
-        console.log(`[${new Date().toLocaleString()}] Deposit of UGX ${depositAmount.toLocaleString()} recorded for ${depositor.fullName}`);
-        console.log(`   Attendant: ${attendantName}`);
-        console.log(`   Balance was: UGX ${oldBalance.toLocaleString()} now → UGX ${newBalance.toLocaleString()}`);
-        
-        // Render receipt page with user data
         res.render('deposit_receipt', { 
             deposit: depositRecord,
             depositor: depositor,
-            depositIndex: depositIndex,
-            currentUser: user,  // Added for consistency
+            currentUser: user,
             success: true 
         });
         
