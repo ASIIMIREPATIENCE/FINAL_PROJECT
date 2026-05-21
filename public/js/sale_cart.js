@@ -169,20 +169,6 @@ completeBtn.addEventListener('click', function(e) {
     }
     const total = subtotal + transportFee;
     
-    const confirmMsg = '--------------------------\n' +
-        '       CONFIRM SALE DETAILS\n' +
-        '------------------------------\n\n' +
-        'Subtotal:      UGX ' + subtotal.toLocaleString() + '\n' +
-        'Transport Fee: UGX ' + transportFee.toLocaleString() + '\n' +
-        '───────────────────────────────\n' +
-        'GRAND TOTAL:   UGX ' + total.toLocaleString() + '\n\n' +
-        '--------------------------\n' +
-        'Click OK to complete this sale.\n' +
-        'Click Cancel to review your cart.';
-    
-    if (!confirm(confirmMsg)) {
-        e.preventDefault();
-    }
 });
 
 updateTotals();

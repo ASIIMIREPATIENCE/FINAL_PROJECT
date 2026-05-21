@@ -41,9 +41,9 @@ router.get('/reports', isAuthenticated, async (req, res) => {
         const lowStockItems = allStock.filter(item => item.quantity <= (item.reorderlevel || 0));
         const totalProducts = allStock.length;
         
-        // ========== SALES REPORT (FIXED FOR NEW SCHEMA) ==========
+        // ========== SALES REPORT ==========
         if (selectedReport === 'sales') {
-            // Get all sales within date range - using the NEW schema structure
+            // Get all sales within date range
             const sales = await Sale.find({
                 Date: { $gte: start, $lte: end }
             }).populate('attendant', 'fullname').sort({ Date: -1 });
@@ -65,7 +65,7 @@ router.get('/reports', isAuthenticated, async (req, res) => {
             const totalTransactions = salesData.length;
             const avgTransactionValue = totalTransactions > 0 ? totalSales / totalTransactions : 0;
             
-            // Calculate payment method breakdown from sales data
+            // Calculate payment method breakdown
             let cashSales = 0;
             let mobileSales = 0;
             let bankSales = 0;
@@ -80,13 +80,16 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 }
             }
             
-            // Get top selling products from the items array
+            // Get top selling products by QUANTITY sold (most quantity sold)
             const productSales = {};
             for (const sale of sales) {
                 if (sale.items && sale.items.length) {
                     for (const item of sale.items) {
                         if (!productSales[item.productname]) {
-                            productSales[item.productname] = { quantity: 0, revenue: 0 };
+                            productSales[item.productname] = { 
+                                quantity: 0, 
+                                revenue: 0 
+                            };
                         }
                         productSales[item.productname].quantity += item.quantity || 0;
                         productSales[item.productname].revenue += item.subtotal || (item.quantity * item.unitprice) || 0;
@@ -94,9 +97,10 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 }
             }
             
+            // Sort by QUANTITY (highest quantity sold first)
             const topProducts = Object.entries(productSales)
-                .map(([name, data]) => ({ name, ...data }))
-                .sort((a, b) => b.revenue - a.revenue)
+                .map(([name, data]) => ({ name, quantity: data.quantity, revenue: data.revenue }))
+                .sort((a, b) => b.quantity - a.quantity)
                 .slice(0, 5);
             
             summary = {
@@ -112,7 +116,6 @@ router.get('/reports', isAuthenticated, async (req, res) => {
         
         // ========== STOCK REPORT ==========
         if (selectedReport === 'stock') {
-            // Filter stock by date if date range is provided
             let filteredStock = allStock;
             if (startDate && endDate) {
                 filteredStock = allStock.filter(item => {
@@ -141,9 +144,7 @@ router.get('/reports', isAuthenticated, async (req, res) => {
         if (selectedReport === 'scheme') {
             const depositors = await Depositor.find().sort({ joinDate: -1 });
             
-            // Process each depositor's data
             schemeData = depositors.map(depositor => {
-                // Get deposit history within date range
                 let filteredDeposits = depositor.depositHistory || [];
                 if (startDate && endDate) {
                     filteredDeposits = (depositor.depositHistory || []).filter(deposit => 
@@ -169,12 +170,10 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 };
             });
             
-            // Calculate summary statistics
             const totalDepositors = depositors.length;
             const totalDepositAmount = schemeData.reduce((sum, d) => sum + d.totalDeposits, 0);
             const totalCurrentBalance = schemeData.reduce((sum, d) => sum + d.currentBalance, 0);
             
-            // Calculate TOTAL NUMBER OF DEPOSITS in the period (count, not amount)
             let totalDepositsCount = 0;
             for (const depositor of depositors) {
                 if (depositor.depositHistory && depositor.depositHistory.length) {
@@ -188,12 +187,10 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 }
             }
             
-            // Get top depositors by balance
             const topDepositors = [...schemeData]
                 .sort((a, b) => b.currentBalance - a.currentBalance)
                 .slice(0, 5);
             
-            // Get recent deposits across all depositors (filtered by date range)
             let allDeposits = [];
             depositors.forEach(depositor => {
                 if (depositor.depositHistory && depositor.depositHistory.length) {
@@ -220,7 +217,7 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 totalDepositors: totalDepositors,
                 totalDepositAmount: totalDepositAmount,
                 totalCurrentBalance: totalCurrentBalance,
-                totalDepositsCount: totalDepositsCount,  // Changed from totalDepositsInRange to count
+                totalDepositsCount: totalDepositsCount,
                 topDepositors: topDepositors,
                 recentDeposits: allDeposits.slice(0, 20)
             };
@@ -228,7 +225,6 @@ router.get('/reports', isAuthenticated, async (req, res) => {
         
         // ========== SUPPLIER CREDIT REPORT ==========
         if (selectedReport === 'supplier-credit') {
-            // Get all credit stock items with date filtering
             let creditItems = [];
             if (startDate && endDate) {
                 creditItems = await Stock.find({ 
@@ -249,7 +245,6 @@ router.get('/reports', isAuthenticated, async (req, res) => {
             let overdueTotal = 0;
             let overdueCount = 0;
             
-            // Process each credit item
             supplierCreditData = creditItems.map(item => {
                 const totalOwed = (item.costprice || 0) * (item.quantity || 0);
                 const paid = item.amountPaid || 0;
@@ -290,10 +285,8 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 };
             });
             
-            // Get unique suppliers with credit
             const uniqueSuppliers = [...new Set(creditItems.map(item => item.supplier).filter(s => s))];
             
-            // Group by supplier
             const suppliersGroup = {};
             supplierCreditData.forEach(item => {
                 if (!suppliersGroup[item.supplier]) {
@@ -323,15 +316,12 @@ router.get('/reports', isAuthenticated, async (req, res) => {
         
         // ========== FINANCIAL REPORT ==========
         if (selectedReport === 'financial') {
-            // Get sales within date range using NEW schema
             const sales = await Sale.find({
                 Date: { $gte: start, $lte: end }
             });
             
-            // Calculate TOTAL REVENUE from grandTotal
             const totalRevenue = sales.reduce((sum, sale) => sum + (sale.grandTotal || 0), 0);
             
-            // Calculate TOTAL COST OF GOODS SOLD (from items in each sale)
             let totalCost = 0;
             for (const sale of sales) {
                 if (sale.items && sale.items.length) {
@@ -344,7 +334,6 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 }
             }
             
-            // Get outstanding credit from supplier credit (filtered by date)
             let creditItems = [];
             if (startDate && endDate) {
                 creditItems = await Stock.find({ 
@@ -361,7 +350,6 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 return sum + (totalOwed - paid);
             }, 0);
             
-            // Get total deposits from deposit scheme (filtered by date range for deposits)
             const depositors = await Depositor.find();
             let totalDepositsInRange = 0;
             depositors.forEach(depositor => {
@@ -376,10 +364,7 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 }
             });
             
-            // Calculate PROFIT
             const profit = totalRevenue - totalCost;
-            
-            // Calculate PROFIT MARGIN (%)
             const profitMargin = totalRevenue > 0 ? (profit / totalRevenue * 100).toFixed(2) : 0;
             
             summary = {
