@@ -15,6 +15,11 @@ html(lang='en')
         h3 NyondoStock
         p Hardware Management
 
+      .sidebar-back-btn
+        button.btn-back(onclick="history.back()")
+          i.bi.bi-arrow-left
+          | Back
+
       .sidebar-user
         .user-name 👤 #{currentUser ? currentUser.fullname : 'Admin User'}
         .user-role #{currentUser ? (currentUser.role === 'admin' ? 'System Administrator' : (currentUser.role === 'store_manager' ? 'Store Manager' : 'Sales Attendant')) : 'System Administrator'}

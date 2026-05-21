@@ -435,3 +435,28 @@
           break-inside: avoid;
         }
       }
+
+      .sidebar-back-btn {
+    padding: 0 15px 15px 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 15px;
+}
+
+.btn-back {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.btn-back:hover {
+    background: rgba(255,255,255,0.2);
+}

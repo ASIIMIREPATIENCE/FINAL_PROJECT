@@ -7,6 +7,43 @@ html(lang='en')
     link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
     link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
     link(rel='stylesheet' href='/css/admin_dashboard.css')
+    style.
+      .sidebar-back-btn {
+        padding: 0 15px 15px 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 15px;
+      }
+      .btn-back {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.1);
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.85rem;
+      }
+      .btn-back:hover {
+        background: rgba(255,255,255,0.2);
+      }
+      .btn-view-all {
+        background: #C6A43F;
+        color: #0D3B2E;
+        padding: 5px 15px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-size: 0.75rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+      .btn-view-all:hover {
+        background: #b8922e;
+        color: #0D3B2E;
+      }
 
   body
     .sidebar
@@ -14,6 +51,13 @@ html(lang='en')
         img(src='/images/logo.png' alt='Logo')
         h3 NyondoStock
         p Enterprise Management
+      
+      // Back Button
+      .sidebar-back-btn
+        button.btn-back(onclick="history.back()")
+          i.bi.bi-arrow-left
+          | Back
+      
       ul.nav-menu
         li.nav-item
           a.nav-link-custom.active(href='/manager')
@@ -40,7 +84,7 @@ html(lang='en')
       .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
         div
           h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Manager Dashboard
-          p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Welcome back, #{currentUser.fullname || 'Store Manager'}
+          p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Welcome back, #{currentUser ? currentUser.fullname : 'Store Manager'}
       
       .row.g-3.mb-4
         .col-md-3.col-sm-4.col-6
@@ -62,21 +106,23 @@ html(lang='en')
       
       .row.g-3
         .col-lg-7
-          .section-title
-            i.bi.bi-box-seam
-            |  Stock Inventory
-            - var lowCount = 0
-            - var criticalCount = 0
-            if stockItems && stockItems.length
-              each item in stockItems
-                if item.quantity <= item.reorderlevel / 2
-                  - criticalCount++
-                else if item.quantity <= item.reorderlevel
-                  - lowCount++
-            if lowCount > 0
-              span.badge-low.ms-2 #{lowCount} Low Stock Items
-            if criticalCount > 0
-              span.badge-critical.ms-2 #{criticalCount} Critical Items
+          .section-title.d-flex.justify-content-between.align-items-center
+            div
+              i.bi.bi-box-seam
+              |  Stock Inventory
+              - var lowCount = 0
+              - var criticalCount = 0
+              if stockItems && stockItems.length
+                each item in stockItems
+                  if item.quantity <= item.reorderlevel / 2
+                    - criticalCount++
+                  else if item.quantity <= item.reorderlevel
+                    - lowCount++
+              if lowCount > 0
+                span.badge-low.ms-2 #{lowCount} Low Stock Items
+              if criticalCount > 0
+                span.badge-critical.ms-2 #{criticalCount} Critical Items
+            a.btn-view-all(href='/addStock') View All
           .table-responsive.custom-table.mb-4
             table.table.mb-0
               thead
@@ -88,7 +134,7 @@ html(lang='en')
                   th Selling Price
               tbody
                 if stockItems && stockItems.length
-                  each item in stockItems
+                  each item in stockItems.slice(0, 4)
                     - var isLowStock = item.quantity <= item.reorderlevel
                     - var isCriticalStock = item.quantity <= (item.reorderlevel / 2)
                     - var rowClass = ''
@@ -135,7 +181,7 @@ html(lang='en')
                   th Status
               tbody
                 if creditStockItems && creditStockItems.length
-                  each item in creditStockItems
+                  each item in creditStockItems.slice(0, 4)
                     if item.balance > 0
                       tr
                         td #{item.supplier || 'Unknown'}
@@ -152,9 +198,11 @@ html(lang='en')
 
       .row.g-3.mt-4
         .col-lg-8
-          .section-title
-            i.bi.bi-clock-history
-            |  Recent Sales
+          .section-title.d-flex.justify-content-between.align-items-center
+            div
+              i.bi.bi-clock-history
+              |  Recent Sales
+            a.btn-view-all(href='/salesattendant') View All
           .custom-table
             table
               thead
@@ -167,7 +215,7 @@ html(lang='en')
                   th Attendant
               tbody
                 if allSales && allSales.length
-                  each sale in allSales.slice(0, 10)
+                  each sale in allSales.slice(0, 4)
                     tr
                       td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
                       td #{sale.customername || 'Walk-in Customer'}
@@ -201,7 +249,7 @@ html(lang='en')
                   th Quantity Sold
               tbody
                 if topProducts && topProducts.length
-                  each product in topProducts
+                  each product in topProducts.slice(0, 4)
                     tr
                       td #{product._id || 'Unknown'}
                       td #{product.totalSold || 0}

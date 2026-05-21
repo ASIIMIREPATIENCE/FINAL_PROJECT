@@ -18,6 +18,12 @@ body
       h3 NyondoStock
       p Hardware Management
 
+    // Back Button
+    .sidebar-back-btn
+      button.btn-back(onclick="history.back()")
+        i.bi.bi-arrow-left
+        | Back
+
     // Add New User Button - Moved to Sidebar
     .sidebar-add-user
       a(href='/register' style='text-decoration: none;')

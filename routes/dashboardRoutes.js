@@ -259,7 +259,7 @@ router.get("/manager", isAuthenticated, async (req, res) => {
         
         // Get top 5 selling products using aggregation pipeline
         const topProducts = await Sale.aggregate([
-            { $unwind: '$items' }, // Unwind items array to separate documents
+            { $unwind: '$items' },
             {
                 $group: {
                     _id: '$items.productname',
@@ -303,7 +303,7 @@ router.get("/manager", isAuthenticated, async (req, res) => {
 
 // ============================================================
 // SALES ATTENDANT DASHBOARD ROUTE
-// Access: Only users with role 'sales_attendant'
+// Access: Users with role 'sales_attendant', 'store_manager', or 'admin'
 // ============================================================
 
 /**
@@ -314,10 +314,12 @@ router.get("/manager", isAuthenticated, async (req, res) => {
  * - Recent sales transactions
  * - Quick sale button
  * - Stock inventory for reference
+ * 
+ * Accessible by: sales_attendant, store_manager, admin
  */
 router.get("/salesattendant", isAuthenticated, async (req, res) => {
-    // Role-based access control - only sales attendant allowed
-    if (!req.user || req.user.role !== 'sales_attendant') {
+    // Role-based access control - allow sales_attendant, store_manager, and admin
+    if (!req.user || (req.user.role !== 'sales_attendant' && req.user.role !== 'store_manager' && req.user.role !== 'admin')) {
         return res.redirect('/userlogin');
     }
     

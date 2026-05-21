@@ -15,17 +15,17 @@ html(lang='en')
         h3 NyondoStock
         p Hardware Management
       
-    if message
-      .alert.alert-danger(role='alert') #{message}
-    if error
-      .alert.alert-danger(role='alert') #{error}
+      // Back Button
+      .sidebar-back-btn
+        button.btn-back(onclick="history.back()")
+          i.bi.bi-arrow-left
+          | Back
       
       .sidebar-user
         .user-name
-          | 👤 Admin User 
-          span.role-badge Admin
-        .user-role System Administrator
-        button.logout-btn
+          | 👤 #{currentUser ? currentUser.fullname : 'Admin User'}
+        .user-role #{currentUser ? (currentUser.role === 'admin' ? 'Administrator' : (currentUser.role === 'store_manager' ? 'Store Manager' : 'Sales Attendant')) : 'System Administrator'}
+        button.logout-btn(onclick="window.location.href='/logout'")
           i.bi.bi-box-arrow-right
           |  Sign Out
 
@@ -68,7 +68,7 @@ html(lang='en')
             
             .col-md-3
               label.form-label Phone Number
-              input#customerPhone.form-control(type='tel' value='+256' name='phonenumber' required)
+              input#customerPhone.form-control(type='tel' placeholder='+256' name='phonenumber' required)
             
             .col-md-3
               label.form-label NIN (Optional)
@@ -135,7 +135,7 @@ html(lang='en')
             
             .col-md-3
               label.form-label Unit Price (UGX)
-              input#unitPrice.form-control(type='number' )
+              input#unitPrice.form-control(type='number')
             
             .col-md-2
               label.form-label &nbsp;

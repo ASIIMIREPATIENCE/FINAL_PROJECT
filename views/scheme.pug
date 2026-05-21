@@ -17,6 +17,12 @@ body
       h3 NyondoStock
       p Hardware Management
 
+    // Back Button
+    .sidebar-back-btn
+      button.btn-back(onclick="history.back()")
+        i.bi.bi-arrow-left
+        | Back
+
     .sidebar-user
       .user-name
         | 👤 #{user ? user.fullname : (currentUser ? currentUser.fullname : 'Guest User')}
