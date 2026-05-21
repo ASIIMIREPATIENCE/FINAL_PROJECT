@@ -18,6 +18,13 @@ body
       h3 NyondoStock
       p Hardware Management
 
+    // Add New User Button - Moved to Sidebar
+    .sidebar-add-user
+      a(href='/register' style='text-decoration: none;')
+        button.btn-save(style='width: 100%;')
+          i.bi.bi-person-plus.me-1
+          | Add New User
+
     .sidebar-user
       .user-name
         i.bi.bi-person-circle
@@ -35,10 +42,6 @@ body
       div
         h3.page-title User Management
         p.page-subtitle Manage system users — add, edit, delete, and assign roles.
-      a(href='/register' style='text-decoration: none;')
-        button.btn-save 
-          i.bi.bi-person-plus.me-1
-          | Add New User
 
     // Users Table
     .section-title

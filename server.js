@@ -1,4 +1,3 @@
-// SECTION 1: Dependencies
 const express = require('express');
 const expressSession = require('express-session');
 const path = require('path');
@@ -8,32 +7,27 @@ const Registration = require('./models/Registration');
 require('dotenv').config();
 const connectDb = require('./config/db');
 
-// SECTION 2: Instantiations
 const app = express();
 const port = 3000;
 
-// SECTION 3: Configurations
 connectDb();
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
-// SECTION 4: Middleware
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// Updated Session Configuration - Add cookie settings here
 app.use(expressSession({
-  secret: "secret",
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    maxAge: 60 * 60 * 1000, // 1 hour
-    httpOnly: true
-  }
+    secret: 'secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 60 * 60 * 1000,
+        httpOnly: true
+    }
 }));
 
-// Passport initialization
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -41,26 +35,21 @@ passport.use(Registration.createStrategy());
 passport.serializeUser(Registration.serializeUser());
 passport.deserializeUser(Registration.deserializeUser());
 
-// Global variable for pug templates
 app.use((req, res, next) => {
-  res.locals.currentUser = req.user;
-  next();
+    res.locals.currentUser = req.user;
+    next();
 });
 
-// SECTION 5: Routes
-app.use('/', require('./routes/dashboardRoutes'));
 app.use('/', require('./routes/indexRoutes'));
+app.use('/', require('./routes/dashboardRoutes'));
 app.use('/', require('./routes/salesRoutes'));
 app.use('/', require('./routes/stockRoutes'));
 app.use('/', require('./routes/supplierRoutes'));
 app.use('/', require('./routes/schemeRoutes'));
-app.use('/', require('./routes/reportsRoutes')); 
-app.use('/', require('./routes/passwordRoutes'));
+app.use('/', require('./routes/reportsRoutes'));
 
-// Handling non-existent routes
 app.use((req, res) => {
-  res.status(404).send('Oops! Route not found.');
+    res.status(404).send('Oops! Route not found.');
 });
 
-// SECTION 6: Bootstrapping Server
 app.listen(port, () => console.log(`listening on port ${port}`));

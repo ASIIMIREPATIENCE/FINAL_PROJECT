@@ -18,9 +18,9 @@
     "ejs": "^5.0.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "mongoose": "^9.5.0",
+    "mongoose": "^7.8.0",
     "passport": "^0.7.0",
-    "passport-local-mongoose": "^9.0.1",
+    "passport-local-mongoose": "^8.0.0",
     "pug": "^3.0.4"
   },
   "devDependencies": {

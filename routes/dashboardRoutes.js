@@ -1,342 +1,3 @@
-// const express = require("express");
-// const router = express.Router();
-// const Sale = require('../models/Sales'); 
-// const Stock = require('../models/Stock'); 
-// const Registration = require('../models/Registration');
-// const SupplierCredit = require('../models/Supplier');
-// const Depositor = require('../models/Depositor'); 
-
-// router.get("/admin", async (req, res) => {
-//     try {
-//         // Get all sales using the NEW schema structure (same as manager)
-//         const sales = await Sale.find()
-//             .populate('attendant', 'fullname')
-//             .sort({ Date: -1 });
-        
-//         const stockItems = await Stock.find();
-//         const depositors = await Depositor.find();
-        
-//         // Use sales directly since each sale already contains all items (same as manager)
-//         const allSales = sales.map(sale => ({
-//             _id: sale._id,
-//             Date: sale.Date,
-//             customername: sale.customername,
-//             phonenumber: sale.phonenumber,
-//             items: sale.items || [],  // Array of products in this sale
-//             grandTotal: sale.grandTotal || 0,
-//             paymentmethod: sale.paymentmethod,
-//             transportFee: sale.transportFee || 0,
-//             attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
-//         }));
-        
-//         // Get credit stock items
-//         let creditStockItems = await Stock.find({ paymentMethod: 'Credit' });
-        
-//         creditStockItems = creditStockItems.map(item => {
-//             const totalOwed = (item.costprice || 0) * (item.quantity || 0);
-//             const paid = item.amountPaid || 0;
-//             const balance = totalOwed - paid;
-            
-//             let dueDate = null;
-//             let status = 'Pending';
-//             const today = new Date();
-            
-//             if (item.Date) {
-//                 dueDate = new Date(item.Date);
-//                 dueDate.setDate(dueDate.getDate() + 30);
-                
-//                 if (balance <= 0) {
-//                     status = 'Paid';
-//                 } else if (dueDate < today) {
-//                     status = 'Overdue';
-//                 }
-//             }
-            
-//             return {
-//                 ...item.toObject(),
-//                 balance: balance,
-//                 dueDate: dueDate,
-//                 status: status,
-//                 supplier: item.supplier
-//             };
-//         });
-        
-//         // Calculate Stock Value
-//         let totalStockValue = 0;
-//         for (let i = 0; i < stockItems.length; i++) {
-//             totalStockValue += (stockItems[i].quantity || 0) * (stockItems[i].sellingprice || 0);
-//         }
-        
-//         // Calculate Today's Sales using grandTotal (same as manager)
-//         const today = new Date().toDateString();
-//         let todaysSalesTotal = 0;
-//         for (let i = 0; i < allSales.length; i++) {
-//             if (allSales[i].Date && new Date(allSales[i].Date).toDateString() === today) {
-//                 todaysSalesTotal += allSales[i].grandTotal || 0;
-//             }
-//         }
-        
-//         // Calculate Outstanding Credit
-//         let outstandingCredit = 0;
-//         for (let i = 0; i < creditStockItems.length; i++) {
-//             if (creditStockItems[i].balance > 0) {
-//                 outstandingCredit += creditStockItems[i].balance;
-//             }
-//         }
-        
-//         // Calculate Total Deposits
-//         let totalDeposits = 0;
-//         for (let i = 0; i < depositors.length; i++) {
-//             totalDeposits += depositors[i].currentBalance || 0;
-//         }
-        
-//         res.render('admin_dashboard', { 
-//             allSales: allSales,  // ← Now using the same format as manager
-//             stockItems: stockItems,
-//             creditStockItems: creditStockItems,
-//             depositors: depositors,
-//             totalStockValue: totalStockValue.toLocaleString(),
-//             todaysSalesTotal: todaysSalesTotal.toLocaleString(),
-//             outstandingCredit: outstandingCredit.toLocaleString(),
-//             totalDeposits: totalDeposits.toLocaleString()
-//         });
-        
-//     } catch (error) {
-//         console.log(error.message);
-//         res.render('admin_dashboard', { 
-//             allSales: [], 
-//             stockItems: [],
-//             creditStockItems: [],
-//             depositors: [],
-//             totalStockValue: '0',
-//             todaysSalesTotal: '0',
-//             outstandingCredit: '0',
-//             totalDeposits: '0'
-//         });
-//     }
-// });
-
-// router.get("/manager", async (req, res) => {
-//     try {
-//         // Get current user from session
-//         const currentUser = req.user || { fullname: 'Store Manager' };
-        
-//         // Get all stock items
-//         const stockItems = await Stock.find().sort({ Date: -1 });
-        
-//         // Get all sales using the NEW schema structure
-//         const sales = await Sale.find()
-//             .populate('attendant', 'fullname')
-//             .sort({ Date: -1 });
-        
-//         // Use sales directly since each sale already contains all items
-//         const allSales = sales.map(sale => ({
-//             _id: sale._id,
-//             Date: sale.Date,
-//             customername: sale.customername,
-//             phonenumber: sale.phonenumber,
-//             items: sale.items,  // Array of products in this sale
-//             grandTotal: sale.grandTotal,
-//             paymentmethod: sale.paymentmethod,
-//             attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
-//         }));
-        
-//         // Get credit stock items (for supplier credit table)
-//         let creditStockItems = await Stock.find({ paymentMethod: 'Credit' });
-        
-//         // Process credit stock items
-//         let uniqueSuppliers = new Set();
-//         creditStockItems = creditStockItems.map(item => {
-//             const totalOwed = (item.costprice || 0) * (item.quantity || 0);
-//             const paid = item.amountPaid || 0;
-//             const balance = totalOwed - paid;
-            
-//             if (item.supplier) {
-//                 uniqueSuppliers.add(item.supplier);
-//             }
-            
-//             let dueDate = null;
-//             let status = 'Pending';
-            
-//             if (item.Date) {
-//                 dueDate = new Date(item.Date);
-//                 dueDate.setDate(dueDate.getDate() + 30);
-                
-//                 if (balance <= 0) {
-//                     status = 'Paid';
-//                 } else if (dueDate < new Date()) {
-//                     status = 'Overdue';
-//                 }
-//             }
-            
-//             return {
-//                 ...item.toObject(),
-//                 balance: balance,
-//                 dueDate: dueDate,
-//                 status: status
-//             };
-//         });
-        
-//         // Calculate total stock value
-//         let totalStockValue = 0;
-//         for (let i = 0; i < stockItems.length; i++) {
-//             totalStockValue += (stockItems[i].quantity || 0) * (stockItems[i].sellingprice || 0);
-//         }
-        
-//         // Calculate Today's Sales using grandTotal
-//         const today = new Date().toDateString();
-//         let todaySales = 0;
-//         for (let i = 0; i < allSales.length; i++) {
-//             if (allSales[i].Date && new Date(allSales[i].Date).toDateString() === today) {
-//                 todaySales += allSales[i].grandTotal || 0;
-//             }
-//         }
-        
-//         // Count low stock items
-//         let lowStockCount = 0;
-//         for (let i = 0; i < stockItems.length; i++) {
-//             if (stockItems[i].reorderlevel && stockItems[i].quantity <= stockItems[i].reorderlevel) {
-//                 lowStockCount++;
-//             }
-//         }
-        
-//         // Get unique credit suppliers count
-//         const creditSuppliersCount = uniqueSuppliers.size;
-        
-//         // Get top selling products from the items array
-//         const topProducts = await Sale.aggregate([
-//             { $unwind: '$items' },
-//             {
-//                 $group: {
-//                     _id: '$items.productname',
-//                     totalSold: { $sum: '$items.quantity' }
-//                 }
-//             },
-//             { $sort: { totalSold: -1 } },
-//             { $limit: 5 }
-//         ]);
-        
-//         res.render('manager_dashboard', {
-//             currentUser: currentUser,
-//             stockItems: stockItems,
-//             allSales: allSales,
-//             creditStockItems: creditStockItems,
-//             totalStockValue: totalStockValue.toLocaleString(),
-//             todaySales: todaySales.toLocaleString(),
-//             lowStockCount: lowStockCount,
-//             creditSuppliersCount: creditSuppliersCount,
-//             topProducts: topProducts
-//         });
-        
-//     } catch (error) {
-//         console.error("Error in /manager route:", error.message);
-//         console.error(error.stack);
-        
-//         res.render('manager_dashboard', {
-//             currentUser: { fullname: 'Store Manager' },
-//             stockItems: [],
-//             allSales: [],
-//             creditStockItems: [],
-//             totalStockValue: '0',
-//             todaySales: '0',
-//             lowStockCount: 0,
-//             creditSuppliersCount: 0,
-//             topProducts: []
-//         });
-//     }
-// });
-
-// router.get("/salesattendant", async (req, res) => {
-//     try {
-//         console.log("=== /salesattendant route hit ===");
-        
-//         // Get all sales using the NEW schema structure (same as manager)
-//         const sales = await Sale.find()
-//             .populate('attendant', 'fullname')
-//             .sort({ Date: -1 });
-        
-//         const stockItems = await Stock.find();
-        
-//         // Use sales directly since each sale already contains all items (same as manager)
-//         const allSales = sales.map(sale => ({
-//             _id: sale._id,
-//             Date: sale.Date,
-//             customername: sale.customername,
-//             phonenumber: sale.phonenumber,
-//             items: sale.items || [],  // Array of products in this sale
-//             grandTotal: sale.grandTotal || 0,
-//             paymentmethod: sale.paymentmethod,
-//             attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
-//         }));
-        
-//         // Calculate today's sales total
-//         const today = new Date().toDateString();
-//         let todaysSalesTotal = 0;
-//         let todaysTransactions = 0;
-        
-//         for (let i = 0; i < allSales.length; i++) {
-//             if (allSales[i].Date && new Date(allSales[i].Date).toDateString() === today) {
-//                 todaysSalesTotal += allSales[i].grandTotal || 0;
-//                 todaysTransactions++;
-//             }
-//         }
-        
-//         // Count low stock items
-//         let lowStockCount = 0;
-//         let criticalStockCount = 0;
-//         for (let i = 0; i < stockItems.length; i++) {
-//             if (stockItems[i].reorderlevel) {
-//                 if (stockItems[i].quantity <= stockItems[i].reorderlevel / 2) {
-//                     criticalStockCount++;
-//                 } else if (stockItems[i].quantity <= stockItems[i].reorderlevel) {
-//                     lowStockCount++;
-//                 }
-//             }
-//         }
-        
-//         console.log("Sales count:", allSales.length);
-//         console.log("Stock items count:", stockItems.length);
-        
-//         // Get current attendant name from session
-//         const attendantName = req.user ? req.user.fullname : 'Sales Attendant';
-        
-//         // Render template with sales data
-//         return res.render('sales_dashboard', { 
-//             allSales: allSales,
-//             stockItems: stockItems,
-//             attendantName: attendantName,
-//             todaysSalesTotal: todaysSalesTotal,
-//             todaysTransactions: todaysTransactions,
-//             lowStockCount: lowStockCount,
-//             criticalStockCount: criticalStockCount
-//         });
-        
-//     } catch (error) {
-//         console.error("ERROR in /salesattendant:", error.message);
-//         console.error(error.stack);
-//         return res.render('sales_dashboard', { 
-//             allSales: [], 
-//             stockItems: [],
-//             attendantName: 'Sales Attendant',
-//             todaysSalesTotal: 0,
-//             todaysTransactions: 0,
-//             lowStockCount: 0,
-//             criticalStockCount: 0
-//         });
-//     }
-// });
-
-// router.get('/logout', (req, res, next) => {
-//     req.logout((err) => {
-//         if (err) {
-//             return next(err);
-//         }
-//         res.redirect('/');
-//     });
-// });
-
-
-// module.exports = router;
 const express = require("express");
 const router = express.Router();
 const Sale = require('../models/Sales'); 
@@ -345,68 +6,65 @@ const Registration = require('../models/Registration');
 const SupplierCredit = require('../models/Supplier');
 const Depositor = require('../models/Depositor'); 
 
-// ========== AUTHENTICATION & AUTHORIZATION MIDDLEWARE ==========
+// ============================================================
+// AUTHENTICATION MIDDLEWARE
+// ============================================================
 
-// Check if user is authenticated
+/**
+ * Middleware to check if user is authenticated
+ * Redirects to login page if not authenticated
+ */
 function isAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
+    if (req.isAuthenticated && req.isAuthenticated()) {
         return next();
     }
-    res.redirect('/');
+    res.redirect('/userlogin');
 }
 
-// Role-based authorization middleware
-function authorize(...allowedRoles) {
-    return (req, res, next) => {
-        if (!req.user) {
-            return res.redirect('/');
-        }
-        
-        const userRole = req.user.role;
-        
-        if (allowedRoles.includes(userRole)) {
-            return next();
-        }
-        
-        // User doesn't have permission - redirect based on their role
-        if (userRole === 'admin') {
-            return res.redirect('/admin');
-        } else if (userRole === 'manager') {
-            return res.redirect('/manager');
-        } else if (userRole === 'salesattendant') {
-            return res.redirect('/salesattendant');
-        } else {
-            return res.redirect('/');
-        }
-    };
-}
+// ============================================================
+// ADMIN DASHBOARD ROUTE
+// Access: Only users with role 'admin'
+// ============================================================
 
-// ========== ADMIN DASHBOARD ==========
-// Only admin can access
-router.get("/admin", isAuthenticated, authorize('admin'), async (req, res) => {
+/**
+ * GET /admin
+ * Displays the admin dashboard with:
+ * - Stock inventory overview
+ * - Supplier credit summary
+ * - Deposit scheme summary
+ * - Recent sales transactions
+ * - Statistics cards (Stock Value, Today's Sales, Supplier Credit, Total Deposits)
+ */
+router.get("/admin", isAuthenticated, async (req, res) => {
+    // Role-based access control - only admin allowed
+    if (!req.user || req.user.role !== 'admin') {
+        return res.redirect('/userlogin');
+    }
+    
     try {
-        // Get all sales using the NEW schema structure (same as manager)
+        // Fetch all sales with attendant details
         const sales = await Sale.find()
             .populate('attendant', 'fullname')
             .sort({ Date: -1 });
         
+        // Fetch all stock items and depositors
         const stockItems = await Stock.find();
         const depositors = await Depositor.find();
         
-        // Use sales directly since each sale already contains all items (same as manager)
+        // Transform sales data for template display
         const allSales = sales.map(sale => ({
             _id: sale._id,
             Date: sale.Date,
             customername: sale.customername,
             phonenumber: sale.phonenumber,
-            items: sale.items || [],  // Array of products in this sale
+            items: sale.items || [],
             grandTotal: sale.grandTotal || 0,
             paymentmethod: sale.paymentmethod,
             transportFee: sale.transportFee || 0,
             attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
         }));
         
-        // Get credit stock items
+        // Process credit stock items for supplier credit table
         let creditStockItems = await Stock.find({ paymentMethod: 'Credit' });
         
         creditStockItems = creditStockItems.map(item => {
@@ -420,7 +78,7 @@ router.get("/admin", isAuthenticated, authorize('admin'), async (req, res) => {
             
             if (item.Date) {
                 dueDate = new Date(item.Date);
-                dueDate.setDate(dueDate.getDate() + 30);
+                dueDate.setDate(dueDate.getDate() + 30); // 30 days credit period
                 
                 if (balance <= 0) {
                     status = 'Paid';
@@ -438,13 +96,13 @@ router.get("/admin", isAuthenticated, authorize('admin'), async (req, res) => {
             };
         });
         
-        // Calculate Stock Value
+        // Calculate total value of all stock (quantity * selling price)
         let totalStockValue = 0;
         for (let i = 0; i < stockItems.length; i++) {
             totalStockValue += (stockItems[i].quantity || 0) * (stockItems[i].sellingprice || 0);
         }
         
-        // Calculate Today's Sales using grandTotal (same as manager)
+        // Calculate today's total sales
         const today = new Date().toDateString();
         let todaysSalesTotal = 0;
         for (let i = 0; i < allSales.length; i++) {
@@ -453,7 +111,7 @@ router.get("/admin", isAuthenticated, authorize('admin'), async (req, res) => {
             }
         }
         
-        // Calculate Outstanding Credit
+        // Calculate total outstanding credit from all credit purchases
         let outstandingCredit = 0;
         for (let i = 0; i < creditStockItems.length; i++) {
             if (creditStockItems[i].balance > 0) {
@@ -461,12 +119,13 @@ router.get("/admin", isAuthenticated, authorize('admin'), async (req, res) => {
             }
         }
         
-        // Calculate Total Deposits
+        // Calculate total deposits from all depositors
         let totalDeposits = 0;
         for (let i = 0; i < depositors.length; i++) {
             totalDeposits += depositors[i].currentBalance || 0;
         }
         
+        // Render admin dashboard with all data
         res.render('admin_dashboard', { 
             currentUser: req.user,
             allSales: allSales,
@@ -481,6 +140,7 @@ router.get("/admin", isAuthenticated, authorize('admin'), async (req, res) => {
         
     } catch (error) {
         console.log(error.message);
+        // Render dashboard with empty data on error
         res.render('admin_dashboard', { 
             currentUser: req.user,
             allSales: [], 
@@ -495,37 +155,50 @@ router.get("/admin", isAuthenticated, authorize('admin'), async (req, res) => {
     }
 });
 
-// ========== MANAGER DASHBOARD ==========
-// Admin and Manager can access
-router.get("/manager", isAuthenticated, authorize('admin', 'store_manager'), async (req, res) => {
+// ============================================================
+// MANAGER DASHBOARD ROUTE
+// Access: Only users with role 'store_manager'
+// ============================================================
+
+/**
+ * GET /manager
+ * Displays the store manager dashboard with:
+ * - Stock inventory with low stock alerts
+ * - Top selling products
+ * - Supplier credit summary
+ * - Recent sales
+ * - Statistics cards (Stock Value, Today's Sales, Credit Suppliers, Low Stock Items)
+ */
+router.get("/manager", isAuthenticated, async (req, res) => {
+    // Role-based access control - only store manager allowed
+    if (!req.user || req.user.role !== 'store_manager') {
+        return res.redirect('/userlogin');
+    }
+    
     try {
-        // Get current user from session
-        const currentUser = req.user;
-        
-        // Get all stock items
+        // Fetch all stock items sorted by date
         const stockItems = await Stock.find().sort({ Date: -1 });
         
-        // Get all sales using the NEW schema structure
+        // Fetch all sales with attendant details
         const sales = await Sale.find()
             .populate('attendant', 'fullname')
             .sort({ Date: -1 });
         
-        // Use sales directly since each sale already contains all items
+        // Transform sales data for template
         const allSales = sales.map(sale => ({
             _id: sale._id,
             Date: sale.Date,
             customername: sale.customername,
             phonenumber: sale.phonenumber,
-            items: sale.items,  // Array of products in this sale
+            items: sale.items,
             grandTotal: sale.grandTotal,
             paymentmethod: sale.paymentmethod,
             attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
         }));
         
-        // Get credit stock items (for supplier credit table)
+        // Process credit stock items for supplier credit table
         let creditStockItems = await Stock.find({ paymentMethod: 'Credit' });
         
-        // Process credit stock items
         let uniqueSuppliers = new Set();
         creditStockItems = creditStockItems.map(item => {
             const totalOwed = (item.costprice || 0) * (item.quantity || 0);
@@ -541,7 +214,7 @@ router.get("/manager", isAuthenticated, authorize('admin', 'store_manager'), asy
             
             if (item.Date) {
                 dueDate = new Date(item.Date);
-                dueDate.setDate(dueDate.getDate() + 30);
+                dueDate.setDate(dueDate.getDate() + 30); // 30 days credit period
                 
                 if (balance <= 0) {
                     status = 'Paid';
@@ -564,7 +237,7 @@ router.get("/manager", isAuthenticated, authorize('admin', 'store_manager'), asy
             totalStockValue += (stockItems[i].quantity || 0) * (stockItems[i].sellingprice || 0);
         }
         
-        // Calculate Today's Sales using grandTotal
+        // Calculate today's total sales
         const today = new Date().toDateString();
         let todaySales = 0;
         for (let i = 0; i < allSales.length; i++) {
@@ -573,7 +246,7 @@ router.get("/manager", isAuthenticated, authorize('admin', 'store_manager'), asy
             }
         }
         
-        // Count low stock items
+        // Count products with low stock (quantity <= reorder level)
         let lowStockCount = 0;
         for (let i = 0; i < stockItems.length; i++) {
             if (stockItems[i].reorderlevel && stockItems[i].quantity <= stockItems[i].reorderlevel) {
@@ -581,12 +254,12 @@ router.get("/manager", isAuthenticated, authorize('admin', 'store_manager'), asy
             }
         }
         
-        // Get unique credit suppliers count
+        // Count unique suppliers with credit
         const creditSuppliersCount = uniqueSuppliers.size;
         
-        // Get top selling products from the items array
+        // Get top 5 selling products using aggregation pipeline
         const topProducts = await Sale.aggregate([
-            { $unwind: '$items' },
+            { $unwind: '$items' }, // Unwind items array to separate documents
             {
                 $group: {
                     _id: '$items.productname',
@@ -597,8 +270,9 @@ router.get("/manager", isAuthenticated, authorize('admin', 'store_manager'), asy
             { $limit: 5 }
         ]);
         
+        // Render manager dashboard with all data
         res.render('manager_dashboard', {
-            currentUser: currentUser,
+            currentUser: req.user,
             stockItems: stockItems,
             allSales: allSales,
             creditStockItems: creditStockItems,
@@ -611,10 +285,10 @@ router.get("/manager", isAuthenticated, authorize('admin', 'store_manager'), asy
         
     } catch (error) {
         console.error("Error in /manager route:", error.message);
-        console.error(error.stack);
         
+        // Render dashboard with empty data on error
         res.render('manager_dashboard', {
-            currentUser: req.user || { fullname: 'Store Manager', role: 'manager' },
+            currentUser: req.user,
             stockItems: [],
             allSales: [],
             creditStockItems: [],
@@ -627,32 +301,50 @@ router.get("/manager", isAuthenticated, authorize('admin', 'store_manager'), asy
     }
 });
 
-// ========== SALES ATTENDANT DASHBOARD ==========
-// Admin, Manager, and Sales Attendant can access
-router.get("/salesattendant", isAuthenticated, authorize('admin', 'store_manager', 'sales_attendant'), async (req, res) => {
+// ============================================================
+// SALES ATTENDANT DASHBOARD ROUTE
+// Access: Only users with role 'sales_attendant'
+// ============================================================
+
+/**
+ * GET /salesattendant
+ * Displays the sales attendant dashboard with:
+ * - Today's sales statistics
+ * - Low stock alerts
+ * - Recent sales transactions
+ * - Quick sale button
+ * - Stock inventory for reference
+ */
+router.get("/salesattendant", isAuthenticated, async (req, res) => {
+    // Role-based access control - only sales attendant allowed
+    if (!req.user || req.user.role !== 'sales_attendant') {
+        return res.redirect('/userlogin');
+    }
+    
     try {
         console.log("=== /salesattendant route hit ===");
         
-        // Get all sales using the NEW schema structure (same as manager)
+        // Fetch all sales with attendant details
         const sales = await Sale.find()
             .populate('attendant', 'fullname')
             .sort({ Date: -1 });
         
+        // Fetch all stock items
         const stockItems = await Stock.find();
         
-        // Use sales directly since each sale already contains all items (same as manager)
+        // Transform sales data for template display
         const allSales = sales.map(sale => ({
             _id: sale._id,
             Date: sale.Date,
             customername: sale.customername,
             phonenumber: sale.phonenumber,
-            items: sale.items || [],  // Array of products in this sale
+            items: sale.items || [],
             grandTotal: sale.grandTotal || 0,
             paymentmethod: sale.paymentmethod,
-             attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
+            attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
         }));
         
-        // Calculate today's sales total
+        // Calculate today's sales statistics
         const today = new Date().toDateString();
         let todaysSalesTotal = 0;
         let todaysTransactions = 0;
@@ -664,14 +356,17 @@ router.get("/salesattendant", isAuthenticated, authorize('admin', 'store_manager
             }
         }
         
-        // Count low stock items
+        // Count low stock and critical stock items
         let lowStockCount = 0;
         let criticalStockCount = 0;
         for (let i = 0; i < stockItems.length; i++) {
             if (stockItems[i].reorderlevel) {
+                // Critical: quantity <= half of reorder level
                 if (stockItems[i].quantity <= stockItems[i].reorderlevel / 2) {
                     criticalStockCount++;
-                } else if (stockItems[i].quantity <= stockItems[i].reorderlevel) {
+                } 
+                // Low stock: quantity <= reorder level but above critical
+                else if (stockItems[i].quantity <= stockItems[i].reorderlevel) {
                     lowStockCount++;
                 }
             }
@@ -680,15 +375,12 @@ router.get("/salesattendant", isAuthenticated, authorize('admin', 'store_manager
         console.log("Sales count:", allSales.length);
         console.log("Stock items count:", stockItems.length);
         
-        // Get current attendant name from session
-        const attendantName = req.user ? req.user.fullname : 'Sales Attendant';
-        
-        // Render template with sales data
+        // Render sales attendant dashboard
         return res.render('sales_dashboard', { 
             currentUser: req.user,
             allSales: allSales,
             stockItems: stockItems,
-            attendantName: attendantName,
+            attendantName: req.user ? req.user.fullname : 'Sales Attendant',
             todaysSalesTotal: todaysSalesTotal,
             todaysTransactions: todaysTransactions,
             lowStockCount: lowStockCount,
@@ -697,9 +389,10 @@ router.get("/salesattendant", isAuthenticated, authorize('admin', 'store_manager
         
     } catch (error) {
         console.error("ERROR in /salesattendant:", error.message);
-        console.error(error.stack);
+        
+        // Render dashboard with empty data on error
         return res.render('sales_dashboard', { 
-            currentUser: req.user || { fullname: 'Sales Attendant', role: 'salesattendant' },
+            currentUser: req.user,
             allSales: [], 
             stockItems: [],
             attendantName: 'Sales Attendant',
@@ -709,16 +402,6 @@ router.get("/salesattendant", isAuthenticated, authorize('admin', 'store_manager
             criticalStockCount: 0
         });
     }
-});
-
-// ========== LOGOUT ==========
-router.get('/logout', (req, res, next) => {
-    req.logout((err) => {
-        if (err) {
-            return next(err);
-        }
-        res.redirect('/');
-    });
 });
 
 module.exports = router;

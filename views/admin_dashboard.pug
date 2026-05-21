@@ -1,3 +1,245 @@
+//- doctype html
+//- html(lang='en')
+//-   head
+//-     meta(charset='UTF-8')
+//-     meta(name='viewport' content='width=device-width, initial-scale=1.0')
+//-     title NyondoStock - Admin Dashboard
+//-     link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
+//-     link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
+//-     link(rel='stylesheet' href='/css/admin_dashboard.css')
+
+//-   body
+//-     .sidebar
+//-       .sidebar-logo
+//-         img(src='/images/logo.png' alt='Logo')
+//-         h3 NyondoStock
+//-         p Enterprise Management
+//-       ul.nav-menu
+//-         li.nav-item
+//-           a.nav-link-custom.active(href='/admin')
+//-             i.bi.bi-speedometer2
+//-             |  Dashboard
+//-         li.nav-item
+//-           a.nav-link-custom(href='/addStock')
+//-             i.bi.bi-box-seam
+//-             |  Stock Management
+//-         li.nav-item
+//-           a.nav-link-custom(href='/salesattendant')
+//-             i.bi.bi-cart-plus
+//-             |  Sales Management
+//-         li.nav-item
+//-           a.nav-link-custom(href='/supplier-credit')
+//-             i.bi.bi-credit-card
+//-             |  Supplier Credit
+//-         li.nav-item
+//-           a.nav-link-custom(href='/scheme')
+//-             i.bi.bi-piggy-bank
+//-             |  Deposit Scheme
+//-         li.nav-item
+//-           a.nav-link-custom(href='/reports')
+//-             i.bi.bi-bar-chart-steps
+//-             |  Reports
+//-         li.nav-item
+//-           a.nav-link-custom(href='/users')
+//-             i.bi.bi-people
+//-             |  User Management
+//-       .sidebar-user
+//-         .user-name 👤 #{currentUser ? currentUser.fullname : 'Admin User'}
+//-         .user-role #{currentUser ? (currentUser.role === 'admin' ? 'System Administrator' : (currentUser.role === 'store_manager' ? 'Store Manager' : 'Sales Attendant')) : 'System Administrator'}
+//-       .logout-wrapper
+//-         a(href="/logout")
+//-           button.logout-btn(type="button")
+//-             i.bi.bi-box-arrow-right
+//-             |  Sign Out
+//-     .main-content
+//-       .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
+//-         div
+//-           h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Dashboard
+//-           p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Welcome back, #{currentUser ? currentUser.fullname : 'Admin'}
+      
+//-       .row.g-3.mb-4
+//-         .col-md-3.col-sm-4.col-6
+//-           .stat-card
+//-             .stat-value UGX #{totalStockValue}
+//-             .stat-label Stock Value
+//-         .col-md-3.col-sm-4.col-6
+//-           .stat-card
+//-             .stat-value UGX #{todaysSalesTotal}
+//-             .stat-label Today's Sales
+//-         .col-md-3.col-sm-4.col-6
+//-           .stat-card
+//-             .stat-value UGX #{outstandingCredit}
+//-             .stat-label Supplier Credit
+//-         .col-md-3.col-sm-4.col-6
+//-           .stat-card
+//-             .stat-value UGX #{totalDeposits}
+//-             .stat-label Total Deposits
+      
+//-       .row.g-3
+//-         .col-lg-12
+//-           .section-title
+//-             i.bi.bi-box-seam
+//-             |  Stock Inventory
+//-           .custom-table
+//-             table
+//-               thead
+//-                 tr
+//-                   th Date
+//-                   th Product Name
+//-                   th Category
+//-                   th Current Stock
+//-                   th Reorder Level
+//-                   th Selling Price
+//-                   th Supplier
+//-                   th Payment Method
+//-               tbody
+//-                 if stockItems && stockItems.length
+//-                   each item in stockItems
+//-                     - var isLowStock = item.quantity <= item.reorderlevel
+//-                     - var isCriticalStock = item.quantity <= (item.reorderlevel / 2)
+//-                     - var rowClass = ''
+//-                     - var stockNumberClass = 'stock-number-normal'
+                    
+//-                     if isCriticalStock
+//-                       - rowClass = 'critical-stock-row'
+//-                       - stockNumberClass = 'stock-number-critical'
+//-                     else if isLowStock
+//-                       - rowClass = 'low-stock-row'
+//-                       - stockNumberClass = 'stock-number-low'
+                    
+//-                     tr(class=rowClass)
+//-                       td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
+//-                       td 
+//-                         strong #{item.productname || 'Unknown product'}
+//-                         if isCriticalStock
+//-                           span.badge-critical.ms-2 CRITICAL!
+//-                         else if isLowStock
+//-                           span.badge-low.ms-2 LOW STOCK!
+//-                       td #{item.category || 'N/A'}
+//-                       td
+//-                         span(class=stockNumberClass) #{item.quantity || 0}
+//-                         if isCriticalStock
+//-                           i.bi.bi-exclamation-triangle.warning-icon(style='color: #9E3C2A; margin-left: 5px;')
+//-                         else if isLowStock
+//-                           i.bi.bi-exclamation-circle.warning-icon(style='color: #C6A43F; margin-left: 5px;')
+//-                       td 
+//-                         if item.reorderlevel
+//-                           span #{item.reorderlevel}
+//-                           if item.quantity <= item.reorderlevel
+//-                             br
+//-                             small(style='color: #9E3C2A;') Order more!
+//-                         else
+//-                           | N/A
+//-                       td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
+//-                       td #{item.supplier || 'N/A'}
+//-                       td 
+//-                         if item.paymentMethod
+//-                           | #{item.paymentMethod}
+//-                         else
+//-                           | Cash
+//-                 else
+//-                   tr
+//-                     td.text-center(colspan='8') No stock items found
+      
+//-       .row.g-3.mt-4
+//-         .col-lg-6
+//-           .section-title
+//-             i.bi.bi-credit-card
+//-             |  Supplier Credit Summary
+//-           .custom-table
+//-             table
+//-               thead
+//-                 tr
+//-                   th Supplier
+//-                   th Amount Owed
+//-                   th Due Date
+//-                   th Status
+//-               tbody
+//-                 if creditStockItems && creditStockItems.length
+//-                   each item in creditStockItems
+//-                     if item.balance > 0
+//-                       tr
+//-                         td #{item.supplier || 'Unknown'}
+//-                         td UGX #{item.balance ? item.balance.toLocaleString() : '0'}
+//-                         td #{item.dueDate ? new Date(item.dueDate).toLocaleDateString() : 'Not set'}
+//-                         td
+//-                           if item.status === 'Overdue'
+//-                             span.badge-overdue Overdue
+//-                           else
+//-                             span.badge-pending Pending
+//-                 else
+//-                   tr
+//-                     td.text-center(colspan='4') No credit records found
+
+//-         .col-lg-6
+//-           .section-title
+//-             i.bi.bi-piggy-bank
+//-             |  Deposit Scheme Summary
+//-           .custom-table
+//-             table
+//-               thead
+//-                 tr
+//-                   th Depositor
+//-                   th Latest Deposit
+//-                   th Balance
+//-               tbody
+//-                 if depositors && depositors.length
+//-                   each depositor in depositors
+//-                     - var latestDeposit = 0
+//-                     if depositor.depositHistory && depositor.depositHistory.length
+//-                       - latestDeposit = depositor.depositHistory[depositor.depositHistory.length - 1].amount
+//-                     tr
+//-                       td #{depositor.fullName || 'Unknown'}
+//-                       td UGX #{latestDeposit.toLocaleString() || 0}
+//-                       td UGX #{depositor.currentBalance ? depositor.currentBalance.toLocaleString() : 0}
+//-                 else
+//-                   tr
+//-                     td.text-center(colspan='3') No depositors found
+
+//-       .row.g-3.mt-4
+//-         .col-lg-12
+//-           .section-title
+//-             i.bi.bi-clock-history
+//-             |  Recent Sales
+//-           .custom-table
+//-             table
+//-               thead
+//-                 tr
+//-                   th Date
+//-                   th Customer Name
+//-                   th Products
+//-                   th Total
+//-                   th Payment Method
+//-                   th Attendant
+//-               tbody
+//-                 if allSales && allSales.length
+//-                   each sale in allSales.slice(0, 10)
+//-                     tr
+//-                       td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
+//-                       td #{sale.customername || 'Walk-in Customer'}
+//-                       td 
+//-                         if sale.items && sale.items.length
+//-                           each item, index in sale.items.slice(0, 2)
+//-                             | #{item.productname}
+//-                             if index < sale.items.slice(0, 2).length - 1
+//-                               | , 
+//-                           if sale.items.length > 2
+//-                             |  +#{sale.items.length - 2} more
+//-                         else
+//-                           | Unknown
+//-                       td UGX #{sale.grandTotal ? sale.grandTotal.toLocaleString() : '0'}
+//-                       td 
+//-                         span.badge(style='background: #0D3B2E; color: white; padding: 3px 8px; border-radius: 30px;') #{sale.paymentmethod || 'Cash'}
+//-                       td #{sale.attendantName || 'unknown'}
+//-                 else
+//-                   tr
+//-                     td.text-center(colspan='6') No sales found
+
+//-     .footer
+//-       i.bi.bi-shield-check
+//-       |  NyondoStock &mdash; Enterprise Hardware Management System
+
+//-     script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
 doctype html
 html(lang='en')
   head
@@ -51,6 +293,7 @@ html(lang='en')
           button.logout-btn(type="button")
             i.bi.bi-box-arrow-right
             |  Sign Out
+
     .main-content
       .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
         div
@@ -77,9 +320,11 @@ html(lang='en')
       
       .row.g-3
         .col-lg-12
-          .section-title
-            i.bi.bi-box-seam
-            |  Stock Inventory
+          .section-title.d-flex.justify-content-between.align-items-center
+            div
+              i.bi.bi-box-seam
+              |  Stock Inventory
+            a.btn-view-all(href='/addStock') View All
           .custom-table
             table
               thead
@@ -94,7 +339,7 @@ html(lang='en')
                   th Payment Method
               tbody
                 if stockItems && stockItems.length
-                  each item in stockItems
+                  each item in stockItems.slice(0, 4)
                     - var isLowStock = item.quantity <= item.reorderlevel
                     - var isCriticalStock = item.quantity <= (item.reorderlevel / 2)
                     - var rowClass = ''
@@ -143,9 +388,11 @@ html(lang='en')
       
       .row.g-3.mt-4
         .col-lg-6
-          .section-title
-            i.bi.bi-credit-card
-            |  Supplier Credit Summary
+          .section-title.d-flex.justify-content-between.align-items-center
+            div
+              i.bi.bi-credit-card
+              |  Supplier Credit Summary
+            a.btn-view-all(href='/supplier-credit') View All
           .custom-table
             table
               thead
@@ -156,7 +403,7 @@ html(lang='en')
                   th Status
               tbody
                 if creditStockItems && creditStockItems.length
-                  each item in creditStockItems
+                  each item in creditStockItems.slice(0, 4)
                     if item.balance > 0
                       tr
                         td #{item.supplier || 'Unknown'}
@@ -172,9 +419,11 @@ html(lang='en')
                     td.text-center(colspan='4') No credit records found
 
         .col-lg-6
-          .section-title
-            i.bi.bi-piggy-bank
-            |  Deposit Scheme Summary
+          .section-title.d-flex.justify-content-between.align-items-center
+            div
+              i.bi.bi-piggy-bank
+              |  Deposit Scheme Summary
+            a.btn-view-all(href='/scheme') View All
           .custom-table
             table
               thead
@@ -184,7 +433,7 @@ html(lang='en')
                   th Balance
               tbody
                 if depositors && depositors.length
-                  each depositor in depositors
+                  each depositor in depositors.slice(0, 4)
                     - var latestDeposit = 0
                     if depositor.depositHistory && depositor.depositHistory.length
                       - latestDeposit = depositor.depositHistory[depositor.depositHistory.length - 1].amount
@@ -198,9 +447,11 @@ html(lang='en')
 
       .row.g-3.mt-4
         .col-lg-12
-          .section-title
-            i.bi.bi-clock-history
-            |  Recent Sales
+          .section-title.d-flex.justify-content-between.align-items-center
+            div
+              i.bi.bi-clock-history
+              |  Recent Sales
+            a.btn-view-all(href='/salesattendant') View All
           .custom-table
             table
               thead
@@ -213,7 +464,7 @@ html(lang='en')
                   th Attendant
               tbody
                 if allSales && allSales.length
-                  each sale in allSales.slice(0, 10)
+                  each sale in allSales.slice(0, 4)
                     tr
                       td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
                       td #{sale.customername || 'Walk-in Customer'}

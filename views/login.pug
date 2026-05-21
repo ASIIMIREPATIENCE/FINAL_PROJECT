@@ -1,33 +1,32 @@
 doctype html
-html(lang='en')
 head
   meta(charset='UTF-8')
   meta(name='viewport' content='width=device-width, initial-scale=1.0')
   title NyondoStock - Login
+  // Bootstrap 5 CSS + Icons
   link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
   link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
   link(rel='stylesheet' href='/css/login.css')
-body
-  .login-card
-    img(src='/images/logo.png' alt='NyondoStock Logo')
-    h2 NyondoStock
-    p Hardware Management System
-    
-    .security-badge
-      i.bi.bi-shield-lock-fill
-      span SECURE ACCESS
-    
-    form(action='/postlogin' method='post')
-      .mb-3.text-start
-        label.form-label.fw-semibold(style='color: #0D3B2E;') Email 
-        input.form-control(type='email' placeholder='Enter your email' name='username' required)
-      .mb-3.text-start
-        label.form-label.fw-semibold(style='color: #0D3B2E;') Password
-        input.form-control(type='password' placeholder='Enter your password' name='password' required)
-        .text-end.mt-1
-          a.forgot-link(href='/forgot-password') Forgot password?
-      button.btn-login(type='submit')
-        i.bi.bi-box-arrow-in-right.me-2
-        |  LOG IN
-
+.login-card
+  // Logo
+  img(src='/images/logo.png' alt='NyondoStock Logo')
+  h2 NyondoStock
+  p Hardware Management System
+  // Security Badge
+  .security-badge
+    i.bi.bi-shield-lock-fill
+    span SECURE ACCESS
+  // Login Form
+  form(action='postlogin' method='post')
+    .mb-3.text-start
+      label.form-label.fw-semibold(style='color: #0D3B2E;') Email 
+      input.form-control(type='text' placeholder='Enter your email' name='email')
+    .mb-3.text-start
+      label.form-label.fw-semibold(style='color: #0D3B2E;') Password
+      input.form-control(type='password' placeholder='Enter your password' name='password')
+      .text-end.mt-1
+        a.forgot-link(href='#') Forgot password?
+    button.btn-login(type='submit')
+      i.bi.bi-box-arrow-in-right.me-2
+      |  LOG IN
 script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')

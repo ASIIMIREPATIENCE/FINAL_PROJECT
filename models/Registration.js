@@ -1,7 +1,5 @@
-// 
-// models/Registration.js
 const mongoose = require('mongoose');
-const passportLocalMongoose = require('passport-local-mongoose').default || require('passport-local-mongoose');
+const passportLocalMongoose = require('passport-local-mongoose');
 
 const registrationSchema = new mongoose.Schema({
     fullname: {
@@ -20,7 +18,6 @@ const registrationSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        // match:/^(?:\+256|0)?[7-9][0-9]{8}$/,
     },
     address: {
         type: String,
@@ -29,10 +26,8 @@ const registrationSchema = new mongoose.Schema({
     },
     nin: {
         type: String,
-        required: true,
-        unique: true,
+        default: 'N/A',
         trim: true,
-        // match: /^(CF|CM).{12}$/
     },
     nextOfKinName: {
         type: String,
@@ -43,7 +38,6 @@ const registrationSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        //   match: /^(?:\+256|0)?[7-9][0-9]{8}$/,
     },
     nextOfKinRelationship: {
         type: String,
@@ -52,35 +46,18 @@ const registrationSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        trim: true,
         enum: ['admin', 'store_manager', 'sales_attendant'],
         default: 'sales_attendant'
     },
- 
-
-    resetPasswordToken:{
-        type: String,
-        trim: true
-    },
-    resetPasswordExpires:{
-        type: Date
-    },
-
     Date: {
         type: Date,
         default: Date.now
     },
-    
 });
 
-if (typeof passportLocalMongoose === 'function') {
-    registrationSchema.plugin(passportLocalMongoose, {
-        usernameField: 'email' 
-    });
-} else {
-    console.error('Error: passport-local-mongoose is not properly installed');
-    console.error('Run: npm install passport-local-mongoose');
-    process.exit(1);
-}
+// THIS IS THE ONLY PLUGIN - NO pre('save') hooks
+registrationSchema.plugin(passportLocalMongoose, {
+    usernameField: 'email'
+});
 
 module.exports = mongoose.model('Registration', registrationSchema);
