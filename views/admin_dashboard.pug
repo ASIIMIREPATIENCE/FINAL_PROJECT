@@ -233,19 +233,19 @@ html(lang='en')
                   th Depositor
                   th Latest Deposit
                   th Balance
-              tbody
-                if depositors && depositors.length
-                  each depositor in depositors.slice(0, 4)
-                    - var latestDeposit = 0
-                    if depositor.depositHistory && depositor.depositHistory.length
-                      - latestDeposit = depositor.depositHistory[depositor.depositHistory.length - 1].amount
-                    tr
-                      td #{depositor.fullName || 'Unknown'}
-                      td UGX #{latestDeposit.toLocaleString() || 0}
-                      td UGX #{depositor.currentBalance ? depositor.currentBalance.toLocaleString() : 0}
-                else
-                  tr
-                    td.text-center(colspan='3') No depositors found
+              //- tbody
+              //-   if depositors && depositors.length
+              //-     each depositor in depositors.slice(0, 4)
+              //-       - var latestDeposit = 0
+              //-       if depositor.depositHistory && depositor.depositHistory.length
+              //-         - latestDeposit = depositor.depositHistory[depositor.depositHistory.length - 1].amount
+              //-       tr
+              //-         td #{depositor.fullName || 'Unknown'}
+              //-         td UGX #{latestDeposit.toLocaleString() || 0}
+              //-         td UGX #{depositor.currentBalance ? depositor.currentBalance.toLocaleString() : 0}
+              //-   else
+              //-     tr
+              //-       td.text-center(colspan='3') No depositors found
 
       .row.g-3.mt-4
         .col-lg-12

@@ -26,22 +26,74 @@ const depositorSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-    currentBalance: {
+    items: [{
+        productname: {
+            type: String,
+            required: true,
+        },
+        quantity: {
+            type: Number,
+            required: true,
+            default: 1,
+        },
+        unitprice: {
+            type: Number,
+            required: true,
+        },
+        subtotal: {
+            type: Number,
+            required: true,
+        }
+    }],
+    itemsSubtotal: {
         type: Number,
         default: 0,
     },
-    totalDeposits: {
+    needTransport: {
+        type: Boolean,
+        default: false,
+    },
+    distance: {
+        type: Number,
+        default: 0,
+    },
+    transportFee: {
+        type: Number,
+        default: 0,
+    },
+    totalAmountOwed: {
+        type: Number,
+        default: 0,
+    },
+    totalPaid: {
+        type: Number,
+        default: 0,
+    },
+    remainingBalance: {
         type: Number,
         default: 0,
     },
     depositHistory: [{
-        amount: {
-            type: Number,
-            default: 0,
-        },
         date: {
             type: Date,
             default: Date.now,
+        },
+        amountPaid: {
+            type: Number,
+            required: true,
+        },
+        totalOwedAtTime: {
+            type: Number,
+            required: true,
+        },
+        balanceAfter: {
+            type: Number,
+            required: true,
+        },
+        paymentMethod: {
+            type: String,
+            enum: ['Cash', 'Bank Transfer', 'Mobile Money'],
+            default: 'Cash',
         },
         attendant: {
             type: mongoose.Schema.Types.ObjectId,
@@ -51,72 +103,16 @@ const depositorSchema = new mongoose.Schema({
             type: String,
             trim: true,
         },
-        paymentMethod: {
+        notes: {
             type: String,
-            enum: ['Cash', 'Bank Transfer', 'Mobile Money'],
-            default: 'Cash',
-        },
-        balanceAfter: {
-            type: Number,
-            default: 0,
-        },
-        // New fields for item purchases
-        items: [{
-            productname: {
-                type: String,
-                trim: true,
-            },
-            quantity: {
-                type: Number,
-                default: 0,
-            },
-            unitprice: {
-                type: Number,
-                default: 0,
-            },
-            subtotal: {
-                type: Number,
-                default: 0,
-            }
-        }],
-        cartSubtotal: {
-            type: Number,
-            default: 0,
-        },
-        distance: {
-            type: Number,
-            default: 0,
-        },
-        transportFee: {
-            type: Number,
-            default: 0,
-        },
-        grandTotal: {
-            type: Number,
-            default: 0,
-        },
-        freeTransportApplied: {
-            type: Boolean,
-            default: false,
-        },
-        needTransport: {
-            type: Boolean,
-            default: false,
-        },
-        paymentStatus: {
-            type: String,
-            enum: ['pending', 'partial', 'completed'],
-            default: 'pending',
-        },
-        amountPaid: {
-            type: Number,
-            default: 0,
-        },
-        remainingBalance: {
-            type: Number,
-            default: 0,
+            trim: true,
         }
-    }]
+    }],
+    status: {
+        type: String,
+        enum: ['active', 'completed', 'cancelled'],
+        default: 'active',
+    }
 });
 
 module.exports = mongoose.model('Depositor', depositorSchema);
