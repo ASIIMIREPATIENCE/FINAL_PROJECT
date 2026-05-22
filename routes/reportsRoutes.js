@@ -4,7 +4,6 @@ const Sale = require('../models/Sales');
 const Stock = require('../models/Stock');
 const Depositor = require('../models/Depositor');
 
-// ========== AUTHENTICATION MIDDLEWARE ==========
 function isAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
@@ -12,7 +11,6 @@ function isAuthenticated(req, res, next) {
     res.redirect('/');
 }
 
-// GET route - Main reports page
 router.get('/reports', isAuthenticated, async (req, res) => {
     try {
         const { reportType, startDate, endDate } = req.query;
@@ -24,7 +22,6 @@ router.get('/reports', isAuthenticated, async (req, res) => {
         let summary = {};
         let selectedReport = reportType || 'sales';
         
-        // Set default date range (last 30 days)
         const today = new Date();
         const defaultStart = new Date();
         defaultStart.setDate(today.getDate() - 30);
@@ -33,22 +30,17 @@ router.get('/reports', isAuthenticated, async (req, res) => {
         const end = endDate ? new Date(endDate) : today;
         end.setHours(23, 59, 59, 999);
         
-        // Get all stock items (no date filter needed for stock - it's current inventory)
         const allStock = await Stock.find().sort({ Date: -1 });
-        
-        // Calculate stock summary
         const totalStockValue = allStock.reduce((sum, item) => sum + ((item.quantity || 0) * (item.sellingprice || 0)), 0);
         const lowStockItems = allStock.filter(item => item.quantity <= (item.reorderlevel || 0));
         const totalProducts = allStock.length;
         
         // ========== SALES REPORT ==========
         if (selectedReport === 'sales') {
-            // Get all sales within date range
             const sales = await Sale.find({
                 Date: { $gte: start, $lte: end }
             }).populate('attendant', 'fullname').sort({ Date: -1 });
             
-            // Transform sales data for the report
             salesData = sales.map(sale => ({
                 _id: sale._id,
                 Date: sale.Date,
@@ -60,57 +52,38 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
             }));
             
-            // Calculate summary statistics
             const totalSales = salesData.reduce((sum, sale) => sum + sale.grandTotal, 0);
             const totalTransactions = salesData.length;
             const avgTransactionValue = totalTransactions > 0 ? totalSales / totalTransactions : 0;
             
-            // Calculate payment method breakdown
-            let cashSales = 0;
-            let mobileSales = 0;
-            let bankSales = 0;
-            
+            let cashSales = 0, mobileSales = 0, bankSales = 0;
             for (const sale of sales) {
-                if (sale.paymentmethod === 'Cash') {
-                    cashSales += sale.grandTotal || 0;
-                } else if (sale.paymentmethod === 'Mobile Money') {
-                    mobileSales += sale.grandTotal || 0;
-                } else if (sale.paymentmethod === 'Bank Transfer') {
-                    bankSales += sale.grandTotal || 0;
-                }
+                if (sale.paymentmethod === 'Cash') cashSales += sale.grandTotal || 0;
+                else if (sale.paymentmethod === 'Mobile Money') mobileSales += sale.grandTotal || 0;
+                else if (sale.paymentmethod === 'Bank Transfer') bankSales += sale.grandTotal || 0;
             }
             
-            // Get top selling products by QUANTITY sold (most quantity sold)
             const productSales = {};
             for (const sale of sales) {
                 if (sale.items && sale.items.length) {
                     for (const item of sale.items) {
                         if (!productSales[item.productname]) {
-                            productSales[item.productname] = { 
-                                quantity: 0, 
-                                revenue: 0 
-                            };
+                            productSales[item.productname] = { quantity: 0, revenue: 0 };
                         }
                         productSales[item.productname].quantity += item.quantity || 0;
-                        productSales[item.productname].revenue += item.subtotal || (item.quantity * item.unitprice) || 0;
+                        productSales[item.productname].revenue += item.subtotal || 0;
                     }
                 }
             }
             
-            // Sort by QUANTITY (highest quantity sold first)
             const topProducts = Object.entries(productSales)
                 .map(([name, data]) => ({ name, quantity: data.quantity, revenue: data.revenue }))
                 .sort((a, b) => b.quantity - a.quantity)
                 .slice(0, 5);
             
             summary = {
-                totalSales: totalSales,
-                totalTransactions: totalTransactions,
-                avgTransactionValue: avgTransactionValue,
-                cashSales: cashSales,
-                mobileSales: mobileSales,
-                bankSales: bankSales,
-                topProducts: topProducts
+                totalSales, totalTransactions, avgTransactionValue,
+                cashSales, mobileSales, bankSales, topProducts
             };
         }
         
@@ -128,19 +101,18 @@ router.get('/reports', isAuthenticated, async (req, res) => {
             
             const totalCostValue = filteredStock.reduce((sum, item) => sum + ((item.quantity || 0) * (item.costprice || 0)), 0);
             const totalStockValueFiltered = filteredStock.reduce((sum, item) => sum + ((item.quantity || 0) * (item.sellingprice || 0)), 0);
-            const potentialProfit = totalStockValueFiltered - totalCostValue;
             
             summary = {
                 totalProducts: filteredStock.length,
                 totalStockValue: totalStockValueFiltered,
                 totalCostValue: totalCostValue,
-                potentialProfit: potentialProfit,
+                potentialProfit: totalStockValueFiltered - totalCostValue,
                 lowStockCount: filteredStock.filter(item => item.quantity <= (item.reorderlevel || 0)).length,
                 outOfStockCount: filteredStock.filter(item => item.quantity === 0).length
             };
         }
         
-        // ========== SCHEME REPORT (Deposits) ==========
+        // ========== SCHEME REPORT ==========
         if (selectedReport === 'scheme') {
             const depositors = await Depositor.find().sort({ joinDate: -1 });
             
@@ -152,8 +124,11 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                     );
                 }
                 
-                const depositsWithinRange = filteredDeposits.reduce((sum, d) => sum + d.amount, 0);
-                const totalDepositsAll = (depositor.depositHistory || []).reduce((sum, d) => sum + d.amount, 0);
+                // FIXED: Use amountPaid instead of amount
+                const depositsWithinRange = filteredDeposits.reduce((sum, d) => sum + (d.amountPaid || 0), 0);
+                const totalDepositsAll = (depositor.depositHistory || []).reduce((sum, d) => sum + (d.amountPaid || 0), 0);
+                const totalOwed = (depositor.itemsSubtotal || 0) + (depositor.transportFee || 0);
+                const remainingBalance = totalOwed - (depositor.totalPaid || 0);
                 
                 return {
                     fullName: depositor.fullName,
@@ -161,9 +136,11 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                     nin: depositor.nin,
                     employer: depositor.employer,
                     joinDate: depositor.joinDate,
+                    totalOwed: totalOwed,
                     totalDeposits: totalDepositsAll,
-                    depositsWithinRange: depositsWithinRange,
-                    currentBalance: depositor.currentBalance,
+                    totalPaid: depositor.totalPaid || 0,
+                    remainingBalance: remainingBalance,
+                    currentBalance: depositor.currentBalance || 0,
                     depositCount: filteredDeposits.length,
                     lastDepositDate: filteredDeposits.length > 0 ? 
                         filteredDeposits[filteredDeposits.length - 1].date : null
@@ -173,6 +150,7 @@ router.get('/reports', isAuthenticated, async (req, res) => {
             const totalDepositors = depositors.length;
             const totalDepositAmount = schemeData.reduce((sum, d) => sum + d.totalDeposits, 0);
             const totalCurrentBalance = schemeData.reduce((sum, d) => sum + d.currentBalance, 0);
+            const totalRemainingOwed = schemeData.reduce((sum, d) => sum + (d.remainingBalance > 0 ? d.remainingBalance : 0), 0);
             
             let totalDepositsCount = 0;
             for (const depositor of depositors) {
@@ -188,7 +166,7 @@ router.get('/reports', isAuthenticated, async (req, res) => {
             }
             
             const topDepositors = [...schemeData]
-                .sort((a, b) => b.currentBalance - a.currentBalance)
+                .sort((a, b) => b.totalDeposits - a.totalDeposits)
                 .slice(0, 5);
             
             let allDeposits = [];
@@ -203,7 +181,7 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                     const depositsWithInfo = depositsToShow.map(deposit => ({
                         date: deposit.date,
                         depositorName: depositor.fullName,
-                        amount: deposit.amount,
+                        amount: deposit.amountPaid || 0,
                         balanceAfter: deposit.balanceAfter,
                         paymentMethod: deposit.paymentMethod,
                         attendantName: deposit.attendantName
@@ -217,6 +195,7 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 totalDepositors: totalDepositors,
                 totalDepositAmount: totalDepositAmount,
                 totalCurrentBalance: totalCurrentBalance,
+                totalRemainingOwed: totalRemainingOwed,
                 totalDepositsCount: totalDepositsCount,
                 topDepositors: topDepositors,
                 recentDeposits: allDeposits.slice(0, 20)
@@ -225,25 +204,23 @@ router.get('/reports', isAuthenticated, async (req, res) => {
         
         // ========== SUPPLIER CREDIT REPORT ==========
         if (selectedReport === 'supplier-credit') {
-            let creditItems = [];
+            let creditItems = await Stock.find({ 
+                paymentMethod: 'Credit'
+            });
+            
+            // Apply date filter if provided
             if (startDate && endDate) {
-                creditItems = await Stock.find({ 
-                    paymentMethod: 'Credit',
-                    Date: { $gte: start, $lte: end }
+                creditItems = creditItems.filter(item => {
+                    const itemDate = new Date(item.Date);
+                    return itemDate >= start && itemDate <= end;
                 });
-            } else {
-                creditItems = await Stock.find({ paymentMethod: 'Credit' });
             }
             
             const todayDate = new Date();
             const sevenDaysFromNow = new Date();
             sevenDaysFromNow.setDate(todayDate.getDate() + 7);
             
-            let totalOutstanding = 0;
-            let dueWithin7Days = 0;
-            let dueWithin7DaysCount = 0;
-            let overdueTotal = 0;
-            let overdueCount = 0;
+            let totalOutstanding = 0, dueWithin7Days = 0, dueWithin7DaysCount = 0, overdueTotal = 0, overdueCount = 0;
             
             supplierCreditData = creditItems.map(item => {
                 const totalOwed = (item.costprice || 0) * (item.quantity || 0);
@@ -300,8 +277,6 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 suppliersGroup[item.supplier].items.push(item);
             });
             
-            const supplierSummary = Object.values(suppliersGroup);
-            
             summary = {
                 totalOutstanding: totalOutstanding,
                 uniqueSuppliersCount: uniqueSuppliers.length,
@@ -309,7 +284,7 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 dueWithin7DaysCount: dueWithin7DaysCount,
                 overdueTotal: overdueTotal,
                 overdueCount: overdueCount,
-                supplierSummary: supplierSummary,
+                supplierSummary: Object.values(suppliersGroup),
                 suppliers: uniqueSuppliers
             };
         }
@@ -322,28 +297,31 @@ router.get('/reports', isAuthenticated, async (req, res) => {
             
             const totalRevenue = sales.reduce((sum, sale) => sum + (sale.grandTotal || 0), 0);
             
+            // OPTIMIZED: Get all product costs in one query
             let totalCost = 0;
+            const productNames = new Set();
             for (const sale of sales) {
                 if (sale.items && sale.items.length) {
                     for (const item of sale.items) {
-                        const product = await Stock.findOne({ productname: item.productname });
-                        if (product && product.costprice) {
-                            totalCost += product.costprice * (item.quantity || 0);
-                        }
+                        productNames.add(item.productname);
                     }
                 }
             }
             
-            let creditItems = [];
-            if (startDate && endDate) {
-                creditItems = await Stock.find({ 
-                    paymentMethod: 'Credit',
-                    Date: { $gte: start, $lte: end }
-                });
-            } else {
-                creditItems = await Stock.find({ paymentMethod: 'Credit' });
+            const products = await Stock.find({ productname: { $in: Array.from(productNames) } });
+            const productCostMap = {};
+            products.forEach(p => { productCostMap[p.productname] = p.costprice; });
+            
+            for (const sale of sales) {
+                if (sale.items && sale.items.length) {
+                    for (const item of sale.items) {
+                        const cost = productCostMap[item.productname] || 0;
+                        totalCost += cost * (item.quantity || 0);
+                    }
+                }
             }
             
+            let creditItems = await Stock.find({ paymentMethod: 'Credit' });
             const outstandingCredit = creditItems.reduce((sum, item) => {
                 const totalOwed = (item.costprice || 0) * (item.quantity || 0);
                 const paid = item.amountPaid || 0;
@@ -352,7 +330,7 @@ router.get('/reports', isAuthenticated, async (req, res) => {
             
             const depositors = await Depositor.find();
             let totalDepositsInRange = 0;
-            depositors.forEach(depositor => {
+            for (const depositor of depositors) {
                 if (depositor.depositHistory && depositor.depositHistory.length) {
                     let depositsToSum = depositor.depositHistory;
                     if (startDate && endDate) {
@@ -360,36 +338,29 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                             deposit.date >= start && deposit.date <= end
                         );
                     }
-                    totalDepositsInRange += depositsToSum.reduce((sum, d) => sum + d.amount, 0);
+                    totalDepositsInRange += depositsToSum.reduce((sum, d) => sum + (d.amountPaid || 0), 0);
                 }
-            });
+            }
             
             const profit = totalRevenue - totalCost;
             const profitMargin = totalRevenue > 0 ? (profit / totalRevenue * 100).toFixed(2) : 0;
             
             summary = {
-                totalRevenue: totalRevenue,
-                totalCost: totalCost,
-                profit: profit,
-                profitMargin: profitMargin,
-                outstandingCredit: outstandingCredit,
-                totalDeposits: totalDepositsInRange
+                totalRevenue, totalCost, profit, profitMargin,
+                outstandingCredit, totalDeposits: totalDepositsInRange
             };
         }
         
         res.render('reports', {
             currentUser: req.user,
-            selectedReport: selectedReport,
+            selectedReport,
             startDate: start.toISOString().split('T')[0],
             endDate: end.toISOString().split('T')[0],
-            salesData: salesData,
-            stockData: stockData,
-            schemeData: schemeData,
-            supplierCreditData: supplierCreditData,
-            summary: summary,
-            totalStockValue: totalStockValue,
+            salesData, stockData, schemeData, supplierCreditData,
+            summary,
+            totalStockValue,
             lowStockCount: lowStockItems.length,
-            totalProducts: totalProducts
+            totalProducts
         });
         
     } catch (error) {
@@ -397,16 +368,10 @@ router.get('/reports', isAuthenticated, async (req, res) => {
         res.render('reports', {
             currentUser: req.user,
             selectedReport: 'sales',
-            startDate: '',
-            endDate: '',
-            salesData: [],
-            stockData: [],
-            schemeData: [],
-            supplierCreditData: [],
+            startDate: '', endDate: '',
+            salesData: [], stockData: [], schemeData: [], supplierCreditData: [],
             summary: {},
-            totalStockValue: 0,
-            lowStockCount: 0,
-            totalProducts: 0,
+            totalStockValue: 0, lowStockCount: 0, totalProducts: 0,
             error: error.message
         });
     }

@@ -170,7 +170,7 @@ html(lang='en')
         .col-lg-5
           .section-title
             i.bi.bi-credit-card
-            |  Supplier Credit Summary
+            |  Supplier Credit 
           .custom-table
             table
               thead
@@ -197,7 +197,7 @@ html(lang='en')
                     td.text-center(colspan='4') No credit records found
 
       .row.g-3.mt-4
-        .col-lg-8
+        .col-lg-7
           .section-title.d-flex.justify-content-between.align-items-center
             div
               i.bi.bi-clock-history
@@ -209,9 +209,7 @@ html(lang='en')
                 tr
                   th Date
                   th Customer Name
-                  th Products
                   th Total
-                  th Payment Method
                   th Attendant
               tbody
                 if allSales && allSales.length
@@ -219,25 +217,13 @@ html(lang='en')
                     tr
                       td #{sale.Date ? new Date(sale.Date).toLocaleDateString() : 'No date'}
                       td #{sale.customername || 'Walk-in Customer'}
-                      td 
-                        if sale.items && sale.items.length
-                          each item, index in sale.items.slice(0, 2)
-                            | #{item.productname}
-                            if index < sale.items.slice(0, 2).length - 1
-                              | , 
-                          if sale.items.length > 2
-                            |  +#{sale.items.length - 2} more
-                        else
-                          | Unknown
                       td UGX #{sale.grandTotal ? sale.grandTotal.toLocaleString() : '0'}
-                      td 
-                        span.badge(style='background: #0D3B2E; color: white; padding: 3px 8px; border-radius: 30px;') #{sale.paymentmethod || 'Cash'}
                       td #{sale.attendantName || 'unknown'}
                 else
                   tr
-                    td.text-center(colspan='6') No sales found
+                    td.text-center(colspan='4') No sales found
         
-        .col-lg-4
+        .col-lg-5
           .section-title
             i.bi.bi-trophy
             |  Top Selling Products

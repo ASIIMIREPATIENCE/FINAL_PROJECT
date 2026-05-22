@@ -61,7 +61,19 @@ router.get('/editStock/:id', isAuthenticated, async (req, res) => {
 // POST route - Add new stock item (with duplicate check)
 router.post('/postStock', isAuthenticated, async (req, res) => {
     try {
-        const { productname, category, quantity, costprice, sellingprice, supplier, reorderlevel, paymentMethod } = req.body;
+        const { 
+            productname, 
+            category, 
+            quantity, 
+            costprice, 
+            sellingprice, 
+            supplier, 
+            supplierEmail, 
+            supplierPhone, 
+            supplierCompany,
+            reorderlevel, 
+            paymentMethod 
+        } = req.body;
         
         const attendantName = req.user ? req.user.fullname : 'Unknown';
         const attendantId = req.user ? req.user._id : null;
@@ -83,6 +95,9 @@ router.post('/postStock', isAuthenticated, async (req, res) => {
             existingStock.quantity = newQty;
             existingStock.category = category;
             existingStock.supplier = supplier;
+            existingStock.supplierEmail = supplierEmail;
+            existingStock.supplierPhone = supplierPhone;
+            existingStock.supplierCompany = supplierCompany;
             existingStock.reorderlevel = Number(reorderlevel);
             existingStock.paymentMethod = paymentMethod || 'Cash';
             
@@ -99,6 +114,9 @@ router.post('/postStock', isAuthenticated, async (req, res) => {
                 costprice: Number(costprice),
                 sellingprice: Number(sellingprice),
                 supplier: supplier,
+                supplierEmail: supplierEmail,
+                supplierPhone: supplierPhone,
+                supplierCompany: supplierCompany,
                 reorderlevel: Number(reorderlevel),
                 paymentMethod: paymentMethod || 'Cash',
                 attendant: attendantId,
@@ -118,6 +136,9 @@ router.post('/postStock', isAuthenticated, async (req, res) => {
                 costprice: Number(costprice),
                 sellingprice: Number(sellingprice),
                 supplier,
+                supplierEmail,
+                supplierPhone,
+                supplierCompany,
                 reorderlevel: Number(reorderlevel),
                 paymentMethod: paymentMethod || 'Cash',
                 Date: new Date(),
@@ -138,6 +159,9 @@ router.post('/postStock', isAuthenticated, async (req, res) => {
                 costprice: Number(costprice),
                 sellingprice: Number(sellingprice),
                 supplier: supplier,
+                supplierEmail: supplierEmail,
+                supplierPhone: supplierPhone,
+                supplierCompany: supplierCompany,
                 reorderlevel: Number(reorderlevel),
                 paymentMethod: paymentMethod || 'Cash',
                 attendant: attendantId,
@@ -177,6 +201,9 @@ router.post('/deleteStock/:id', isAuthenticated, async (req, res) => {
                 costprice: deletedItem.costprice,
                 sellingprice: deletedItem.sellingprice,
                 supplier: deletedItem.supplier,
+                supplierEmail: deletedItem.supplierEmail,
+                supplierPhone: deletedItem.supplierPhone,
+                supplierCompany: deletedItem.supplierCompany,
                 reorderlevel: deletedItem.reorderlevel,
                 paymentMethod: deletedItem.paymentMethod,
                 attendant: attendantId,
@@ -200,7 +227,18 @@ router.post('/deleteStock/:id', isAuthenticated, async (req, res) => {
 // EDIT route - Update stock item
 router.post('/editStock/:id', isAuthenticated, async (req, res) => {
     try {
-        const { quantity, costprice, sellingprice, supplier, reorderlevel, paymentMethod } = req.body;
+        const { 
+            quantity, 
+            costprice, 
+            sellingprice, 
+            supplier, 
+            supplierEmail, 
+            supplierPhone, 
+            supplierCompany,
+            reorderlevel, 
+            paymentMethod 
+        } = req.body;
+        
         const attendantName = req.user ? req.user.fullname : 'Unknown';
         const attendantId = req.user ? req.user._id : null;
         
@@ -213,6 +251,9 @@ router.post('/editStock/:id', isAuthenticated, async (req, res) => {
             costprice: Number(costprice),
             sellingprice: Number(sellingprice),
             supplier,
+            supplierEmail,
+            supplierPhone,
+            supplierCompany,
             reorderlevel: Number(reorderlevel),
             paymentMethod: paymentMethod || 'Cash'
         });
@@ -228,6 +269,9 @@ router.post('/editStock/:id', isAuthenticated, async (req, res) => {
             costprice: Number(costprice),
             sellingprice: Number(sellingprice),
             supplier: supplier,
+            supplierEmail: supplierEmail,
+            supplierPhone: supplierPhone,
+            supplierCompany: supplierCompany,
             reorderlevel: Number(reorderlevel),
             paymentMethod: paymentMethod || 'Cash',
             attendant: attendantId,

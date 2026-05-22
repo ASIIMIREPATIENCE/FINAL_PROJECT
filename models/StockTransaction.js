@@ -40,6 +40,18 @@ const stockTransactionSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    supplierEmail: {
+        type: String,
+        trim: true
+    },
+    supplierPhone: {
+        type: String,
+        trim: true
+    },
+    supplierCompany: {
+        type: String,
+        trim: true
+    },
     reorderlevel: {
         type: Number
     },

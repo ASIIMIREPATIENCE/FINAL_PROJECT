@@ -35,6 +35,24 @@ head
     .btn-back:hover {
       background: rgba(255,255,255,0.2);
     }
+    .btn-edit-transaction {
+      background: #C6A43F;
+      color: #0D3B2E;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.7rem;
+    }
+    .btn-delete-transaction {
+      background: #9E3C2A;
+      color: white;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.7rem;
+    }
 
 body
   .sidebar
@@ -43,18 +61,17 @@ body
       h3 NyondoStock
       p Hardware Management
     
-    // Back Button
     .sidebar-back-btn
       button.btn-back(onclick="history.back()")
         i.bi.bi-arrow-left
-        |  Back
+        | Back
     
     .sidebar-user
       .user-name 👤 #{currentUser ? currentUser.fullname : 'Admin User'}
       .user-role #{currentUser ? (currentUser.role === 'admin' ? 'System Administrator' : (currentUser.role === 'store_manager' ? 'Store Manager' : 'Sales Attendant')) : 'System Administrator'}
       button.logout-btn(onclick="window.location.href='/logout'")
         i.bi.bi-box-arrow-right
-        |  Sign Out
+        | Sign Out
 
   .main-content
     .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
@@ -67,7 +84,7 @@ body
       .form-card
         .form-title
           i.bi.bi-plus-circle(style='color: #C6A43F;')
-          |  Register New Stock
+          | Register New Stock
           span.role-badge Admin/Manager Only
         .row.g-3
           .col-md-3
@@ -92,8 +109,17 @@ body
             label.form-label Selling Price (UGX)
             input.form-control(type='number' placeholder='Selling price' name='sellingprice' required)
           .col-md-3
-            label.form-label Supplier
+            label.form-label Supplier Name
             input.form-control(type='text' placeholder='Supplier name' name='supplier' required)
+          .col-md-3
+            label.form-label Supplier Email
+            input.form-control(type='email' placeholder='supplier@company.com' name='supplierEmail')
+          .col-md-2
+            label.form-label Supplier Phone
+            input.form-control(type='tel' placeholder='+256XXXXXXXXX' name='supplierPhone')
+          .col-md-3
+            label.form-label Supplier Company
+            input.form-control(type='text' placeholder='Company name' name='supplierCompany')
           .col-md-2
             label.form-label Reorder Level
             input.form-control(type='number' placeholder='Min stock alert' name='reorderlevel' required)
@@ -105,12 +131,12 @@ body
           .col-md-2.d-flex.align-items-end
             button.btn-save.w-100(type='submit')
               i.bi.bi-save
-              |  Save Stock
+              | Save Stock
 
-    // Current Stock Table
+    // SECTION 1: Current Stock Table (No Actions)
     .section-title
       i.bi.bi-list-ul
-      |  Current Stock Inventory
+      | Current Stock Inventory
       - var lowCount = 0
       - var criticalCount = 0
       each item in stockItems
@@ -127,17 +153,10 @@ body
       table
         thead
           tr
-            th Date
             th Product Name
             th Category
             th Current Stock
-            th Reorder Level
-            th Cost Price
             th Selling Price
-            th Supplier
-            th Payment Method
-            th Attendant
-            th(style='text-align: center; width: 140px;') Actions
         tbody
           if stockItems && stockItems.length
             each item in stockItems
@@ -154,7 +173,6 @@ body
                 - stockNumberClass = 'stock-number-low'
               
               tr(class=rowClass)
-                td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
                 td 
                   strong #{item.productname || 'Unknown product'}
                   if isCriticalStock
@@ -168,37 +186,47 @@ body
                     i.bi.bi-exclamation-triangle.warning-icon(style='color: #9E3C2A; margin-left: 5px;')
                   else if isLowStock
                     i.bi.bi-exclamation-circle.warning-icon(style='color: #C6A43F; margin-left: 5px;')
-                td 
-                  if item.reorderlevel
-                    span #{item.reorderlevel}
-                  else
-                    | N/A
-                td #{item.costprice ? 'UGX ' + item.costprice.toLocaleString() : 'N/A'}
                 td #{item.sellingprice ? 'UGX ' + item.sellingprice.toLocaleString() : 'N/A'}
+          else
+            tr
+              td.text-center(colspan='4') No stock items found
+
+    // SECTION 2: Supplier Information Table
+    .section-title.mt-4
+      i.bi.bi-truck
+      | Supplier Information
+    .custom-table
+      table
+        thead
+          tr
+            th Supplier Name
+            th Contact Email
+            th Contact Phone
+            th Product Supplied
+            th Supplier Company
+            th Payment Method
+        tbody
+          if stockItems && stockItems.length
+            each item in stockItems
+              tr
                 td #{item.supplier || 'N/A'}
+                td #{item.supplierEmail || 'N/A'}
+                td #{item.supplierPhone || 'N/A'}
+                td #{item.productname || 'N/A'}
+                td #{item.supplierCompany || 'N/A'}
                 td 
                   if item.paymentMethod
                     | #{item.paymentMethod}
                   else
                     | Cash
-                td #{item.attendantName || (item.attendant ? item.attendant.fullname : 'unknown')}
-                td(style='text-align: center;')
-                  .action-buttons
-                    a.btn-edit(href=`/editStock/${item._id}`)
-                      i.bi.bi-pencil
-                      | Edit
-                    form(action=`/deleteStock/${item._id}` method='POST' style='display: inline; margin: 0;')
-                      button.btn-delete(type='submit' onclick='return confirm("Are you sure you want to delete this item?")')
-                        i.bi.bi-trash
-                        | Delete
           else
             tr
-              td.text-center(colspan='11') No stock items found
+              td.text-center(colspan='6') No supplier information found
 
-    // Stock Transaction History Table
+    // SECTION 3: Stock Transaction History Table (With Edit & Delete Actions)
     .section-title.mt-4
       i.bi.bi-clock-history
-      |  Stock Transaction History
+      | Stock Transaction History
     .custom-table
       table
         thead
@@ -213,7 +241,7 @@ body
             th Selling Price
             th Supplier
             th Attendant
-            th Notes
+            th Actions
         tbody
           if stockTransactions && stockTransactions.length
             each transaction in stockTransactions
@@ -247,13 +275,32 @@ body
                 td UGX #{transaction.sellingprice ? transaction.sellingprice.toLocaleString() : '0'}
                 td #{transaction.supplier || 'N/A'}
                 td #{transaction.attendantName || 'unknown'}
-                td #{transaction.notes || '-'}
+                td(style='text-align: center;')
+                  .action-buttons
+                    button.btn-edit-transaction(type='button' onclick=`editTransaction('${transaction._id}')`)
+                      i.bi.bi-pencil
+                      | Edit
+                    button.btn-delete-transaction(type='button' onclick=`deleteTransaction('${transaction._id}')`)
+                      i.bi.bi-trash
+                      | Delete
           else
             tr
               td.text-center(colspan='11') No stock transaction records found
 
   .footer
     i.bi.bi-shield-check
-    |  NyondoStock &mdash; Enterprise Hardware Management System
+    | NyondoStock &mdash; Enterprise Hardware Management System
 
   script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
+  script.
+    function editTransaction(id) {
+      alert('Edit transaction: ' + id + '\nThis feature will allow you to edit transaction details.');
+      // You can implement edit logic here
+    }
+    
+    function deleteTransaction(id) {
+      if (confirm('Are you sure you want to delete this transaction record?')) {
+        alert('Deleting transaction: ' + id);
+        // Add your delete logic here
+      }
+    }

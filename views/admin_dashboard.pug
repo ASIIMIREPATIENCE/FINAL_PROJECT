@@ -193,7 +193,7 @@ html(lang='en')
           .section-title.d-flex.justify-content-between.align-items-center
             div
               i.bi.bi-credit-card
-              |  Supplier Credit Summary
+              |  Supplier Credit 
             a.btn-view-all(href='/supplier-credit') View All
           .custom-table
             table
@@ -224,28 +224,39 @@ html(lang='en')
           .section-title.d-flex.justify-content-between.align-items-center
             div
               i.bi.bi-piggy-bank
-              |  Deposit Scheme Summary
+              |  Deposit Scheme 
             a.btn-view-all(href='/scheme') View All
           .custom-table
             table
               thead
                 tr
                   th Depositor
-                  th Latest Deposit
-                  th Balance
-              //- tbody
-              //-   if depositors && depositors.length
-              //-     each depositor in depositors.slice(0, 4)
-              //-       - var latestDeposit = 0
-              //-       if depositor.depositHistory && depositor.depositHistory.length
-              //-         - latestDeposit = depositor.depositHistory[depositor.depositHistory.length - 1].amount
-              //-       tr
-              //-         td #{depositor.fullName || 'Unknown'}
-              //-         td UGX #{latestDeposit.toLocaleString() || 0}
-              //-         td UGX #{depositor.currentBalance ? depositor.currentBalance.toLocaleString() : 0}
-              //-   else
-              //-     tr
-              //-       td.text-center(colspan='3') No depositors found
+                  th Paid (UGX)
+                  th Balance (UGX)
+                  th Status
+              tbody
+                if depositors && depositors.length
+                  each depositor in depositors.slice(0, 4)
+                    - var totalOwed = (depositor.itemsSubtotal || 0) + (depositor.transportFee || 0)
+                    - var balance = totalOwed - (depositor.totalPaid || 0)
+                    tr
+                      td #{depositor.fullName || 'Unknown'}
+                      td UGX #{depositor.totalPaid ? depositor.totalPaid.toLocaleString() : '0'}
+                      td 
+                        if balance <= 0
+                          span(style='color: #28a745; font-weight: bold;') PAID
+                        else
+                          span(style='color: #1b0204; font-weight: bold;') UGX #{balance.toLocaleString()}
+                      td
+                        if balance <= 0
+                          span.badge(style='background: #28a745; color: white;') Completed
+                        else if depositor.totalPaid > 0
+                          span.badge(style='background: #ffc107; color: black;') In Progress
+                        else
+                          span.badge(style='background: #dc3545; color: white;') Pending
+                else
+                  tr
+                    td.text-center(colspan='4') No depositors found
 
       .row.g-3.mt-4
         .col-lg-12

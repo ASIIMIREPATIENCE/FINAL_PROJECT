@@ -301,10 +301,10 @@ router.get("/manager", isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// SALES ATTENDANT DASHBOARD ROUTE
-// Access: Users with role 'sales_attendant', 'store_manager', or 'admin'
-// ============================================================
+// // ============================================================
+// // SALES ATTENDANT DASHBOARD ROUTE
+// // Access: Users with role 'sales_attendant', 'store_manager', or 'admin'
+// // ============================================================
 
 /**
  * GET /salesattendant

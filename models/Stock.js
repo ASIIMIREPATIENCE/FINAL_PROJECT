@@ -1,4 +1,3 @@
-// 
 const mongoose = require('mongoose');
 
 const stockSchema = new mongoose.Schema({
@@ -7,7 +6,7 @@ const stockSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    category:{
+    category: {
         type: String,
         required: true,
         trim: true,
@@ -24,15 +23,28 @@ const stockSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    // Supplier Information
     supplier: {
         type: String,
         required: true,
         trim: true,
     },
+    supplierEmail: {
+        type: String,
+        trim: true,
+        lowercase: true
+    },
+    supplierPhone: {
+        type: String,
+        trim: true,
+    },
+    supplierCompany: {
+        type: String,
+        trim: true,
+    },
     reorderlevel: {
         type: Number,
         required: true,
-        trim: true,
     },
     paymentMethod: {
         type: String,
@@ -43,7 +55,6 @@ const stockSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    // Add these 2 fields for payment tracking
     amountPaid: {
         type: Number,
         default: 0
@@ -51,7 +62,6 @@ const stockSchema = new mongoose.Schema({
     attendant: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Registration',
-    
     },
     attendantName: {
         type: String,
