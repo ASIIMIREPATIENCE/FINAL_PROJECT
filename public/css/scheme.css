@@ -326,3 +326,107 @@
 .btn-back:hover {
     background: rgba(255,255,255,0.2);
 }
+
+/* Action Buttons Styling */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* View Button */
+.btn-sm.btn-info {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-sm.btn-info:hover {
+    background: #138496;
+    transform: translateY(-1px);
+}
+
+/* Mark Ready Button (Warning) */
+.btn-sm.btn-warning {
+    background: #ffc107;
+    color: #0D3B2E;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-sm.btn-warning:hover {
+    background: #e0a800;
+    transform: translateY(-1px);
+}
+
+/* Record Pickup Button (Success) */
+.btn-sm.btn-success {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-sm.btn-success:hover {
+    background: #1e7e34;
+    transform: translateY(-1px);
+}
+
+/* Cancel Button (Danger) */
+.btn-sm.btn-danger {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-sm.btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+/* Badge Styles */
+.badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+/* Status Badge Colors */
+.badge[style*="background: #28a745"] { background: #28a745 !important; }
+.badge[style*="background: #ffc107"] { background: #ffc107 !important; color: #0D3B2E !important; }
+.badge[style*="background: #17a2b8"] { background: #17a2b8 !important; }
+.badge[style*="background: #6c757d"] { background: #6c757d !important; }
+.badge[style*="background: #dc3545"] { background: #dc3545 !important; }

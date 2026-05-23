@@ -1,0 +1,144 @@
+doctype html
+html(lang='en')
+head
+  meta(charset='UTF-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1.0')
+  title NyondoStock - Pickup Receipt
+  link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
+  link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
+  link(rel='stylesheet' href='/css/deposit_receipt.css')
+  style.
+    @media print {
+      .no-print { display: none; }
+      .receipt-container { margin: 0; padding: 0; }
+    }
+    .receipt-container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .receipt-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .receipt-body {
+      padding: 1.5rem;
+    }
+    .receipt-footer {
+      background: #f8f9fa;
+      padding: 1rem;
+      text-align: center;
+      border-top: 1px solid #dee2e6;
+    }
+    .receipt-line {
+      border-top: 1px dashed #dee2e6;
+      margin: 1rem 0;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .total-row {
+      border-top: 2px solid #dee2e6;
+      padding-top: 8px;
+      margin-top: 8px;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+    .company-info {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .btn-print, .btn-back {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      margin: 0 0.25rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-print {
+      background: #2E7D32;
+      color: white;
+    }
+    .btn-back {
+      background: #6c757d;
+      color: white;
+    }
+
+body
+  .receipt-container
+    .receipt-card
+      .receipt-body
+        .company-info
+          img(src='/images/logo.png' alt='Logo' style='height: 50px; margin-bottom: 10px;')
+          h4 NyondoStock Hardware
+          p(style='margin: 0; font-size: 0.8rem;') Tel: +256 7012345678
+          p(style='margin: 0; font-size: 0.8rem;') Nansana, Kampala, Uganda
+        
+        .receipt-line
+        
+        .receipt-details
+          .detail-row
+            span <strong>Receipt No:</strong>
+            span #PICK-#{depositor._id.toString().slice(-8)}
+          .detail-row
+            span <strong>Pickup Date:</strong>
+            span #{pickupDate ? new Date(pickupDate).toLocaleString() : new Date().toLocaleString()}
+          .detail-row
+            span <strong>Customer Name:</strong>
+            span #{depositor.fullName}
+          .detail-row
+            span <strong>Phone Number:</strong>
+            span #{depositor.phoneNumber}
+          .detail-row
+            span <strong>Picked Up By:</strong>
+            span #{pickedUpBy || depositor.fullName}
+          .detail-row
+            span <strong>Attendant:</strong>
+            span #{attendantName || 'System Admin'}
+        
+        .receipt-line
+        
+        .section-title(style='font-weight: 700; margin-bottom: 8px;') Items Collected:
+        each item in depositor.items
+          .detail-row
+            span #{item.productname} (x#{item.quantity})
+            span UGX #{item.subtotal.toLocaleString()}
+        
+        .receipt-line
+        
+        .receipt-details
+          .detail-row
+            span <strong>Total Amount Paid:</strong>
+            span UGX #{depositor.totalPaid ? depositor.totalPaid.toLocaleString() : '0'}
+          .total-row
+            span <strong>Status:</strong>
+            span <strong style='color: #28a745;'>COMPLETED - PICKED UP</strong>
+        
+        .receipt-line
+        
+        .text-center
+          p(style='margin: 0; font-size: 0.8rem;') Thank you for saving with us!
+          p(style='margin: 0; font-size: 0.7rem; color: #6c757d;') Your items have been collected.
+      
+      .receipt-footer.no-print
+        button.btn-print(onclick='window.print()')
+          i.bi.bi-printer.me-2
+          | Print Receipt
+        a.btn-back(href='/scheme')
+          i.bi.bi-arrow-left.me-2
+          | Back to Scheme
+
+  script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
+  script.
+    window.onload = function() {
+      window.print();
+    }

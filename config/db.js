@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const connectDb = async () => {
     try {
         // Temporary hardcoded connection - replace with your actual database name
-        await mongoose.connect('mongodb://localhost:27017/nyondo');
+        await mongoose.connect('mongodb://localhost:27017/trial');
         console.log('MongoDB connected successfully  Well done!');
     } catch (error) {
         console.log('Connection error:', error.message);

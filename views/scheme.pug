@@ -78,7 +78,7 @@ body
           .col-md-2
             label.form-label NIN
             input.form-control(type='text' name='nin' placeholder='Enter NIN' required)
-          .col-md-2
+          .col-md-3
             label.form-label Employer (Optional)
             input.form-control(type='text' name='employer' placeholder='Company name')
         
@@ -171,7 +171,7 @@ body
             select.form-select(name='depositorId' required)
               option(value='') Select depositor...
               each depositor in depositors
-                option(value=depositor._id) #{depositor.fullName} - #{depositor.savingFor} - Remaining: UGX #{depositor.remainingBalance.toLocaleString()}
+                option(value=depositor._id) #{depositor.fullName} - Remaining: UGX #{depositor.remainingBalance.toLocaleString()}
           .col-md-2
             label.form-label Amount Paying (UGX)
             input.form-control(type='number' name='amountPaid' placeholder='Amount' required min='1000')
@@ -189,7 +189,7 @@ body
               i.bi.bi-check-circle
               | Pay
 
-    // Registered Depositors Table
+    // Registered Depositors Table with Pickup Status
     .section-title
       i.bi.bi-people
       | Registered Depositors
@@ -205,11 +205,14 @@ body
             th Total Owed (UGX)
             th Total Paid (UGX)
             th Remaining Balance (UGX)
+            th Pickup Status
             th Status
+            th Actions
         tbody
           if depositors && depositors.length
             each depositor in depositors
               - var remaining = depositor.totalAmountOwed - depositor.totalPaid
+              - var pickupStatus = depositor.pickupStatus || 'pending'
               tr
                 td #{depositor.joinDate ? new Date(depositor.joinDate).toLocaleDateString() : 'N/A'}
                 td #{depositor.fullName}
@@ -233,15 +236,47 @@ body
                   else
                     span(style='color: #dc3545; font-weight: bold;') UGX #{remaining.toLocaleString()}
                 td
-                  if remaining <= 0
+                  if pickupStatus === 'picked_up'
+                    span.badge(style='background: #28a745; color: white;') Picked Up
+                  else if pickupStatus === 'ready'
+                    span.badge(style='background: #ffc107; color: black;') Ready for Pickup
+                  else if remaining <= 0
+                    span.badge(style='background: #17a2b8; color: white;') Awaiting Pickup
+                  else
+                    span.badge(style='background: #6c757d; color: white;') Payment Pending
+                td
+                  if depositor.status === 'picked_up'
                     span.badge(style='background: #28a745; color: white;') Completed
-                  else if depositor.totalPaid > 0
+                  else if depositor.status === 'completed'
+                    span.badge(style='background: #17a2b8; color: white;') Paid - Ready
+                  else if depositor.status === 'active'
                     span.badge(style='background: #ffc107; color: black;') In Progress
                   else
-                    span.badge(style='background: #dc3545; color: white;') Pending
+                    span.badge(style='background: #dc3545; color: white;') #{depositor.status}
+                td
+                  .action-buttons(style='display: flex; gap: 5px; flex-wrap: wrap;')
+                    button.btn-sm.btn-info(type='button' data-bs-toggle='modal' data-bs-target=`#historyModal${depositor._id}`)
+                      i.bi.bi-clock-history
+                      | View
+                    
+                    if remaining <= 0 && pickupStatus === 'pending'
+                      form(action=`/mark-ready/${depositor._id}` method='POST' style='display: inline;')
+                        button.btn-sm.btn-warning(type='submit' style='background: #ffc107; color: black;' onclick='return confirm("Mark these goods as ready for pickup?")')
+                          i.bi.bi-check-circle
+                          | Mark Ready
+                    
+                    if pickupStatus === 'ready'
+                      button.btn-sm.btn-success(type='button' data-bs-toggle='modal' data-bs-target=`#pickupModal${depositor._id}`)
+                        i.bi.bi-truck
+                        | Record Pickup
+                      
+                      form(action=`/cancel-pickup/${depositor._id}` method='POST' style='display: inline;')
+                        button.btn-sm.btn-danger(type='submit' onclick='return confirm("Cancel ready status?")')
+                          i.bi.bi-x-circle
+                          | Cancel
           else
             tr
-              td.text-center(colspan='10') No depositors registered yet
+              td.text-center(colspan='11') No depositors registered yet
 
     // Deposit Transactions Table
     .section-title.mt-4
@@ -272,6 +307,91 @@ body
           else
             tr
               td.text-center(colspan='7') No deposit transactions recorded yet
+
+  // Pickup Record Modal
+  each depositor in depositors
+    .modal.fade(id=`pickupModal${depositor._id}` tabindex='-1')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h5.modal-title Record Pickup - #{depositor.fullName}
+            button.btn-close(type='button' data-bs-dismiss='modal')
+          form(action=`/record-pickup/${depositor._id}` method='POST')
+            .modal-body
+              .mb-3
+                label.form-label Picked Up By
+                input.form-control(type='text' name='pickedUpBy' placeholder="Customer's name or representative" required)
+              .mb-3
+                label.form-label Notes (Optional)
+                textarea.form-control(name='notes' rows='3' placeholder='Any additional notes about the pickup...')
+              .alert.alert-info
+                i.bi.bi-info-circle.me-2
+                strong Items to be picked up:
+                ul.mt-2.mb-0
+                  each item in depositor.items
+                    li #{item.productname} (x#{item.quantity})
+            .modal-footer
+              button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+              button.btn.btn-success(type='submit')
+                i.bi.bi-truck
+                | Confirm Pickup
+
+  // History Modal
+  each depositor in depositors
+    .modal.fade(id=`historyModal${depositor._id}` tabindex='-1')
+      .modal-dialog.modal-lg
+        .modal-content
+          .modal-header
+            h5.modal-title Transaction History - #{depositor.fullName}
+            button.btn-close(type='button' data-bs-dismiss='modal')
+          .modal-body
+            // Deposit History
+            if depositor.depositHistory && depositor.depositHistory.length
+              h6 Deposit History
+              .table-responsive
+                table.table.table-sm
+                  thead
+                    tr
+                      th Date
+                      th Amount Paid
+                      th Balance After
+                      th Payment Method
+                      th Attendant
+                  tbody
+                    each transaction in depositor.depositHistory.slice().reverse()
+                      tr
+                        td #{transaction.date ? new Date(transaction.date).toLocaleString() : 'N/A'}
+                        td UGX #{transaction.amountPaid.toLocaleString()}
+                        td UGX #{transaction.balanceAfter.toLocaleString()}
+                        td #{transaction.paymentMethod || 'Cash'}
+                        td #{transaction.attendantName || 'unknown'}
+            else
+              p No deposit history found.
+            
+            // Pickup History
+            if depositor.pickupHistory && depositor.pickupHistory.length
+              h6.mt-3 Pickup History
+              .table-responsive
+                table.table.table-sm
+                  thead
+                    tr
+                      th Date
+                      th Action
+                      th Attendant
+                      th Notes
+                  tbody
+                    each pickup in depositor.pickupHistory.slice().reverse()
+                      tr
+                        td #{pickup.date ? new Date(pickup.date).toLocaleString() : 'N/A'}
+                        td
+                          if pickup.action === 'marked_ready'
+                            span.badge(style='background: #ffc107; color: black;') Marked Ready
+                          else if pickup.action === 'picked_up'
+                            span.badge(style='background: #28a745; color: white;') Picked Up
+                          else
+                            span.badge(style='background: #dc3545; color: white;') Cancelled
+                        td #{pickup.attendantName || 'unknown'}
+                        td #{pickup.notes || '-'}
 
   .footer
     i.bi.bi-shield-check

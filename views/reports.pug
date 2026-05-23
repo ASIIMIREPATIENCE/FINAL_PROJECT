@@ -7,6 +7,7 @@ html(lang='en')
     link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
     link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
     link(rel='stylesheet' href='/css/reports.css')
+    script(src='https://cdn.jsdelivr.net/npm/chart.js')
   
   body
     .sidebar
@@ -98,9 +99,12 @@ html(lang='en')
                 .d-flex.justify-content-between.mb-1
                   span 📱 Mobile Money:
                   strong UGX #{summary.mobileSales ? summary.mobileSales.toLocaleString() : '0'}
-                .d-flex.justify-content-between
+                .d-flex.justify-content-between.mb-1
                   span 💳 Bank Transfer:
                   strong UGX #{summary.bankSales ? summary.bankSales.toLocaleString() : '0'}
+                .d-flex.justify-content-between
+                  span 🏦 Deposit Scheme:
+                  strong UGX #{summary.depositSchemeSales ? summary.depositSchemeSales.toLocaleString() : '0'}
           
           .col-md-8
             .report-card
@@ -202,7 +206,7 @@ html(lang='en')
                   tr
                     td.text-center(colspan='7') No stock items found
       
-      // ========== DEPOSIT SCHEME REPORT (FIXED) ==========
+      // ========== DEPOSIT SCHEME REPORT ==========
       if selectedReport === 'scheme'
         .row.g-3.mb-4
           .col-md-3
@@ -290,9 +294,11 @@ html(lang='en')
                   th Phone Number
                   th NIN
                   th Employer
+                  th Items
                   th Total Owed (UGX)
                   th Total Paid (UGX)
                   th Remaining Balance (UGX)
+                  th Pickup Status
                   th # Deposits
               tbody
                 if schemeData && schemeData.length
@@ -304,6 +310,7 @@ html(lang='en')
                       td #{depositor.phoneNumber}
                       td #{depositor.nin || 'N/A'}
                       td #{depositor.employer || 'N/A'}
+                      td #{itemsList}
                       td UGX #{depositor.totalOwed ? depositor.totalOwed.toLocaleString() : '0'}
                       td UGX #{depositor.totalDeposits ? depositor.totalDeposits.toLocaleString() : '0'}
                       td 
@@ -311,10 +318,19 @@ html(lang='en')
                           span(style='color: #28a745; font-weight: bold;') PAID
                         else
                           span(style='color: #dc3545; font-weight: bold;') UGX #{depositor.remainingBalance.toLocaleString()}
+                      td
+                        if depositor.pickupStatus === 'picked_up'
+                          span.badge(style='background: #28a745; color: white;') Picked Up
+                        else if depositor.pickupStatus === 'ready'
+                          span.badge(style='background: #ffc107; color: black;') Ready
+                        else if depositor.remainingBalance <= 0
+                          span.badge(style='background: #17a2b8; color: white;') Awaiting
+                        else
+                          span.badge(style='background: #6c757d; color: white;') Pending
                       td #{depositor.depositCount || 0}
                 else
                   tr
-                    td.text-center(colspan='10') No depositors found
+                    td.text-center(colspan='11') No depositors found
       
       // ========== SUPPLIER CREDIT REPORT ==========
       if selectedReport === 'supplier-credit'
@@ -390,7 +406,7 @@ html(lang='en')
                       td UGX #{item.totalOwed.toLocaleString()}
                       td UGX #{item.paidAmount.toLocaleString()}
                       td UGX #{item.balance.toLocaleString()}
-                      td #{item.dueDate ? new Date(item.dueDate).toLocaleDateString() : 'N/A'}
+                      td #{item.dueDate ? new Date(item.dueDate).toLocaleString() : 'N/A'}
                       td
                         if item.status === 'Overdue'
                           span.badge-overdue Overdue
@@ -444,35 +460,14 @@ html(lang='en')
       |  NyondoStock &mdash; Enterprise Hardware Management System
 
     script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
-    script(src='https://cdn.jsdelivr.net/npm/chart.js')
-    script.
-      const salesData = {
-        cashSales: #{summary.cashSales || 0},
-        mobileSales: #{summary.mobileSales || 0},
-        bankSales: #{summary.bankSales || 0}
-      };
-      
-      if (document.getElementById('paymentChart') && (salesData.cashSales > 0 || salesData.mobileSales > 0 || salesData.bankSales > 0)) {
-        const ctx = document.getElementById('paymentChart').getContext('2d');
-        new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-            labels: ['Cash', 'Mobile Money', 'Bank Transfer'],
-            datasets: [{
-              data: [salesData.cashSales, salesData.mobileSales, salesData.bankSales],
-              backgroundColor: ['#0D3B2E', '#C6A43F', '#2E7D64'],
-              borderWidth: 0
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-              legend: { 
-                position: 'bottom',
-                labels: { font: { size: 11 } }
-              }
-            }
-          }
-        });
-      }
+    script(src='/js/reports-chart.js')
+    
+    //- Pass data from server to JavaScript for the chart
+    if selectedReport === 'sales'
+      script.
+        window.salesChartData = {
+          cashSales: #{summary.cashSales || 0},
+          mobileSales: #{summary.mobileSales || 0},
+          bankSales: #{summary.bankSales || 0},
+          depositSchemeSales: #{summary.depositSchemeSales || 0}
+        };

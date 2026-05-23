@@ -106,7 +106,8 @@ router.get('/reports', isAuthenticated, async (req, res) => {
             // Break down sales by payment method
             let cashSales = 0;      // Total from cash payments
             let mobileSales = 0;    // Total from mobile money payments
-            let bankSales = 0;       // Total from bank transfer payments
+            let bankSales = 0;   // Total from bank transfer payments
+            let depositSchemeSales = 0;   // Total from deposit scheme payments
             
             for (const sale of sales) {
                 if (sale.paymentmethod === 'Cash') {
@@ -115,7 +116,9 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                     mobileSales += sale.grandTotal || 0;
                 } else if (sale.paymentmethod === 'Bank Transfer') {
                     bankSales += sale.grandTotal || 0;
-                }
+                } else if (sale.paymentmethod === 'Deposit Scheme') {  
+        depositSchemeSales += sale.grandTotal || 0;
+    }
             }
             
             // Calculate top selling products (by quantity sold, not revenue)
@@ -146,6 +149,7 @@ router.get('/reports', isAuthenticated, async (req, res) => {
                 cashSales,
                 mobileSales,
                 bankSales,
+                depositSchemeSales,  
                 topProducts
             };
         }

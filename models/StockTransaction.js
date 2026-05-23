@@ -13,7 +13,7 @@ const stockTransactionSchema = new mongoose.Schema({
     },
     transactionType: {
         type: String,
-        enum: ['ADD_NEW', 'UPDATE_QUANTITY', 'DELETE'],
+        enum: ['ADD_NEW', 'UPDATE_QUANTITY', 'DELETE', 'PICKUP_DEDUCTION'],
         required: true
     },
     previousQuantity: {
@@ -57,7 +57,7 @@ const stockTransactionSchema = new mongoose.Schema({
     },
     paymentMethod: {
         type: String,
-        enum: ['Cash', 'Credit'],
+        enum: ['Cash', 'Credit'], 
         default: 'Cash'
     },
     attendant: {

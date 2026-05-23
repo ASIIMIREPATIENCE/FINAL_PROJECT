@@ -21,7 +21,7 @@ const salesSchema = new mongoose.Schema({
     },
     paymentmethod: {
         type: String,
-        enum: ['Cash', 'Mobile Money', 'Bank Transfer'],
+        enum: ['Cash', 'Mobile Money', 'Bank Transfer','Deposit Scheme'],
         default: 'Cash',
         required: [true]
     },

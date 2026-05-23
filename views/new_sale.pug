@@ -88,6 +88,31 @@ html(lang='en')
               label.form-label Distance (km)
               input#distance.form-control(type='number' name='distance' value='0' min='0')
         
+        //- ADD PRODUCT TO CART - MOVED HERE (AFTER Transport Information, BEFORE Shopping Cart)
+        .form-card
+          .form-title
+            i.bi.bi-plus-circle(style='color: #C6A43F;')
+            | Add Product to Cart
+          
+          .row.g-3
+            .col-md-4
+              label.form-label Product Name
+              select#productName.form-select
+                option(value='' disabled selected) Select Product
+                each product in items 
+                  option(value=product.productname data-price=product.sellingprice data-stock=product.quantity)= `${product.productname} (Stock: ${product.quantity} | Price: ${product.sellingprice} UGX)`
+            .col-md-3
+              label.form-label Quantity
+              input#quantity.form-control(type='number' value='1' min='1')
+            .col-md-3
+              label.form-label Unit Price (UGX)
+              input#unitPrice.form-control(type='number')
+            .col-md-2
+              label.form-label &nbsp;
+              button#addToCart.btn.btn-warning(type='button' style='background:#C6A43F; color:white; width:100%')
+                i.bi.bi-cart-plus
+                | Add to Cart
+        
         .form-card
           .form-title
             i.bi.bi-cart(style='color: #C6A43F;')
@@ -124,30 +149,6 @@ html(lang='en')
                     strong GRAND TOTAL:
                   td.text-end
                     strong UGX <span id="displayTotal">0</span>
-        
-        .form-card
-          .form-title
-            i.bi.bi-plus-circle(style='color: #C6A43F;')
-            | Add Product to Cart
-          
-          .row.g-3
-            .col-md-4
-              label.form-label Product Name
-              select#productName.form-select
-                option(value='' disabled selected) Select Product
-                each product in items 
-                  option(value=product.productname data-price=product.sellingprice data-stock=product.quantity)= `${product.productname} (Stock: ${product.quantity} | Price: ${product.sellingprice} UGX)`
-            .col-md-3
-              label.form-label Quantity
-              input#quantity.form-control(type='number' value='1' min='1')
-            .col-md-3
-              label.form-label Unit Price (UGX)
-              input#unitPrice.form-control(type='number')
-            .col-md-2
-              label.form-label &nbsp;
-              button#addToCart.btn.btn-warning(type='button' style='background:#C6A43F; color:white; width:100%')
-                i.bi.bi-cart-plus
-                | Add to Cart
         
         input#cartItems(type='hidden' name='cartItems')
         
