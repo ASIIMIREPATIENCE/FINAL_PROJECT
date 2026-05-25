@@ -70,6 +70,18 @@ router.get('/editStock/:id', isAuthenticated, async (req, res) => {
         // Find the stock item by its ID
         const item = await Stock.findById(req.params.id).populate('attendant', 'fullname');
         
+        // ✅ ADD THIS NULL CHECK RIGHT HERE
+        if (!item) {
+            console.log(`[${new Date().toLocaleString()}] Edit form requested for non-existent stock ID: ${req.params.id}`);
+            
+            // If using flash messages (optional)
+            if (req.flash) {
+                req.flash('error', 'Stock item not found - it may have been deleted');
+            }
+            
+            return res.redirect('/addStock');
+        }
+        
         // Render the edit form with the item data
         res.render('stock_edit', { 
             item: item,
@@ -305,9 +317,22 @@ router.post('/editStock/:id', isAuthenticated, async (req, res) => {
         const attendantName = req.user ? req.user.fullname : 'Unknown';
         const attendantId = req.user ? req.user._id : null;
         
-        // Find the existing item to get old quantity
+        // Find the existing item to get old quantity and product info
         const existingItem = await Stock.findById(req.params.id);
-        const oldQuantity = existingItem ? existingItem.quantity : 0;
+        
+        // CHECK IF ITEM EXISTS
+        if (!existingItem) {
+            console.log(`[${new Date().toLocaleString()}] Edit failed - Stock item not found: ${req.params.id}`);
+            
+            // If using flash messages
+            if (req.flash) {
+                req.flash('error', 'Stock item not found - it may have been deleted');
+            }
+            
+            return res.redirect('/addStock');
+        }
+        
+        const oldQuantity = existingItem.quantity || 0;
         const newQuantity = Number(quantity);
         
         // Update the stock item in the database
@@ -331,7 +356,7 @@ router.post('/editStock/:id', isAuthenticated, async (req, res) => {
             category: existingItem.category,
             transactionType: 'UPDATE_QUANTITY',      // Type of transaction
             previousQuantity: oldQuantity,
-            addedQuantity: newQuantity - oldQuantity, // Change in quantity
+            addedQuantity: newQuantity - oldQuantity, // Change in quantity (negative if decreased)
             newQuantity: newQuantity,
             costprice: Number(costprice),
             sellingprice: Number(sellingprice),
@@ -349,10 +374,17 @@ router.post('/editStock/:id', isAuthenticated, async (req, res) => {
         
         await transaction.save();
         
-        console.log(`[${new Date().toLocaleString()}] Stock updated by ${attendantName} with ID:`, req.params.id);
+        console.log(`[${new Date().toLocaleString()}] Stock updated by ${attendantName} with ID: ${req.params.id}`);
         res.redirect('/addStock');
+        
     } catch (error) {
-        console.error(error);
+        console.error('Error editing stock:', error);
+        
+        // If using flash messages
+        if (req.flash) {
+            req.flash('error', 'Error updating stock: ' + error.message);
+        }
+        
         res.redirect('/addStock');
     }
 });

@@ -129,7 +129,7 @@ body
             input.form-control(type='email' placeholder='supplier@company.com' name='supplierEmail')
           .col-md-2
             label.form-label Supplier Phone
-            input.form-control(type='tel' placeholder='+256XXXXXXXXX' name='supplierPhone')
+            input.form-control(type='tel' value='+256' name='supplierPhone')
           .col-md-3
             label.form-label Supplier Company
             input.form-control(type='text' placeholder='Company name' name='supplierCompany')
@@ -236,7 +236,7 @@ body
             tr
               td.text-center(colspan='6') No supplier information found
 
-    // SECTION 3: Stock Transaction History Table
+    // SECTION 3: Stock Transaction History Table (NO ACTION BUTTONS)
     .section-title.mt-4
       i.bi.bi-clock-history
       | Stock Transaction History
@@ -254,7 +254,6 @@ body
             th Selling Price
             th Supplier
             th Attendant
-            th Actions
         tbody
           if stockTransactions && stockTransactions.length
             each transaction in stockTransactions
@@ -288,18 +287,9 @@ body
                 td UGX #{transaction.sellingprice ? transaction.sellingprice.toLocaleString() : '0'}
                 td #{transaction.supplier || 'N/A'}
                 td #{transaction.attendantName || 'unknown'}
-                td(style='text-align: center;')
-                  .action-buttons
-                    a.btn-edit-stock(href=`/editStock/${transaction.productId || transaction._id}`)
-                      i.bi.bi-pencil
-                      | Edit
-                    form(action=`/deleteStock/${transaction.productId || transaction._id}` method='POST' style='display: inline; margin: 0;')
-                      button.btn-delete-stock(type='submit' onclick='return confirm("Are you sure you want to delete this stock item? This will affect inventory.")')
-                        i.bi.bi-trash
-                        | Delete
           else
             tr
-              td.text-center(colspan='11') No stock transaction records found
+              td.text-center(colspan='10') No stock transaction records found
 
   .footer
     i.bi.bi-shield-check

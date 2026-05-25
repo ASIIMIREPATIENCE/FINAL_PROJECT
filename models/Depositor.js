@@ -10,16 +10,18 @@ const depositorSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
+        match: /^\+256[0-9]{9}$/
     },
     nin: {
         type: String,
         required: true,
         unique: true,
         trim: true,
+        match: /^(CF|CM).{12}$/
     },
     employer: {
         type: String,
-        default: '',
+        required: false,
         trim: true,
     },
     joinDate: {
@@ -35,19 +37,23 @@ const depositorSchema = new mongoose.Schema({
             type: Number,
             required: true,
             default: 1,
+            min: 1
         },
         unitprice: {
             type: Number,
             required: true,
+            min: 0
         },
         subtotal: {
             type: Number,
             required: true,
+            min: 0
         }
     }],
     itemsSubtotal: {
         type: Number,
         default: 0,
+        min: 0
     },
     needTransport: {
         type: Boolean,
@@ -56,22 +62,27 @@ const depositorSchema = new mongoose.Schema({
     distance: {
         type: Number,
         default: 0,
+        min: 0
     },
     transportFee: {
         type: Number,
         default: 0,
+        min: 0
     },
     totalAmountOwed: {
         type: Number,
         default: 0,
+        min: 0
     },
     totalPaid: {
         type: Number,
         default: 0,
+        min: 0
     },
     remainingBalance: {
         type: Number,
         default: 0,
+        min: 0
     },
     // Pickup fields
     pickupStatus: {
@@ -111,7 +122,8 @@ const depositorSchema = new mongoose.Schema({
         },
         notes: {
             type: String,
-            trim: true
+            trim: true,
+            required: false
         }
     }],
     depositHistory: [{
@@ -122,14 +134,17 @@ const depositorSchema = new mongoose.Schema({
         amountPaid: {
             type: Number,
             required: true,
+            min: 0
         },
         totalOwedAtTime: {
             type: Number,
             required: true,
+            min: 0
         },
         balanceAfter: {
             type: Number,
             required: true,
+            min: 0
         },
         paymentMethod: {
             type: String,

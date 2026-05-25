@@ -30,7 +30,8 @@ const supplierCreditSchema = new mongoose.Schema({
     },
     notes: {
         type: String,
-        trim: true
+        trim: true,
+        required: false
     },
     status: {
         type: String,
@@ -44,7 +45,8 @@ const supplierCreditSchema = new mongoose.Schema({
     },
     paymentReference: {
         type: String,
-        trim: true
+        trim: true,
+        required: false
     },
     paidDate: {
         type: Date

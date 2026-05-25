@@ -13,16 +13,19 @@ const stockTransactionSchema = new mongoose.Schema({
     },
     transactionType: {
         type: String,
-        enum: ['ADD_NEW', 'UPDATE_QUANTITY', 'DELETE', 'PICKUP_DEDUCTION'],
+        enum: ['ADD_NEW', 'UPDATE_QUANTITY', 'DELETE', ],
         required: true
     },
     previousQuantity: {
         type: Number,
-        default: 0
+        default: 0,
+        
+        
     },
     addedQuantity: {
         type: Number,
-        default: 0
+        default: 0,
+        
     },
     newQuantity: {
         type: Number,
@@ -30,11 +33,13 @@ const stockTransactionSchema = new mongoose.Schema({
     },
     costprice: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     },
     sellingprice: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     },
     supplier: {
         type: String,
@@ -46,7 +51,8 @@ const stockTransactionSchema = new mongoose.Schema({
     },
     supplierPhone: {
         type: String,
-        trim: true
+        trim: true,
+        match: /^\+256[0-9]{9}$/
     },
     supplierCompany: {
         type: String,

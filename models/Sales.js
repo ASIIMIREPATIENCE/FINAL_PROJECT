@@ -4,12 +4,12 @@ const mongoose = require('mongoose');
 const salesSchema = new mongoose.Schema({
     customername: {
         type: String,
-        required: [true, 'Customer name is required'],
+        required: true, 
         trim: true
     },
     phonenumber: {
         type: String,
-        required: [true, 'Phone number is required'],
+        required: true,
         trim: true,
         match: /^\+256[0-9]{9}$/,
     },
@@ -43,7 +43,8 @@ const salesSchema = new mongoose.Schema({
         },
         subtotal: {
             type: Number,
-            required: true
+            required: true,
+            min: 0
         }
     }],
     // Totals for the entire transaction

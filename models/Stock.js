@@ -13,15 +13,18 @@ const stockSchema = new mongoose.Schema({
     },
     quantity: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     },
     costprice: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     },
     sellingprice: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     },
     // Supplier Information
     supplier: {
@@ -32,19 +35,23 @@ const stockSchema = new mongoose.Schema({
     supplierEmail: {
         type: String,
         trim: true,
-        lowercase: true
+        required: false
     },
     supplierPhone: {
         type: String,
         trim: true,
+        match: /^\+256[0-9]{9}$/,
+        required: true
     },
     supplierCompany: {
         type: String,
         trim: true,
+        required: true
     },
     reorderlevel: {
         type: Number,
         required: true,
+        min: 0
     },
     paymentMethod: {
         type: String,
