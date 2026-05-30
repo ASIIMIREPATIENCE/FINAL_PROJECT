@@ -22,6 +22,20 @@ body
         
         .receipt-line
         
+        // Edited Badge (shows if sale was edited)
+        if edited === 'true' || edited === true
+          .alert.alert-warning.text-center(style='padding: 5px; margin-bottom: 15px; font-size: 0.8rem;')
+            i.bi.bi-pencil-square
+            strong  This sale has been edited
+        
+        // Voided Badge (shows if sale was voided)
+        if sale.voided === true
+          .alert.alert-danger.text-center(style='padding: 5px; margin-bottom: 15px; font-size: 0.8rem;')
+            i.bi.bi-exclamation-triangle
+            strong  THIS SALE HAS BEEN VOIDED
+            br
+            small Voided by: #{sale.voidedBy || 'Unknown'} on #{sale.voidedAt ? new Date(sale.voidedAt).toLocaleString() : 'Unknown'}
+        
         // Customer Details
         .receipt-details
           .detail-row
@@ -79,24 +93,25 @@ body
         .receipt-details
           .detail-row
             span <strong>Subtotal (Items):</strong>
-            span UGX #{(sale.cartSubtotal || cartSubtotal || 0).toLocaleString()}
+            span UGX #{(sale.cartSubtotal || 0).toLocaleString()}
           
           if sale.transportFee && sale.transportFee > 0
             .detail-row
               span <strong>Transport Fee:</strong>
               span UGX #{sale.transportFee.toLocaleString()}
-          else if transportFee && transportFee > 0
-            .detail-row
-              span <strong>Transport Fee:</strong>
-              span UGX #{transportFee.toLocaleString()}
           else
             .detail-row
               span <strong>Transport Fee:</strong>
               span UGX 0
           
+          if sale.freeTransportApplied
+            .detail-row
+              span <strong>Free Transport Applied:</strong>
+              span (Order ≥ UGX 500,000 & ≤ 10km)
+          
           .total-row
             span <strong>TOTAL:</strong>
-            strong UGX #{(sale.grandTotal || grandTotal || 0).toLocaleString()}
+            strong UGX #{(sale.grandTotal || 0).toLocaleString()}
         
         .receipt-line
         

@@ -3,17 +3,13 @@ const router = express.Router();
 const Sale = require('../models/Sales'); 
 const Stock = require('../models/Stock'); 
 const Registration = require('../models/Registration');
-const SupplierCredit = require('../models/Supplier');
 const Depositor = require('../models/Depositor'); 
+const SupplierCredit = require('../models/SupplierCredit');
 
 // ============================================================
 // AUTHENTICATION MIDDLEWARE
 // ============================================================
 
-/**
- * Middleware to check if user is authenticated
- * Redirects to login page if not authenticated
- */
 function isAuthenticated(req, res, next) {
     if (req.isAuthenticated && req.isAuthenticated()) {
         return next();
@@ -26,32 +22,24 @@ function isAuthenticated(req, res, next) {
 // Access: Only users with role 'admin'
 // ============================================================
 
-/**
- * GET /admin
- * Displays the admin dashboard with:
- * - Stock inventory overview
- * - Supplier credit summary
- * - Deposit scheme summary
- * - Recent sales transactions
- * - Statistics cards (Stock Value, Today's Sales, Supplier Credit, Total Deposits)
- */
 router.get("/admin", isAuthenticated, async (req, res) => {
-    // Role-based access control - only admin allowed
     if (!req.user || req.user.role !== 'admin') {
         return res.redirect('/userlogin');
     }
     
     try {
-        // Fetch all sales with attendant details
         const sales = await Sale.find()
             .populate('attendant', 'fullname')
             .sort({ Date: -1 });
         
-        // Fetch all stock items and depositors
         const stockItems = await Stock.find();
         const depositors = await Depositor.find();
         
-        // Transform sales data for template display
+        // FIXED: Get credit data from SupplierCredit collection, NOT from Stock
+        const supplierCredits = await SupplierCredit.find()
+            .populate('attendant', 'fullname')
+            .sort({ purchaseDate: -1 });
+        
         const allSales = sales.map(sale => ({
             _id: sale._id,
             Date: sale.Date,
@@ -64,39 +52,44 @@ router.get("/admin", isAuthenticated, async (req, res) => {
             attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
         }));
         
-        // Process credit stock items for supplier credit table
-        let creditStockItems = await Stock.find({ paymentMethod: 'Credit' });
-        
-        creditStockItems = creditStockItems.map(item => {
-            const totalOwed = (item.costprice || 0) * (item.quantity || 0);
-            const paid = item.amountPaid || 0;
-            const balance = totalOwed - paid;
+        // Process credit items from SupplierCredit collection
+        let creditStockItems = supplierCredits.map(item => {
+            const balance = item.balance;
             
-            let dueDate = null;
-            let status = 'Pending';
+            let dueDate = item.dueDate;
+            let status = item.status;
             const today = new Date();
             
-            if (item.Date) {
-                dueDate = new Date(item.Date);
-                dueDate.setDate(dueDate.getDate() + 30); // 30 days credit period
-                
-                if (balance <= 0) {
-                    status = 'Paid';
-                } else if (dueDate < today) {
-                    status = 'Overdue';
-                }
+            if (balance <= 0) {
+                status = 'Paid';
+            } else if (dueDate && dueDate < today) {
+                status = 'Overdue';
             }
             
             return {
-                ...item.toObject(),
+                _id: item._id,
+                productname: item.productname,
+                supplier: item.supplier,
+                quantity: item.quantity,
+                costprice: item.costprice,
+                totalOwed: item.totalAmount,
+                paidAmount: item.amountPaid,
                 balance: balance,
                 dueDate: dueDate,
                 status: status,
-                supplier: item.supplier
+                attendantName: item.attendantName || (item.attendant ? item.attendant.fullname : 'Unknown')
             };
         });
         
-        // Calculate total value of all stock (quantity * selling price)
+        // Calculate total outstanding credit from SupplierCredit
+        let outstandingCredit = 0;
+        for (let i = 0; i < supplierCredits.length; i++) {
+            if (supplierCredits[i].balance > 0) {
+                outstandingCredit += supplierCredits[i].balance;
+            }
+        }
+        
+        // Calculate total stock value
         let totalStockValue = 0;
         for (let i = 0; i < stockItems.length; i++) {
             totalStockValue += (stockItems[i].quantity || 0) * (stockItems[i].sellingprice || 0);
@@ -111,21 +104,12 @@ router.get("/admin", isAuthenticated, async (req, res) => {
             }
         }
         
-        // Calculate total outstanding credit from all credit purchases
-        let outstandingCredit = 0;
-        for (let i = 0; i < creditStockItems.length; i++) {
-            if (creditStockItems[i].balance > 0) {
-                outstandingCredit += creditStockItems[i].balance;
-            }
-        }
-        
-        // Calculate total deposits from all depositors
+        // Calculate total deposits
         let totalDeposits = 0;
         for (let i = 0; i < depositors.length; i++) {
             totalDeposits += depositors[i].currentBalance || 0;
         }
         
-        // Render admin dashboard with all data
         res.render('admin_dashboard', { 
             currentUser: req.user,
             allSales: allSales,
@@ -140,7 +124,6 @@ router.get("/admin", isAuthenticated, async (req, res) => {
         
     } catch (error) {
         console.log(error.message);
-        // Render dashboard with empty data on error
         res.render('admin_dashboard', { 
             currentUser: req.user,
             allSales: [], 
@@ -160,31 +143,23 @@ router.get("/admin", isAuthenticated, async (req, res) => {
 // Access: Only users with role 'store_manager'
 // ============================================================
 
-/**
- * GET /manager
- * Displays the store manager dashboard with:
- * - Stock inventory with low stock alerts
- * - Top selling products
- * - Supplier credit summary
- * - Recent sales
- * - Statistics cards (Stock Value, Today's Sales, Credit Suppliers, Low Stock Items)
- */
 router.get("/manager", isAuthenticated, async (req, res) => {
-    // Role-based access control - only store manager allowed
     if (!req.user || req.user.role !== 'store_manager') {
         return res.redirect('/userlogin');
     }
     
     try {
-        // Fetch all stock items sorted by date
         const stockItems = await Stock.find().sort({ Date: -1 });
         
-        // Fetch all sales with attendant details
         const sales = await Sale.find()
             .populate('attendant', 'fullname')
             .sort({ Date: -1 });
         
-        // Transform sales data for template
+        // FIXED: Get credit data from SupplierCredit collection
+        const supplierCredits = await SupplierCredit.find()
+            .populate('attendant', 'fullname')
+            .sort({ purchaseDate: -1 });
+        
         const allSales = sales.map(sale => ({
             _id: sale._id,
             Date: sale.Date,
@@ -196,39 +171,40 @@ router.get("/manager", isAuthenticated, async (req, res) => {
             attendantName: sale.attendantName || (sale.attendant ? sale.attendant.fullname : 'Unknown')
         }));
         
-        // Process credit stock items for supplier credit table
-        let creditStockItems = await Stock.find({ paymentMethod: 'Credit' });
-        
-        let uniqueSuppliers = new Set();
-        creditStockItems = creditStockItems.map(item => {
-            const totalOwed = (item.costprice || 0) * (item.quantity || 0);
-            const paid = item.amountPaid || 0;
-            const balance = totalOwed - paid;
+        // Process credit items from SupplierCredit collection
+        let creditStockItems = supplierCredits.map(item => {
+            const balance = item.balance;
             
-            if (item.supplier) {
-                uniqueSuppliers.add(item.supplier);
-            }
+            let dueDate = item.dueDate;
+            let status = item.status;
             
-            let dueDate = null;
-            let status = 'Pending';
-            
-            if (item.Date) {
-                dueDate = new Date(item.Date);
-                dueDate.setDate(dueDate.getDate() + 30); // 30 days credit period
-                
-                if (balance <= 0) {
-                    status = 'Paid';
-                } else if (dueDate < new Date()) {
-                    status = 'Overdue';
-                }
+            if (balance <= 0) {
+                status = 'Paid';
+            } else if (dueDate && dueDate < new Date()) {
+                status = 'Overdue';
             }
             
             return {
-                ...item.toObject(),
+                _id: item._id,
+                productname: item.productname,
+                supplier: item.supplier,
+                quantity: item.quantity,
+                costprice: item.costprice,
+                totalOwed: item.totalAmount,
+                paidAmount: item.amountPaid,
                 balance: balance,
                 dueDate: dueDate,
-                status: status
+                status: status,
+                attendantName: item.attendantName || (item.attendant ? item.attendant.fullname : 'Unknown')
             };
+        });
+        
+        // Get unique suppliers
+        let uniqueSuppliers = new Set();
+        supplierCredits.forEach(item => {
+            if (item.supplier) {
+                uniqueSuppliers.add(item.supplier);
+            }
         });
         
         // Calculate total stock value
@@ -246,7 +222,7 @@ router.get("/manager", isAuthenticated, async (req, res) => {
             }
         }
         
-        // Count products with low stock (quantity <= reorder level)
+        // Count low stock items
         let lowStockCount = 0;
         for (let i = 0; i < stockItems.length; i++) {
             if (stockItems[i].reorderlevel && stockItems[i].quantity <= stockItems[i].reorderlevel) {
@@ -254,10 +230,8 @@ router.get("/manager", isAuthenticated, async (req, res) => {
             }
         }
         
-        // Count unique suppliers with credit
         const creditSuppliersCount = uniqueSuppliers.size;
         
-        // Get top 5 selling products using aggregation pipeline
         const topProducts = await Sale.aggregate([
             { $unwind: '$items' },
             {
@@ -270,7 +244,6 @@ router.get("/manager", isAuthenticated, async (req, res) => {
             { $limit: 5 }
         ]);
         
-        // Render manager dashboard with all data
         res.render('manager_dashboard', {
             currentUser: req.user,
             stockItems: stockItems,
@@ -285,8 +258,6 @@ router.get("/manager", isAuthenticated, async (req, res) => {
         
     } catch (error) {
         console.error("Error in /manager route:", error.message);
-        
-        // Render dashboard with empty data on error
         res.render('manager_dashboard', {
             currentUser: req.user,
             stockItems: [],
@@ -301,24 +272,11 @@ router.get("/manager", isAuthenticated, async (req, res) => {
     }
 });
 
-// // ============================================================
-// // SALES ATTENDANT DASHBOARD ROUTE
-// // Access: Users with role 'sales_attendant', 'store_manager', or 'admin'
-// // ============================================================
+// ============================================================
+// SALES ATTENDANT DASHBOARD ROUTE
+// ============================================================
 
-/**
- * GET /salesattendant
- * Displays the sales attendant dashboard with:
- * - Today's sales statistics
- * - Low stock alerts
- * - Recent sales transactions
- * - Quick sale button
- * - Stock inventory for reference
- * 
- * Accessible by: sales_attendant, store_manager, admin
- */
 router.get("/salesattendant", isAuthenticated, async (req, res) => {
-    // Role-based access control - allow sales_attendant, store_manager, and admin
     if (!req.user || (req.user.role !== 'sales_attendant' && req.user.role !== 'store_manager' && req.user.role !== 'admin')) {
         return res.redirect('/userlogin');
     }
@@ -326,15 +284,12 @@ router.get("/salesattendant", isAuthenticated, async (req, res) => {
     try {
         console.log("=== /salesattendant route hit ===");
         
-        // Fetch all sales with attendant details
         const sales = await Sale.find()
             .populate('attendant', 'fullname')
             .sort({ Date: -1 });
         
-        // Fetch all stock items
         const stockItems = await Stock.find();
         
-        // Transform sales data for template display
         const allSales = sales.map(sale => ({
             _id: sale._id,
             Date: sale.Date,
@@ -363,12 +318,9 @@ router.get("/salesattendant", isAuthenticated, async (req, res) => {
         let criticalStockCount = 0;
         for (let i = 0; i < stockItems.length; i++) {
             if (stockItems[i].reorderlevel) {
-                // Critical: quantity <= half of reorder level
                 if (stockItems[i].quantity <= stockItems[i].reorderlevel / 2) {
                     criticalStockCount++;
-                } 
-                // Low stock: quantity <= reorder level but above critical
-                else if (stockItems[i].quantity <= stockItems[i].reorderlevel) {
+                } else if (stockItems[i].quantity <= stockItems[i].reorderlevel) {
                     lowStockCount++;
                 }
             }
@@ -377,7 +329,6 @@ router.get("/salesattendant", isAuthenticated, async (req, res) => {
         console.log("Sales count:", allSales.length);
         console.log("Stock items count:", stockItems.length);
         
-        // Render sales attendant dashboard
         return res.render('sales_dashboard', { 
             currentUser: req.user,
             allSales: allSales,
@@ -386,13 +337,13 @@ router.get("/salesattendant", isAuthenticated, async (req, res) => {
             todaysSalesTotal: todaysSalesTotal,
             todaysTransactions: todaysTransactions,
             lowStockCount: lowStockCount,
-            criticalStockCount: criticalStockCount
+            criticalStockCount: criticalStockCount,
+            success: req.query.success || false,
+            error: req.query.error || null
         });
         
     } catch (error) {
         console.error("ERROR in /salesattendant:", error.message);
-        
-        // Render dashboard with empty data on error
         return res.render('sales_dashboard', { 
             currentUser: req.user,
             allSales: [], 
@@ -401,7 +352,9 @@ router.get("/salesattendant", isAuthenticated, async (req, res) => {
             todaysSalesTotal: 0,
             todaysTransactions: 0,
             lowStockCount: 0,
-            criticalStockCount: 0
+            criticalStockCount: 0,
+            success: false,
+            error: error.message
         });
     }
 });

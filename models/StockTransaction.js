@@ -13,19 +13,16 @@ const stockTransactionSchema = new mongoose.Schema({
     },
     transactionType: {
         type: String,
-        enum: ['ADD_NEW', 'UPDATE_QUANTITY', 'DELETE', ],
+        enum: ['ADD_NEW', 'UPDATE_QUANTITY', 'DELETE'],
         required: true
     },
     previousQuantity: {
         type: Number,
         default: 0,
-        
-        
     },
     addedQuantity: {
         type: Number,
         default: 0,
-        
     },
     newQuantity: {
         type: Number,

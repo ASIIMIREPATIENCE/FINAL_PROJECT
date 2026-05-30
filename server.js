@@ -11,13 +11,17 @@ const app = express();
 const port = 3000;
 
 connectDb();
+
+// View engine setup
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
 
+// Middleware
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+// Session
 app.use(expressSession({
     secret: 'secret',
     resave: false,
@@ -28,6 +32,7 @@ app.use(expressSession({
     }
 }));
 
+// Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -35,19 +40,22 @@ passport.use(Registration.createStrategy());
 passport.serializeUser(Registration.serializeUser());
 passport.deserializeUser(Registration.deserializeUser());
 
+// Global user variable for views
 app.use((req, res, next) => {
     res.locals.currentUser = req.user;
     next();
 });
 
+// Routes - Mounted correctly
 app.use('/', require('./routes/indexRoutes'));
 app.use('/', require('./routes/dashboardRoutes'));
-app.use('/', require('./routes/salesRoutes'));
+app.use('/', require('./routes/salesRoutes'));      // This mounts salesRoutes at root level
 app.use('/', require('./routes/stockRoutes'));
 app.use('/', require('./routes/supplierRoutes'));
 app.use('/', require('./routes/schemeRoutes'));
 app.use('/', require('./routes/reportsRoutes'));
 
+// 404 handler
 app.use((req, res) => {
     res.status(404).send('Oops! Route not found.');
 });

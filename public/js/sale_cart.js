@@ -94,9 +94,14 @@ function removeFromCart(index) {
     updateTotals();
 }
 
+function escapeJsonString(str) {
+    if (!str) return '';
+    return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
 function renderCart() {
     if (cart.length === 0) {
-        cartBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Cart is empty<\/td><\/tr>';
+        cartBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Cart is empty</td></tr>';
         cartItemsInput.value = JSON.stringify(cart);
         return;
     }
@@ -106,15 +111,22 @@ function renderCart() {
         const item = cart[i];
         const subtotal = item.quantity * item.unitPrice;
         html += '<tr>' +
-            '<td>' + escapeHtml(item.productName) + '<\/td>' +
-            '<td>' + item.quantity + '<\/td>' +
-            '<td>UGX ' + item.unitPrice.toLocaleString() + '<\/td>' +
-            '<td>UGX ' + subtotal.toLocaleString() + '<\/td>' +
-            '<td><button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(' + i + ')">Remove<\/button><\/td>' +
-        '<\/tr>';
+            '<td>' + escapeHtml(item.productName) + '</td>' +
+            '<td>' + item.quantity + '</td>' +
+            '<td>UGX ' + item.unitPrice.toLocaleString() + '</td>' +
+            '<td>UGX ' + subtotal.toLocaleString() + '</td>' +
+            '<td><button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(' + i + ')">Remove</button></td>' +
+        '</tr>';
     }
     cartBody.innerHTML = html;
-    cartItemsInput.value = JSON.stringify(cart);
+    
+    // Properly escape JSON string for hidden input
+    const cartForJson = cart.map(item => ({
+        productName: item.productName,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice
+    }));
+    cartItemsInput.value = JSON.stringify(cartForJson);
 }
 
 function escapeHtml(str) {
@@ -159,16 +171,7 @@ completeBtn.addEventListener('click', function(e) {
         return;
     }
     
-    const subtotal = cart.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-    const distance = parseInt(distanceInput ? distanceInput.value : 0) || 0;
-    const needTransport = transportCheck ? transportCheck.checked : false;
-    let transportFee = 0;
-    if (needTransport && distance > 0) {
-        const isFree = (subtotal >= 500000 && distance <= 10);
-        if (!isFree) transportFee = 30000;
-    }
-    const total = subtotal + transportFee;
-    
+    // Form will submit normally
 });
 
 updateTotals();

@@ -16,6 +16,9 @@ const stockSchema = new mongoose.Schema({
         required: true,
         min: 0
     },
+     originalQuantity: {
+         type: Number, default: 0 
+        },
     costprice: {
         type: Number,
         required: true,
