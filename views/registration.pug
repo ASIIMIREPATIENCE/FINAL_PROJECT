@@ -1,10 +1,9 @@
-//- 
 doctype html
+html(lang='en')
 head
   meta(charset='UTF-8')
   meta(name='viewport' content='width=device-width, initial-scale=1.0')
   title NyondoStock - Register
-  // Bootstrap 5 CSS + Icons
   link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
   link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
   link(rel='stylesheet' href='/css/registration.css')
@@ -15,74 +14,94 @@ body
     h2 Create Account
     p Register to access NyondoStock
     
-    if message
-      .alert.alert-danger(role='alert') #{message}
-    if error
-      .alert.alert-danger(role='alert') #{error}
+    #alertContainer
+      if message
+        .alert.alert-danger(role='alert') #{message}
+      if error
+        .alert.alert-danger(role='alert') #{error}
     
     .security-badge
       i.bi.bi-shield-lock-fill
       span SECURE REGISTRATION
     
-    form(action='/postreg' method='post')
+    form#registerForm(action='/postreg' method='post' novalidate)
       // Full Name
       .mb-3.text-start
         label.form-label Full Name
-        input.form-control(type='text' placeholder='Enter your full name' name='fullname')
+        input#fullname.form-control(type='text' placeholder='Enter your full name' name='fullname')
+        .invalid-feedback Full name is required
+
       
       // Email
       .mb-3.text-start
         label.form-label Email Address
-        input.form-control(type='email' placeholder='Enter your email' name='email' )
+        input#email.form-control(type='email' placeholder='Enter your email' name='email')
+        .invalid-feedback Please enter a valid email address
+
       
       // Phone Number
       .mb-3.text-start
         label.form-label Phone Number
-        input.form-control(type='tel' value='+256' name='phonenumber' )
+        input#phonenumber.form-control(type='tel' value='+256' name='phonenumber')
+        .invalid-feedback Use +256XXXXXXXXX or 0XXXXXXXXX
       
       // Address
       .mb-3.text-start
         label.form-label Residential Address
-        input.form-control(type='text' placeholder='Enter your physical address' name='address' )
+        input#address.form-control(type='text' placeholder='Enter your physical address' name='address')
+        .invalid-feedback Address is required
       
       // NIN (National ID Number)
       .mb-3.text-start
         label.form-label National ID Number (NIN)
-        input.form-control(type='text' placeholder='e.g., CM1234567890AB' name='nin' )
+        input#nin.form-control(type='text' placeholder='e.g., CF123456789012' name='nin')
+        .invalid-feedback NIN must be CFXXXXXXXXXXXX or CMXXXXXXXXXXXX (14 characters)
       
       // Next of Kin - Full Name
       .mb-3.text-start
         label.form-label Next of Kin - Full Name
-        input.form-control(type='text' placeholder='Full name of next of kin' name='nextOfKinName' )
+        input#nextOfKinName.form-control(type='text' placeholder='Full name of next of kin' name='nextOfKinName')
+        .invalid-feedback Next of kin name is required
+
       
       // Next of Kin - Phone Number
       .mb-3.text-start
         label.form-label Next of Kin - Phone Number
-        input.form-control(type='tel' value='+256' name='nextOfKinPhone' )
+        input#nextOfKinPhone.form-control(type='tel' value='+256' name='nextOfKinPhone')
+        .invalid-feedback Use +256XXXXXXXXX or 0XXXXXXXXX
+
       
       // Next of Kin - Relationship
       .mb-3.text-start
         label.form-label Next of Kin - Relationship
-        input.form-control(type='text' placeholder='enter relationship' name='nextOfKinRelationship')
+        input#nextOfKinRelationship.form-control(type='text' placeholder='e.g., Father, Mother, Brother' name='nextOfKinRelationship')
+        .invalid-feedback Relationship is required
+
       
       // Password
       .mb-3.text-start
         label.form-label Password
-        input.form-control(type='password' placeholder='Create a password' name='password' required)
+        input#password.form-control(type='password' placeholder='Create a password' name='password')
+        .invalid-feedback Password must be at least 6 characters
+
       
       // Confirm Password
       .mb-3.text-start
         label.form-label Confirm Password
-        input.form-control(type='password' placeholder='Confirm your password' name='confirmpassword' required)
+        input#confirmPassword.form-control(type='password' placeholder='Confirm your password' name='confirmpassword')
+        .invalid-feedback Passwords do not match
+
       
       // Role Selection
       .mb-3.text-start
         label.form-label Select Role
-        select.form-select(name='role' )
-          option(selected disabled) Select your role
+        select#role.form-select(name='role')
+          option(value='' disabled selected) Select your role
           option(value='admin') Administrator
           option(value='store_manager') Store Manager
           option(value='sales_attendant') Sales Attendant
+        .invalid-feedback Please select a role
+
       
       // Register Button
       button.btn-register(type='submit')
@@ -95,3 +114,4 @@ body
         a(href='/userlogin') Sign In
 
   script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
+  script(src='/js/reg.js')

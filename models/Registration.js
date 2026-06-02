@@ -18,7 +18,7 @@ const registrationSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        match: /^\+256[0-9]{9}$/
+        match: /^\+256[0-9]{9}$|^0[0-9]{9}$/
     },
     address: {
         type: String,
@@ -41,7 +41,7 @@ const registrationSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        match: /^\+256[0-9]{9}$/
+        match: /^\+256[0-9]{9}$|^0[0-9]{9}$/
     },
     nextOfKinRelationship: {
         type: String,

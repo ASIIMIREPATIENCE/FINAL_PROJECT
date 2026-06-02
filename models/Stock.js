@@ -43,7 +43,7 @@ const stockSchema = new mongoose.Schema({
     supplierPhone: {
         type: String,
         trim: true,
-        match: /^\+256[0-9]{9}$/,
+        match: /^\+256[0-9]{9}$|^0[0-9]{9}$/,
         required: true
     },
     supplierCompany: {

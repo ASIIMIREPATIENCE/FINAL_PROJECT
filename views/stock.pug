@@ -7,69 +7,7 @@ head
   link(href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css' rel='stylesheet')
   link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css')
   link(rel='stylesheet' href='/css/stock.css')
-  style.
-    .action-buttons {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-      align-items: center;
-    }
-    .sidebar-back-btn {
-      padding: 0 15px 15px 15px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      margin-bottom: 15px;
-    }
-    .btn-back {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255,255,255,0.1);
-      border: none;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 8px;
-      width: 100%;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .btn-back:hover {
-      background: rgba(255,255,255,0.2);
-    }
-    .btn-edit-transaction {
-      background: #C6A43F;
-      color: #0D3B2E;
-      border: none;
-      padding: 4px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.7rem;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s ease;
-    }
-    .btn-edit-transaction:hover {
-      background: #b8922e;
-      color: #0D3B2E;
-    }
-    .btn-delete-transaction {
-      background: #dc3545;
-      color: white;
-      border: none;
-      padding: 4px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.7rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s ease;
-    }
-    .btn-delete-transaction:hover {
-      background: #bb2d3b;
-      color: white;
-    }
+
 
 body
   .sidebar
@@ -96,8 +34,11 @@ body
         h3(style='color: var(--nyondo-green); font-weight: 700; margin: 0;') Stock Management
         p(style='color: #6c757d; margin: 5px 0 0 0; font-size: 0.8rem;') Manage your inventory &mdash; add, edit, or view stock levels.
 
+    // Alert container for notifications
+    #alertContainer
+
     // Add New Stock Form
-    form(action='/postStock' method='post')
+    form#stockForm(action='/postStock' method='post' novalidate)
       .form-card
         .form-title
           i.bi.bi-plus-circle(style='color: #C6A43F;')
@@ -106,52 +47,75 @@ body
         .row.g-3
           .col-md-3
             label.form-label Product Name
-            input.form-control(type='text' placeholder='Enter product name' name='productname' required)
+            input#productName.form-control(type='text' placeholder='Enter product name' name='productname')
+            .invalid-feedback Product name is required
           .col-md-2
             label.form-label Category
-            select.form-select(name='category' required)
+            select#category.form-select(name='category')
+              option(value='') Select category
               option Cement
-              option Pipes
-              option Paint
-              option Tools
+              option Iron Bars
+              option wheel Barrows
+              option Wire Mesh
               option Nails
-              option Electrical
+              option Barbed Wire
+              option Iron Sheets
+            .invalid-feedback Please select a category
+
           .col-md-2
             label.form-label Quantity
-            input.form-control(type='number' placeholder='0' name='quantity' required)
+            input#quantity.form-control(type='number' placeholder='0' name='quantity')
+            .invalid-feedback Quantity must be at least 1
           .col-md-2
             label.form-label Cost Price (UGX)
-            input.form-control(type='number' placeholder='Cost price' name='costprice' required)
+            input#costPrice.form-control(type='number' placeholder='Cost price' name='costprice')
+            .invalid-feedback Cost price must be greater than 0
+
           .col-md-2
             label.form-label Selling Price (UGX)
-            input.form-control(type='number' placeholder='Selling price' name='sellingprice' required)
+            input#sellingPrice.form-control(type='number' placeholder='Selling price' name='sellingprice')
+            .invalid-feedback Selling price must be greater than cost price
+
           .col-md-3
             label.form-label Supplier Name
-            input.form-control(type='text' placeholder='Supplier name' name='supplier' required)
+            input#supplierName.form-control(type='text' placeholder='Supplier name' name='supplier')
+            .invalid-feedback Supplier name is required
+
           .col-md-3
             label.form-label Supplier Email
-            input.form-control(type='email' placeholder='supplier@company.com' name='supplierEmail')
+            input#supplierEmail.form-control(type='email' placeholder='supplier@company.com' name='supplierEmail')
+            .invalid-feedback Enter a valid email address
+
           .col-md-2
             label.form-label Supplier Phone
-            input.form-control(type='tel' value='+256' name='supplierPhone')
+            input#supplierPhone.form-control(type='tel' value='+256' name='supplierPhone')
+            .invalid-feedback Use +256XXXXXXXXX or 0XXXXXXXXX
+
           .col-md-3
             label.form-label Supplier Company
-            input.form-control(type='text' placeholder='Company name' name='supplierCompany')
+            input#supplierCompany.form-control(type='text' placeholder='Company name' name='supplierCompany')
+            .invalid-feedback Supplier company is required
+
           .col-md-2
             label.form-label Reorder Level
-            input.form-control(type='number' placeholder='Min stock alert' name='reorderlevel' required)
+            input#reorderLevel.form-control(type='number' placeholder='Min stock alert' name='reorderlevel')
+            .invalid-feedback Reorder level must be at least 1
+
           .col-md-2
             label.form-label Payment Method
-            select.form-select(name='paymentMethod')
+            select#paymentMethod.form-select(name='paymentMethod')
+              option(value='') Select payment method
               option(value='Cash') Cash
               option(value='Credit') Credit (Supplier Credit)
+            .invalid-feedback Please select payment method
+
           .col-md-2.d-flex.align-items-end
             button.btn-save.w-100(type='submit')
               i.bi.bi-save
               | Save Stock
 
     // SECTION 1: Current Stock Table
-    .section-title
+    .section-title.mt-4
       i.bi.bi-list-ul
       | Current Stock Inventory
       - var lowCount = 0
@@ -313,30 +277,4 @@ body
     | NyondoStock &mdash; Enterprise Hardware Management System
 
   script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js')
-  script.
-    // Edit transaction - opens a form page
-    function editTransaction(transactionId) {
-      window.location.href = `/editTransactionForm/${transactionId}`;
-    }
-    
-    // Delete transaction
-    function deleteTransaction(transactionId) {
-      if (confirm('⚠️ WARNING: Delete this transaction? This will update your stock levels.')) {
-        fetch(`/deleteTransaction/${transactionId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            alert('✓ Transaction deleted, stock updated!');
-            location.reload();
-          } else {
-            alert('✗ Error: ' + data.message);
-          }
-        })
-        .catch(error => {
-          alert('✗ Error deleting transaction');
-        });
-      }
-    }
+  script(src='/js/stock.js?v=2')

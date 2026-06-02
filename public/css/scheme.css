@@ -430,3 +430,50 @@
 .badge[style*="background: #17a2b8"] { background: #17a2b8 !important; }
 .badge[style*="background: #6c757d"] { background: #6c757d !important; }
 .badge[style*="background: #dc3545"] { background: #dc3545 !important; }
+
+
+/* Add to your existing scheme.css */
+
+/* Validation styles - HIDDEN INITIALLY */
+.is-invalid {
+    border-color: #dc3545 !important;
+    background-color: #fff8f8 !important;
+    border-width: 2px !important;
+}
+
+.is-valid {
+    border-color: #198754 !important;
+    background-color: #f0fff4 !important;
+    border-width: 2px !important;
+}
+
+/* HIDE validation messages by default */
+.invalid-feedback,
+.valid-feedback {
+    display: none !important;
+}
+
+/* Show error message only when field has is-invalid class */
+.form-control.is-invalid ~ .invalid-feedback,
+.form-select.is-invalid ~ .invalid-feedback,
+.is-invalid + .invalid-feedback {
+    display: block !important;
+}
+
+/* Show success message only when field has is-valid class */
+.form-control.is-valid ~ .valid-feedback,
+.form-select.is-valid ~ .valid-feedback,
+.is-valid + .valid-feedback {
+    display: block !important;
+}
+
+/* Shake animation */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.3s ease-in-out;
+}

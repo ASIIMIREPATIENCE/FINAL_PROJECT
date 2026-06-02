@@ -1,3 +1,7 @@
+// BLOCK ALL ALERTS
+window.alert = function() { return false; };
+console.log('✅ Validation script loaded - alerts blocked');
+
 let cart = [];
 
 const productSelect = document.getElementById('productName');
@@ -12,7 +16,11 @@ const distanceInput = document.getElementById('distance');
 const displaySubtotal = document.getElementById('displaySubtotal');
 const displayTransport = document.getElementById('displayTransport');
 const displayTotal = document.getElementById('displayTotal');
+const customerName = document.getElementById('customerName');
+const customerPhone = document.getElementById('customerPhone');
+const paymentMethod = document.getElementById('paymentMethod');
 
+// Auto-populate price
 productSelect.addEventListener('change', function() {
     const selected = productSelect.options[productSelect.selectedIndex];
     if (selected && selected.dataset.price) {
@@ -38,46 +46,81 @@ function updateTotals() {
     if (displayTotal) displayTotal.textContent = total.toLocaleString();
 }
 
+// Error display functions
+function showFieldError(field, message) {
+    if (!field) return;
+    field.classList.add('is-invalid');
+    field.classList.remove('is-valid');
+    
+    let errorDiv = field.nextElementSibling;
+    if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    } else {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'invalid-feedback';
+        errorDiv.textContent = message;
+        field.parentNode.insertBefore(errorDiv, field.nextSibling);
+    }
+}
+
+function showFieldSuccess(field) {
+    if (!field) return;
+    field.classList.remove('is-invalid');
+    field.classList.add('is-valid');
+    const errorMsg = field.nextElementSibling;
+    if (errorMsg && errorMsg.classList.contains('invalid-feedback')) {
+        errorMsg.style.display = 'none';
+    }
+}
+
+function clearAllErrors() {
+    document.querySelectorAll('.form-control, .form-select').forEach(field => {
+        field.classList.remove('is-invalid', 'is-valid');
+        const errorMsg = field.nextElementSibling;
+        if (errorMsg && errorMsg.classList.contains('invalid-feedback')) {
+            errorMsg.style.display = 'none';
+        }
+    });
+}
+
+// Add to cart
 addBtn.addEventListener('click', function() {
     const selected = productSelect.options[productSelect.selectedIndex];
     
     if (!selected || !selected.value) {
-        alert('Please select a product');
+        showFieldError(productSelect, 'Please select a product');
         return;
     }
+    showFieldSuccess(productSelect);
     
-    const productName = selected.value;
     const unitPrice = parseFloat(priceInput.value);
     const quantity = parseInt(qtyInput.value);
     const maxStock = parseInt(selected.dataset.stock);
     
     if (isNaN(unitPrice) || unitPrice <= 0) {
-        alert('Please enter a valid unit price');
+        showFieldError(priceInput, 'Valid unit price required');
         return;
     }
+    showFieldSuccess(priceInput);
     
     if (isNaN(quantity) || quantity <= 0) {
-        alert('Please enter a valid quantity');
+        showFieldError(qtyInput, 'Valid quantity required');
         return;
     }
     
     if (quantity > maxStock) {
-        alert('Only ' + maxStock + ' items available in stock');
+        showFieldError(qtyInput, 'Only ' + maxStock + ' available');
         return;
     }
+    showFieldSuccess(qtyInput);
     
-    const existingIndex = cart.findIndex(item => item.productName === productName);
-    
+    const existingIndex = cart.findIndex(item => item.productName === selected.value);
     if (existingIndex !== -1) {
-        const newQty = cart[existingIndex].quantity + quantity;
-        if (newQty > maxStock) {
-            alert('Total quantity would exceed stock (' + maxStock + ')');
-            return;
-        }
-        cart[existingIndex].quantity = newQty;
+        cart[existingIndex].quantity += quantity;
     } else {
         cart.push({
-            productName: productName,
+            productName: selected.value,
             quantity: quantity,
             unitPrice: unitPrice
         });
@@ -94,43 +137,29 @@ function removeFromCart(index) {
     updateTotals();
 }
 
-function escapeJsonString(str) {
-    if (!str) return '';
-    return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-}
-
 function renderCart() {
     if (cart.length === 0) {
-        cartBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Cart is empty</td></tr>';
+        cartBody.innerHTML = '<td><td colspan="5" class="text-center">Cart is empty</td></tr>';
         cartItemsInput.value = JSON.stringify(cart);
         return;
     }
     
     let html = '';
-    for (let i = 0; i < cart.length; i++) {
-        const item = cart[i];
+    cart.forEach((item, i) => {
         const subtotal = item.quantity * item.unitPrice;
-        html += '<tr>' +
-            '<td>' + escapeHtml(item.productName) + '</td>' +
-            '<td>' + item.quantity + '</td>' +
-            '<td>UGX ' + item.unitPrice.toLocaleString() + '</td>' +
-            '<td>UGX ' + subtotal.toLocaleString() + '</td>' +
-            '<td><button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(' + i + ')">Remove</button></td>' +
-        '</tr>';
-    }
+        html += `<tr>
+            <td>${escapeHtml(item.productName)}</td>
+            <td>${item.quantity}</td>
+            <td>UGX ${item.unitPrice.toLocaleString()}</td>
+            <td>UGX ${subtotal.toLocaleString()}</td>
+            <td><button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart(${i})">Remove</button></td>
+        </tr>`;
+    });
     cartBody.innerHTML = html;
-    
-    // Properly escape JSON string for hidden input
-    const cartForJson = cart.map(item => ({
-        productName: item.productName,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice
-    }));
-    cartItemsInput.value = JSON.stringify(cartForJson);
+    cartItemsInput.value = JSON.stringify(cart);
 }
 
 function escapeHtml(str) {
-    if (!str) return '';
     return str.replace(/[&<>]/g, function(m) {
         if (m === '&') return '&amp;';
         if (m === '<') return '&lt;';
@@ -139,39 +168,61 @@ function escapeHtml(str) {
     });
 }
 
+// FORM SUBMISSION - NO ALERTS, JUST RED FIELDS
+completeBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    clearAllErrors();
+    
+    let hasError = false;
+    
+    // Customer name
+    if (!customerName.value.trim()) {
+        showFieldError(customerName, 'Customer name is required');
+        hasError = true;
+    } else if (customerName.value.trim().length < 2) {
+        showFieldError(customerName, 'Must be at least 2 characters');
+        hasError = true;
+    } else {
+        showFieldSuccess(customerName);
+    }
+    
+    // Phone
+    const phoneRegex = /^\+256[0-9]{9}$|^0[0-9]{9}$/;
+    if (!customerPhone.value.trim()) {
+        showFieldError(customerPhone, 'Phone number is required');
+        hasError = true;
+    } else if (!phoneRegex.test(customerPhone.value)) {
+        showFieldError(customerPhone, 'Use +256XXXXXXXXX or 0XXXXXXXXX');
+        hasError = true;
+    } else {
+        showFieldSuccess(customerPhone);
+    }
+    
+    // Payment
+    if (!paymentMethod.value) {
+        showFieldError(paymentMethod, 'Select payment method');
+        hasError = true;
+    } else {
+        showFieldSuccess(paymentMethod);
+    }
+    
+    // Cart
+    if (cart.length === 0) {
+        alert('Cart is empty'); // This will be blocked by our override
+        hasError = true;
+    }
+    
+    if (!hasError) {
+        document.getElementById('saleForm').submit();
+    } else {
+        const firstError = document.querySelector('.is-invalid');
+        if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+
+// Transport listeners
 if (transportCheck) transportCheck.addEventListener('change', updateTotals);
 if (distanceInput) distanceInput.addEventListener('input', updateTotals);
 
-completeBtn.addEventListener('click', function(e) {
-    const custName = document.getElementById('customerName').value.trim();
-    const custPhone = document.getElementById('customerPhone').value.trim();
-    const payMethod = document.getElementById('paymentMethod').value;
-    
-    if (!custName) {
-        e.preventDefault();
-        alert('Please enter customer name');
-        return;
-    }
-    
-    if (!custPhone) {
-        e.preventDefault();
-        alert('Please enter phone number');
-        return;
-    }
-    
-    if (!payMethod) {
-        e.preventDefault();
-        alert('Please select payment method');
-        return;
-    }
-    
-    if (cart.length === 0) {
-        e.preventDefault();
-        alert('Cart is empty. Add at least one product.');
-        return;
-    }
-    
-    // Form will submit normally
-});
-
 updateTotals();
+window.removeFromCart = removeFromCart;
