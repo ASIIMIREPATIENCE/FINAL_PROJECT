@@ -14,9 +14,7 @@ const password = document.getElementById('password');
 const confirmPassword = document.getElementById('confirmPassword');
 const role = document.getElementById('role');
 
-// ============================================================
-// ERROR DISPLAY FUNCTIONS
-// ============================================================
+// Displaying errors 
 
 function showFieldError(field, message) {
     if (!field) return;
@@ -81,9 +79,7 @@ function showNotification(message, isError = true) {
     setTimeout(() => alertDiv.remove(), 5000);
 }
 
-// ============================================================
-// VALIDATION FUNCTIONS
-// ============================================================
+// Validation functions for each field
 
 function validateFullname(field, showErrors = false) {
     if (!field.value.trim()) {
@@ -229,9 +225,7 @@ function validateRole(field, showErrors = false) {
     }
 }
 
-// ============================================================
 // REAL-TIME VALIDATION
-// ============================================================
 
 if (fullname) {
     fullname.addEventListener('input', () => validateFullname(fullname, true));
@@ -290,9 +284,7 @@ if (role) {
     role.addEventListener('change', () => validateRole(role, true));
 }
 
-// ============================================================
 // FORM SUBMISSION
-// ============================================================
 
 if (form) {
     form.addEventListener('submit', function(e) {

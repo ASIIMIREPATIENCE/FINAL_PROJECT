@@ -1,40 +1,12 @@
-// ============================================================
-// TRANSACTION FUNCTIONS
-// ============================================================
 
 // View transaction details
 function viewTransactionDetails(transactionId) {
    window.location.href = `/editTransactionForm/${transactionId}`;
 }
 
-// Edit transaction (create a reversal and new transaction)
+// Edit transaction 
 function editTransaction(transactionId) {
     window.location.href = `/editTransactionForm/${transactionId}`;
-}
-
-// Revert/undo a transaction
-function revertTransaction(transactionId) {
-    if (confirm('Are you sure you want to revert this transaction? This will reverse the stock changes.')) {
-        fetch(`/revertTransaction/${transactionId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showNotification('Transaction reverted successfully!', false);
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                showNotification('Error reverting transaction: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification('Error reverting transaction');
-        });
-    }
 }
 
 // Delete transaction
@@ -59,9 +31,8 @@ function deleteTransaction(transactionId) {
     }
 }
 
-// ============================================================
-// STOCK FORM VALIDATION - Only shows on submit or after user interaction
-// ============================================================
+
+// STOCK FORM VALIDATION 
 
 // DOM Elements
 const form = document.getElementById('stockForm');
@@ -77,7 +48,7 @@ const supplierCompany = document.getElementById('supplierCompany');
 const reorderLevel = document.getElementById('reorderLevel');
 const paymentMethod = document.getElementById('paymentMethod');
 
-// Track if field has been touched/interacted with
+// Track if field has been interacted with
 let touchedFields = {
     productName: false,
     category: false,
@@ -160,7 +131,7 @@ function showNotification(message, isError = true) {
     setTimeout(() => alertDiv.remove(), 5000);
 }
 
-// Validate a single field (returns true if valid)
+
 function validateField(field, showErrors = false) {
     const fieldName = field.id;
     
@@ -240,7 +211,7 @@ function validateField(field, showErrors = false) {
                     return true;
                 }
             }
-            return true; // Optional field - always valid if empty
+            return true; 
             
         case 'supplierPhone':
             if (field.value.trim() && field.value !== '+256') {
@@ -253,7 +224,7 @@ function validateField(field, showErrors = false) {
                     return true;
                 }
             }
-            return true; // Optional field - always valid if empty
+            return true; 
             
         case 'supplierCompany':
             if (!field.value.trim()) {
@@ -291,9 +262,7 @@ function validateField(field, showErrors = false) {
     }
 }
 
-// ============================================================
-// REAL-TIME VALIDATION - Only shows after field is touched
-// ============================================================
+// Real-time validation
 
 if (productName) {
     productName.addEventListener('focus', () => {
@@ -340,7 +309,7 @@ if (costPrice) {
     costPrice.addEventListener('input', () => {
         if (touchedFields.costPrice) {
             validateField(costPrice, true);
-            // Also re-validate selling price if it was touched
+            
             if (touchedFields.sellingPrice && sellingPrice && sellingPrice.value) {
                 validateField(sellingPrice, true);
             }
@@ -425,9 +394,7 @@ if (paymentMethod) {
     });
 }
 
-// ============================================================
-// FORM SUBMISSION - Validate all fields and show errors
-// ============================================================
+// Validate all fields and show errors
 
 if (form) {
     form.addEventListener('submit', function(e) {
@@ -436,7 +403,7 @@ if (form) {
         
         window.isSubmitting = true;
         
-        // Mark all fields as touched
+        
         Object.keys(touchedFields).forEach(key => {
             touchedFields[key] = true;
         });

@@ -10,9 +10,9 @@ function isAuthenticated(req, res, next) {
     res.redirect('/');
 }
 
-// ============================================================
-// DISPLAY SALES ATTENDANT DASHBOARD
-// ============================================================
+
+//sales attendant dashboard
+
 router.get('/salesattendant', isAuthenticated, async (req, res) => {
     try {
         const stockItems = await Stock.find()
@@ -48,9 +48,7 @@ router.get('/salesattendant', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// DISPLAY NEW SALE PAGE
-// ============================================================
+// sales
 router.get("/sale", isAuthenticated, async (req, res) => {
     try {
         const items = await Stock.find({ quantity: { $gt: 0 } }).lean();
@@ -70,9 +68,6 @@ router.get("/sale", isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// PROCESS NEW SALE SUBMISSION
-// ============================================================
 router.post('/postSale', isAuthenticated, async (req, res) => {
     try {
         const {
@@ -171,9 +166,7 @@ router.post('/postSale', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// VIEW SALE RECEIPT
-// ============================================================
+//Sales  receipt
 router.get('/receipt/:id', isAuthenticated, async (req, res) => {
     try {
         const sale = await Sale.findById(req.params.id).populate('attendant', 'fullname');
@@ -194,9 +187,7 @@ router.get('/receipt/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// SHOW EDIT SALE FORM
-// ============================================================
+// sales edit
 router.get('/editSale/:id', isAuthenticated, async (req, res) => {
     try {
         const sale = await Sale.findById(req.params.id);
@@ -223,9 +214,8 @@ router.get('/editSale/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// UPDATE SALE - EDIT EXISTING SALE
-// ============================================================
+
+
 router.post('/updateSale/:id', isAuthenticated, async (req, res) => {
     try {
         const { customername, phonenumber, nin, paymentmethod, cartItems, distance, addTransport } = req.body;
@@ -252,7 +242,7 @@ router.post('/updateSale/:id', isAuthenticated, async (req, res) => {
         const distanceKm = parseInt(distance) || 0;
         const needTransport = addTransport === 'true';
         
-        // STEP 1: RESTORE ALL ORIGINAL STOCK (add back everything that was sold)
+        
         for (const item of sale.items) {
             const product = await Stock.findOne({ productname: item.productname });
             if (product) {
@@ -261,7 +251,7 @@ router.post('/updateSale/:id', isAuthenticated, async (req, res) => {
             }
         }
         
-        // STEP 2: PROCESS NEW CART AND DEDUCT NEW QUANTITIES
+       
         let cartItemsWithDetails = [];
         let cartSubtotal = 0;
         
@@ -274,12 +264,13 @@ router.post('/updateSale/:id', isAuthenticated, async (req, res) => {
             
             const qty = parseInt(item.quantity);
             
-            // Check if we have enough stock for the NEW sale
+      
             if (product.quantity < qty) {
                 return res.redirect(`/editSale/${req.params.id}?error=Insufficient stock for ${product.productname}. Only ${product.quantity} available, but you need ${qty}.`);
             }
             
-            // Deduct the new quantity
+       
+
             product.quantity -= qty;
             await product.save();
             
@@ -294,7 +285,7 @@ router.post('/updateSale/:id', isAuthenticated, async (req, res) => {
             });
         }
         
-        // Calculate transport fee
+      
         let transportFee = 0;
         let freeTransportApplied = false;
         
@@ -312,7 +303,7 @@ router.post('/updateSale/:id', isAuthenticated, async (req, res) => {
         
         const grandTotal = cartSubtotal + transportFee;
         
-        // Update sale record
+      
         sale.customername = customername;
         sale.phonenumber = phonenumber;
         sale.nin = nin || 'N/A';
@@ -340,9 +331,9 @@ router.post('/updateSale/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// DELETE SALE - Permanently remove sale and restore stock
-// ============================================================
+
+// DELETE SALE 
+
 router.post('/deleteSale/:id', isAuthenticated, async (req, res) => {
     try {
         console.log('=== DELETE SALE ATTEMPT ===');
@@ -354,7 +345,7 @@ router.post('/deleteSale/:id', isAuthenticated, async (req, res) => {
             return res.redirect('/salesattendant?error=Sale not found');
         }
         
-        // Restore ALL stock quantities before deleting
+        
         for (const item of sale.items) {
             const product = await Stock.findOne({ productname: item.productname });
             if (product) {
@@ -364,7 +355,7 @@ router.post('/deleteSale/:id', isAuthenticated, async (req, res) => {
             }
         }
         
-        // Permanently delete the sale
+     
         await Sale.findByIdAndDelete(req.params.id);
         
         console.log('Sale deleted successfully!');

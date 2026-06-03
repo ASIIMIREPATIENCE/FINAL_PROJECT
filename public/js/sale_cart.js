@@ -208,7 +208,7 @@ completeBtn.addEventListener('click', function(e) {
     
     // Cart
     if (cart.length === 0) {
-        alert('Cart is empty'); // This will be blocked by our override
+        alert('Cart is empty'); 
         hasError = true;
     }
     

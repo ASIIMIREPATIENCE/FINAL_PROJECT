@@ -3,10 +3,14 @@ const router = express.Router();
 const Registration = require('../models/Registration');
 const passport = require('passport');
 
+
+// index
 router.get("/", (req, res) => {
     res.render('index');
 });
 
+
+// registration
 router.get("/register", (req, res) => {
     res.render('registration', { error: null, message: null });
 });
@@ -45,6 +49,8 @@ router.post('/postreg', async (req, res) => {
     }
 });
 
+
+// login
 router.get("/userlogin", (req, res) => {
     res.render('login', { error: null });
 });
@@ -65,6 +71,8 @@ router.get('/dashboard-redirect', (req, res) => {
     }
 });
 
+
+// logout
 router.get('/logout', (req, res) => {
     req.logout((err) => {
         if (err) console.error(err);
@@ -72,12 +80,12 @@ router.get('/logout', (req, res) => {
     });
 });
 
-// GET - View all users
+// View all users
 router.get('/users', async (req, res) => {
     try {
         const users = await Registration.find({}).sort({ Date: -1 });
         
-        // Calculate statistics
+        
         let adminCount = 0;
         let managerCount = 0;
         let attendantCount = 0;
@@ -107,7 +115,7 @@ router.get('/users', async (req, res) => {
     }
 });
 
-// GET - Edit user form
+// Edit user 
 router.get('/edit-user/:id', async (req, res) => {
     try {
         const user = await Registration.findById(req.params.id);
@@ -121,7 +129,7 @@ router.get('/edit-user/:id', async (req, res) => {
     }
 });
 
-// POST - Update user
+
 router.post('/edit-user/:id', async (req, res) => {
     try {
         const { 
@@ -157,7 +165,7 @@ router.post('/edit-user/:id', async (req, res) => {
     }
 });
 
-// POST - Delete user
+//Delete user
 router.post('/delete-user/:id', async (req, res) => {
     try {
         const user = await Registration.findById(req.params.id);

@@ -1,4 +1,3 @@
-console.log('🔥 Deposit Scheme Validation Loaded - No alerts on load');
 
 let itemsCart = [];
 
@@ -27,9 +26,8 @@ const depositorSelect = paymentForm ? paymentForm.querySelector('select[name="de
 const amountPaid = paymentForm ? paymentForm.querySelector('input[name="amountPaid"]') : null;
 const paymentMethodSelect = paymentForm ? paymentForm.querySelector('select[name="paymentMethod"]') : null;
 
-// ============================================================
 // HELPER FUNCTIONS FOR VALIDATION
-// ============================================================
+
 
 function showFieldError(field, message) {
     if (!field) return;
@@ -47,7 +45,7 @@ function showFieldError(field, message) {
         field.parentNode.insertBefore(errorDiv, field.nextSibling);
     }
     
-    // Shake animation
+    // Shaking animation
     field.classList.add('shake');
     setTimeout(() => field.classList.remove('shake'), 300);
 }
@@ -97,9 +95,8 @@ function showNotification(message, isError = true) {
     setTimeout(() => alertDiv.remove(), 5000);
 }
 
-// ============================================================
-// CART FUNCTIONS
-// ============================================================
+// CART functions
+
 
 if (itemSelect) {
     itemSelect.addEventListener('change', function() {
@@ -133,7 +130,7 @@ function calculateTotals() {
 
 if (addItemBtn) {
     addItemBtn.addEventListener('click', function() {
-        // Validate item selection
+        
         if (!itemSelect.value) {
             showFieldError(itemSelect, 'Please select an item');
             return;
@@ -233,9 +230,9 @@ function escapeHtml(str) {
 // Make removeItem available globally
 window.removeItem = removeItem;
 
-// ============================================================
+
 // DEPOSITOR FORM VALIDATION
-// ============================================================
+
 
 let depositorFieldInteracted = {
     fullName: false,
@@ -321,19 +318,19 @@ if (depositorForm) {
         e.preventDefault();
         clearAllErrors();
         
-        // Mark all fields as interacted
+        
         depositorFieldInteracted.fullName = true;
         depositorFieldInteracted.phoneNumber = true;
         depositorFieldInteracted.nin = true;
         
-        // Validate cart is not empty
+        
         let isCartValid = true;
         if (itemsCart.length === 0) {
             showNotification('Please add at least one item to the cart');
             isCartValid = false;
         }
         
-        // Validate all fields
+        
         const isFullNameValid = validateDepositorField(fullName, true);
         const isPhoneValid = validateDepositorField(phoneNumber, true);
         const isNinValid = validateDepositorField(nin, true);
@@ -356,9 +353,8 @@ if (depositorForm) {
     });
 }
 
-// ============================================================
-// PAYMENT FORM VALIDATION
-// ============================================================
+
+// Payment form
 
 let paymentFieldInteracted = {
     depositorId: false,
@@ -423,7 +419,7 @@ function setupPaymentValidation(field) {
     });
 }
 
-// Setup payment validation
+//  payment validation
 if (depositorSelect) setupPaymentValidation(depositorSelect);
 if (amountPaid) setupPaymentValidation(amountPaid);
 if (paymentMethodSelect) setupPaymentValidation(paymentMethodSelect);
@@ -433,12 +429,12 @@ if (paymentForm) {
     paymentForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // Clear previous errors
+        
         if (depositorSelect) clearFieldError(depositorSelect);
         if (amountPaid) clearFieldError(amountPaid);
         if (paymentMethodSelect) clearFieldError(paymentMethodSelect);
         
-        // Mark all fields as interacted
+        
         paymentFieldInteracted.depositorId = true;
         paymentFieldInteracted.amountPaid = true;
         paymentFieldInteracted.paymentMethod = true;
@@ -464,4 +460,3 @@ if (paymentForm) {
 }
 
 calculateTotals();
-console.log('✅ Deposit scheme validation loaded - No alerts on load');

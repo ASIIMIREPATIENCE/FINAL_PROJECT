@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const SupplierCredit = require('../models/SupplierCredit'); // Use SupplierCredit, not Stock
+const SupplierCredit = require('../models/SupplierCredit'); 
 const Stock = require('../models/Stock');
 
 function isAuthenticated(req, res, next) {
@@ -10,9 +10,7 @@ function isAuthenticated(req, res, next) {
     res.redirect('/');
 }
 
-// ============================================================
-// DISPLAY SUPPLIER CREDIT PAGE
-// ============================================================
+
 router.get('/supplier-credit', isAuthenticated, async (req, res) => {
     try {
         // Get credit records from SupplierCredit collection
@@ -87,9 +85,9 @@ router.get('/supplier-credit', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// SHOW PAYMENT FORM
-// ============================================================
+
+// Payement form for supplier credit
+
 router.get('/payment/:id', isAuthenticated, async (req, res) => {
     try {
         const creditItem = await SupplierCredit.findById(req.params.id).populate('attendant', 'fullname');
@@ -114,9 +112,7 @@ router.get('/payment/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// RECORD SUPPLIER PAYMENT
-// ============================================================
+
 router.post('/recordSupplierPayment', isAuthenticated, async (req, res) => {
     try {
         const { stockId, amountPaid } = req.body;

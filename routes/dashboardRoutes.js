@@ -6,9 +6,7 @@ const Registration = require('../models/Registration');
 const Depositor = require('../models/Depositor'); 
 const SupplierCredit = require('../models/SupplierCredit');
 
-// ============================================================
-// AUTHENTICATION MIDDLEWARE
-// ============================================================
+
 
 function isAuthenticated(req, res, next) {
     if (req.isAuthenticated && req.isAuthenticated()) {
@@ -17,10 +15,8 @@ function isAuthenticated(req, res, next) {
     res.redirect('/userlogin');
 }
 
-// ============================================================
-// ADMIN DASHBOARD ROUTE
-// Access: Only users with role 'admin'
-// ============================================================
+
+// admin
 
 router.get("/admin", isAuthenticated, async (req, res) => {
     if (!req.user || req.user.role !== 'admin') {
@@ -35,7 +31,7 @@ router.get("/admin", isAuthenticated, async (req, res) => {
         const stockItems = await Stock.find();
         const depositors = await Depositor.find();
         
-        // FIXED: Get credit data from SupplierCredit collection, NOT from Stock
+        //  Get credit data from SupplierCredit collection.
         const supplierCredits = await SupplierCredit.find()
             .populate('attendant', 'fullname')
             .sort({ purchaseDate: -1 });
@@ -138,10 +134,9 @@ router.get("/admin", isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// MANAGER DASHBOARD ROUTE
-// Access: Only users with role 'store_manager'
-// ============================================================
+
+
+// manager
 
 router.get("/manager", isAuthenticated, async (req, res) => {
     if (!req.user || req.user.role !== 'store_manager') {
@@ -155,7 +150,7 @@ router.get("/manager", isAuthenticated, async (req, res) => {
             .populate('attendant', 'fullname')
             .sort({ Date: -1 });
         
-        // FIXED: Get credit data from SupplierCredit collection
+        //Get credit data from SupplierCredit collection
         const supplierCredits = await SupplierCredit.find()
             .populate('attendant', 'fullname')
             .sort({ purchaseDate: -1 });
@@ -272,9 +267,8 @@ router.get("/manager", isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// SALES ATTENDANT DASHBOARD ROUTE
-// ============================================================
+
+// sales attendant
 
 router.get("/salesattendant", isAuthenticated, async (req, res) => {
     if (!req.user || (req.user.role !== 'sales_attendant' && req.user.role !== 'store_manager' && req.user.role !== 'admin')) {

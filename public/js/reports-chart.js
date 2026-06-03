@@ -1,5 +1,4 @@
-// /public/js/reports-chart.js
-// Chart initialization for reports dashboard
+
 
 function initPaymentChart(salesSummary) {
   const canvas = document.getElementById('paymentChart');
@@ -9,7 +8,7 @@ function initPaymentChart(salesSummary) {
     return;
   }
   
-  // Check if Chart.js is loaded
+  // Check if Chartis loaded
   if (typeof Chart === 'undefined') {
     console.error('Chart.js is not loaded!');
     return;

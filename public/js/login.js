@@ -5,9 +5,7 @@ const form = document.getElementById('loginForm');
 const email = document.getElementById('email');
 const password = document.getElementById('password');
 
-// ============================================================
 // ERROR DISPLAY FUNCTIONS
-// ============================================================
 
 function showFieldError(field, message) {
     if (!field) return;
@@ -72,9 +70,8 @@ function showNotification(message, isError = true) {
     setTimeout(() => alertDiv.remove(), 5000);
 }
 
-// ============================================================
-// VALIDATION FUNCTIONS
-// ============================================================
+
+// Validations
 
 function validateEmail(field, showErrors = false) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -103,9 +100,9 @@ function validatePassword(field, showErrors = false) {
     }
 }
 
-// ============================================================
-// REAL-TIME VALIDATION
-// ============================================================
+
+// Real-time validation
+
 
 if (email) {
     email.addEventListener('input', () => validateEmail(email, true));
@@ -117,9 +114,7 @@ if (password) {
     password.addEventListener('blur', () => validatePassword(password, true));
 }
 
-// ============================================================
-// FORM SUBMISSION
-// ============================================================
+// Form submission validation
 
 if (form) {
     form.addEventListener('submit', function(e) {
@@ -144,4 +139,3 @@ if (form) {
     });
 }
 
-console.log('✅ Login validation loaded');

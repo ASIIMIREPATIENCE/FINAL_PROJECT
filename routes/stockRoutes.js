@@ -2,11 +2,9 @@ const express = require("express");
 const router = express.Router();
 const Stock = require('../models/Stock');
 const StockTransaction = require('../models/StockTransaction');
-const SupplierCredit = require('../models/SupplierCredit'); // ADD THIS LINE
+const SupplierCredit = require('../models/SupplierCredit'); 
 
-// ============================================================
-// AUTHENTICATION MIDDLEWARE
-// ============================================================
+
 function isAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
@@ -14,10 +12,8 @@ function isAuthenticated(req, res, next) {
     res.redirect('/');
 }
 
-// ============================================================
-// DISPLAY STOCK MANAGEMENT PAGE
-// URL: /addStock
-// ============================================================
+// Display stock page
+
 router.get('/addStock', isAuthenticated, async (req, res) => {
     try {
         const stockItems = await Stock.find()
@@ -49,10 +45,10 @@ router.get('/addStock', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// SHOW EDIT STOCK FORM
-// URL: /editStock/:id
-// ============================================================
+
+
+// edit stock
+
 router.get('/editStock/:id', isAuthenticated, async (req, res) => {
     try {
         const item = await Stock.findById(req.params.id);
@@ -78,10 +74,9 @@ router.get('/editStock/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// ADD NEW STOCK ITEM
-// URL: /postStock
-// ============================================================
+
+
+
 router.post('/postStock', isAuthenticated, async (req, res) => {
     try {
         const { 
@@ -172,9 +167,9 @@ router.post('/postStock', isAuthenticated, async (req, res) => {
             console.log(`[${new Date().toLocaleString()}] New stock added by ${attendantName}:`, productname);
         }
         
-        // ============================================================
-        // CREATE SEPARATE SUPPLIER CREDIT RECORD (IF PAYMENT METHOD IS CREDIT)
-        // ============================================================
+
+// Create supplier credit record if payment method is Credit
+
         if (paymentMethod === 'Credit') {
             const totalAmount = Number(costprice) * Number(quantity);
             const dueDate = new Date();
@@ -206,10 +201,8 @@ router.post('/postStock', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// DELETE STOCK ITEM
-// URL: /deleteStock/:id
-// ============================================================
+// Delete stock 
+
 router.post('/deleteStock/:id', isAuthenticated, async (req, res) => {
     try {
         const attendantName = req.user ? req.user.fullname : 'Unknown';
@@ -252,10 +245,8 @@ router.post('/deleteStock/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// UPDATE STOCK ITEM (EDIT)
-// URL: /editStock/:id
-// ============================================================
+// UPDATE STOCK ITEM 
+
 router.post('/editStock/:id', isAuthenticated, async (req, res) => {
     try {
         const { 
@@ -321,10 +312,7 @@ router.post('/editStock/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// SHOW EDIT TRANSACTION FORM
-// URL: /editTransactionForm/:id
-// ============================================================
+// Edit stock transaction 
 router.get('/editTransactionForm/:id', isAuthenticated, async (req, res) => {
     try {
         const transaction = await StockTransaction.findById(req.params.id);
@@ -349,10 +337,7 @@ router.get('/editTransactionForm/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// EDIT TRANSACTION - Updates stock based on edited transaction
-// URL: /editTransaction/:id
-// ============================================================
+
 router.post('/editTransaction/:id', isAuthenticated, async (req, res) => {
     try {
         const { 
@@ -433,10 +418,8 @@ router.post('/editTransaction/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// ============================================================
-// DELETE TRANSACTION - Removes transaction effect from stock
-// URL: /deleteTransaction/:id
-// ============================================================
+// DELETE TRANSACTION
+
 router.post('/deleteTransaction/:id', isAuthenticated, async (req, res) => {
     try {
         const transaction = await StockTransaction.findById(req.params.id);
@@ -474,21 +457,6 @@ router.post('/deleteTransaction/:id', isAuthenticated, async (req, res) => {
     }
 });
 
-// DEBUG: Check credit items before and after sale
-router.get('/debug-credit', isAuthenticated, async (req, res) => {
-    const creditItems = await Stock.find({ paymentMethod: 'Credit' });
-    
-    const debug = creditItems.map(item => ({
-        productname: item.productname,
-        originalQuantity: item.originalQuantity,
-        currentQuantity: item.quantity,
-        costprice: item.costprice,
-        amountPaid: item.amountPaid,
-        totalOwed: (item.originalQuantity || item.quantity) * item.costprice,
-        balance: ((item.originalQuantity || item.quantity) * item.costprice) - (item.amountPaid || 0)
-    }));
-    
-    res.json(debug);
-});
+
 
 module.exports = router;

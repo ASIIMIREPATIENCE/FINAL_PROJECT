@@ -9,7 +9,7 @@ const editSaleForm = document.getElementById('editSaleForm');
 const transportCheck = document.getElementById('addTransport');
 const distanceInput = document.getElementById('distance');
 
-// Load existing cart items from the page
+// to load existing cart items 
 document.querySelectorAll('.cart-item').forEach(item => {
     const hiddenInput = item.querySelector('input[type="hidden"]');
     if (hiddenInput) {
@@ -45,7 +45,7 @@ function updateTotals() {
     
     const total = subtotal + transportFee;
     
-    // Update display if elements exist
+    // display totals
     const displaySubtotal = document.getElementById('displaySubtotal');
     const displayTransport = document.getElementById('displayTransport');
     const displayTotal = document.getElementById('displayTotal');
