@@ -11,7 +11,7 @@ head
   link(rel='stylesheet' href='/css/supplier_credit.css')
 
 body
-  // ========== SIDEBAR ==========
+  //  SIDEBAR 
   .sidebar
     .sidebar-logo
       img(src='/images/logo.png' alt='Logo')
@@ -33,7 +33,7 @@ body
         i.bi.bi-box-arrow-right
         |  Sign Out
 
-  // ========== MAIN CONTENT ==========
+  //MAIN CONTENT 
   .main-content
     
     .d-flex.justify-content-between.align-items-center.flex-wrap.mb-3
@@ -89,7 +89,7 @@ body
                 td #{item.productname || 'Unknown'}
                 td UGX #{item.balance ? item.balance.toLocaleString() : '0'}
                 td #{item.quantity || 0}
-                td #{item.Date ? new Date(item.Date).toLocaleDateString() : 'No date'}
+                td #{item.purchaseDate ? new Date(item.purchaseDate).toLocaleDateString() : 'N/A'}
                 td #{item.dueDate ? new Date(item.dueDate).toLocaleDateString() : 'N/A'}
                 td
                   if item.status === 'Overdue'

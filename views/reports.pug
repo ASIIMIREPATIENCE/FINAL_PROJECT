@@ -65,7 +65,7 @@ html(lang='en')
       if error
         .alert.alert-danger(style='border-radius: 16px;') #{error}
       
-      // ========== SALES REPORT ==========
+      // SALES REPORT
       if selectedReport === 'sales'
         .row.g-3.mb-4
           .col-md-3
@@ -157,7 +157,7 @@ html(lang='en')
                   tr
                     td.text-center(colspan='6') No sales found for selected period
       
-      // ========== STOCK REPORT ==========
+      // STOCK REPORT 
       if selectedReport === 'stock'
         .row.g-3.mb-4
           .col-md-3
@@ -206,7 +206,7 @@ html(lang='en')
                   tr
                     td.text-center(colspan='7') No stock items found
       
-      // ========== DEPOSIT SCHEME REPORT ==========
+      //  DEPOSIT SCHEME REPORT 
       if selectedReport === 'scheme'
         .row.g-3.mb-4
           .col-md-3
@@ -332,7 +332,7 @@ html(lang='en')
                   tr
                     td.text-center(colspan='11') No depositors found
       
-      // ========== SUPPLIER CREDIT REPORT ==========
+      // SUPPLIER CREDIT REPORT 
       if selectedReport === 'supplier-credit'
         .row.g-3.mb-4
           .col-md-3
@@ -418,7 +418,7 @@ html(lang='en')
                   tr
                     td.text-center(colspan='10') No credit purchases found
       
-      // ========== FINANCIAL REPORT ==========
+      //  FINANCIAL REPORT 
       if selectedReport === 'financial'
         .row.g-3.mb-4
           .col-md-3

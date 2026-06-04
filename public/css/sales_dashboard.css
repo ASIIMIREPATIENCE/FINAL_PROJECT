@@ -1,287 +1,391 @@
- 
-        body {
-            background: #F0E6D6;
-            min-height: 100vh;
-        }
-        
-        :root {
-            --nyondo-green: #0D3B2E;
-            --nyondo-gold: #C6A43F;
-            --nyondo-gold-hover: #B8922E;
-            --nyondo-sand: #F0E6D6;
-        }
-        
-        /* ========== SIDEBAR ========== */
-        .sidebar {
-            width: 260px;
-            background: #0D3B2E;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 100;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        }
-        
-        .sidebar .logo {
-            padding: 1.5rem;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 1rem;
-        }
-        
-        .sidebar .logo img {
-            height: 50px;
-            margin-bottom: 10px;
-        }
-        
-        .sidebar .logo h4 {
-            color: white;
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin: 0;
-        }
-        
-        .sidebar .logo p {
-            color: rgba(255,255,255,0.5);
-            font-size: 0.65rem;
-            margin: 0;
-        }
-        
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.7);
-            padding: 12px 20px;
-            margin: 4px 12px;
-            border-radius: 12px;
-            transition: all 0.2s;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-        
-        .sidebar .nav-link:hover {
-            background: rgba(198, 164, 63, 0.2);
-            color: var(--nyondo-gold);
-        }
-        
-        .sidebar .nav-link.active {
-            background: var(--nyondo-gold);
-            color: #0D3B2E;
-        }
-        
-        .sidebar .nav-link i {
-            margin-right: 12px;
-            font-size: 1.1rem;
-        }
-        
-        /* User Section in Sidebar */
-        .sidebar .user-section {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 1.5rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .sidebar .user-name {
-            color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-        
-        .sidebar .user-role {
-            color: var(--nyondo-gold);
-            font-size: 0.7rem;
-        }
-        
-        .logout-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            padding: 8px;
-            border-radius: 30px;
-            color: white;
-            font-size: 0.75rem;
-            width: 100%;
-            margin-top: 10px;
-            transition: all 0.2s;
-        }
-        
-        .logout-btn:hover {
-            background: var(--nyondo-gold);
-            color: #0D3B2E;
-        }
-        
-        /* ========== MAIN CONTENT ========== */
-        .main-content {
-            margin-left: 260px;
-            padding: 1.5rem;
-        }
-        
-        /* Stat Cards */
-        .stat-card {
-            background: white;
-            border-radius: 20px;
-            padding: 1.2rem;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: transform 0.2s;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-3px);
-        }
-        
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--nyondo-green);
-        }
-        
-        .stat-label {
-            font-size: 0.7rem;
-            color: #6c757d;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        /* Quick Sale Button */
-        .quick-sale-btn {
-            background: var(--nyondo-gold);
-            color: #0D3B2E;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            border-radius: 60px;
-            width: 100%;
-            transition: all 0.3s;
-        }
-        
-        .quick-sale-btn:hover {
-            background: var(--nyondo-gold-hover);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(198, 164, 63, 0.3);
-        }
-        
-        /* Section Titles */
-        .section-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--nyondo-green);
-            margin: 1.5rem 0 1rem 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border-left: 3px solid var(--nyondo-gold);
-            padding-left: 12px;
-        }
-        
-        /* Tables */
-        .custom-table {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-        
-        .custom-table thead th {
-            background: #0D3B2E;
-            color: white;
-            padding: 12px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .custom-table tbody td {
-            padding: 10px 12px;
-            font-size: 0.85rem;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .custom-table tbody tr:hover td {
-            background: rgba(198, 164, 63, 0.05);
-        }
-        
-        /* Badges */
-        .badge-critical {
-            background: #9E3C2A;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-        }
-        
-        .badge-low {
-            background: #C6A43F;
-            color: #0D3B2E;
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-        }
-        
-        .badge-paid {
-            background: #2E7D64;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-        }
-        
-        .badge-credit {
-            background: #C6A43F;
-            color: #0D3B2E;
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-        }
-        
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 1rem;
-            color: #8E8E8E;
-            font-size: 0.7rem;
-            margin-left: 260px;
-            background: transparent;
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s;
-            }
-            .sidebar.show {
-                transform: translateX(0);
-            }
-            .main-content, .footer {
-                margin-left: 0;
-            }
-            .stat-value {
-                font-size: 1.3rem;
-            }
-        }
     
-        .sidebar-back-btn {
-    padding: 0 15px 15px 15px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    margin-bottom: 15px;
-}
-
-.btn-back {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(255,255,255,0.1);
-    border: none;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    width: 100%;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 0.85rem;
-}
-
-.btn-back:hover {
-    background: rgba(255,255,255,0.2);
-}
+      body {
+        background: #F0E6D6;
+        min-height: 100vh;
+      }
+      
+      :root {
+        --nyondo-green: #0D3B2E;
+        --nyondo-gold: #C6A43F;
+        --nyondo-gold-hover: #B8922E;
+        --nyondo-sand: #F0E6D6;
+      }
+      
+      /*  SIDEBAR */
+      .sidebar {
+        width: 260px;
+        background: #0D3B2E;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 100;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+      }
+      
+      .sidebar .logo {
+        padding: 1.5rem;
+        text-align: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 1rem;
+      }
+      
+      .sidebar .logo img {
+        height: 50px;
+        margin-bottom: 10px;
+      }
+      
+      .sidebar .logo h4 {
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0;
+      }
+      
+      .sidebar .logo p {
+        color: rgba(255,255,255,0.5);
+        font-size: 0.65rem;
+        margin: 0;
+      }
+      
+      .sidebar .nav-link {
+        color: rgba(255,255,255,0.7);
+        padding: 12px 20px;
+        margin: 4px 12px;
+        border-radius: 12px;
+        transition: all 0.2s;
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+      
+      .sidebar .nav-link:hover {
+        background: rgba(198, 164, 63, 0.2);
+        color: var(--nyondo-gold);
+      }
+      
+      .sidebar .nav-link.active {
+        background: var(--nyondo-gold);
+        color: #0D3B2E;
+      }
+      
+      .sidebar .nav-link i {
+        margin-right: 12px;
+        font-size: 1.1rem;
+      }
+      
+      /* User Section in Sidebar */
+      .sidebar .user-section {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+      }
+      
+      .sidebar .user-name {
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      
+      .sidebar .user-role {
+        color: var(--nyondo-gold);
+        font-size: 0.7rem;
+      }
+      
+      .logout-btn {
+        background: rgba(255,255,255,0.1);
+        border: none;
+        padding: 8px;
+        border-radius: 30px;
+        color: white;
+        font-size: 0.75rem;
+        width: 100%;
+        margin-top: 10px;
+        transition: all 0.2s;
+      }
+      
+      .logout-btn:hover {
+        background: var(--nyondo-gold);
+        color: #0D3B2E;
+      }
+      
+      /*  MAIN CONTENT */
+      .main-content {
+        margin-left: 260px;
+        padding: 1.5rem;
+      }
+      
+      /* Stat Cards */
+      .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.2rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: transform 0.2s;
+      }
+      
+      .stat-card:hover {
+        transform: translateY(-3px);
+      }
+      
+      .stat-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--nyondo-green);
+      }
+      
+      .stat-label {
+        font-size: 0.7rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      
+      /* Quick Sale Button */
+      .quick-sale-btn {
+        background: var(--nyondo-gold);
+        color: #0D3B2E;
+        border: none;
+        padding: 15px 30px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        border-radius: 60px;
+        width: 100%;
+        transition: all 0.3s;
+      }
+      
+      .quick-sale-btn:hover {
+        background: var(--nyondo-gold-hover);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(198, 164, 63, 0.3);
+      }
+      
+      /* Section Titles */
+      .section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--nyondo-green);
+        margin: 1.5rem 0 1rem 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-left: 3px solid var(--nyondo-gold);
+        padding-left: 12px;
+      }
+      
+      /* Tables */
+      .custom-table {
+        background: white;
+        border-radius: 16px;
+        overflow-x: auto;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      }
+      
+      .custom-table table {
+        width: 100%;
+        min-width: 600px;
+      }
+      
+      .custom-table thead th {
+        background: #0D3B2E;
+        color: white;
+        padding: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      
+      .custom-table tbody td {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #eee;
+        white-space: nowrap;
+      }
+      
+      .custom-table tbody tr:hover td {
+        background: rgba(198, 164, 63, 0.05);
+      }
+      
+      /* Badges */
+      .badge-critical {
+        background: #9E3C2A;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 30px;
+        font-size: 0.7rem;
+      }
+      
+      .badge-low {
+        background: #C6A43F;
+        color: #0D3B2E;
+        padding: 4px 10px;
+        border-radius: 30px;
+        font-size: 0.7rem;
+      }
+      
+      .badge-paid {
+        background: #2E7D64;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 30px;
+        font-size: 0.7rem;
+      }
+      
+      .badge-credit {
+        background: #C6A43F;
+        color: #0D3B2E;
+        padding: 4px 10px;
+        border-radius: 30px;
+        font-size: 0.7rem;
+      }
+      
+      /* Sidebar Back Button */
+      .sidebar-back-btn {
+        padding: 0 15px 15px 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 15px;
+      }
+      
+      .btn-back {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.1);
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        width: 100%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.85rem;
+      }
+      
+      .btn-back:hover {
+        background: rgba(255,255,255,0.2);
+      }
+      
+      /* Action Buttons */
+      .btn-view-receipt, .btn-edit-sale, .btn-delete-sale {
+        border: none;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        margin: 2px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      
+      .btn-view-receipt {
+        background: #0D3B2E;
+        color: white;
+      }
+      
+      .btn-view-receipt:hover {
+        background: #1a5d48;
+        color: white;
+      }
+      
+      .btn-edit-sale {
+        background: #C6A43F;
+        color: #0D3B2E;
+      }
+      
+      .btn-edit-sale:hover {
+        background: #b8922e;
+        color: #0D3B2E;
+      }
+      
+      .btn-delete-sale {
+        background: #dc3545;
+        color: white;
+      }
+      
+      .btn-delete-sale:hover {
+        background: #bb2d3b;
+        color: white;
+      }
+      
+      /* Column widths for stock table */
+      .stock-table th:nth-child(1) { width: 10%; }  
+      .stock-table th:nth-child(2) { width: 20%; }  
+      .stock-table th:nth-child(3) { width: 10%; }  
+      .stock-table th:nth-child(4) { width: 10%; }  
+      .stock-table th:nth-child(5) { width: 15%; }  
+      .stock-table th:nth-child(6) { width: 20%; }  
+      .stock-table th:nth-child(7) { width: 15%; }  
+      
+      /* Column widths for sales table */
+      .sales-table th:nth-child(1) { width: 10%; }  
+      .sales-table th:nth-child(2) { width: 15%; }  
+      .sales-table th:nth-child(3) { width: 25%; } 
+      .sales-table th:nth-child(4) { width: 12%; }  
+      .sales-table th:nth-child(5) { width: 10%; }  
+      .sales-table th:nth-child(6) { width: 13%; }  
+      .sales-table th:nth-child(7) { width: 15%; }  
+      
+      /* Footer */
+      .footer {
+        text-align: center;
+        padding: 1rem;
+        color: #8E8E8E;
+        font-size: 0.7rem;
+        margin-left: 260px;
+        background: transparent;
+      }
+      
+      .stock-number-critical {
+        color: #dc3545;
+        font-weight: bold;
+      }
+      
+      .stock-number-low {
+        color: #ffc107;
+        font-weight: bold;
+      }
+      
+      .critical-stock-row {
+        background-color: rgba(220, 53, 69, 0.1);
+      }
+      
+      .low-stock-row {
+        background-color: rgba(255, 193, 7, 0.1);
+      }
+      
+      /* Items column text wrapping */
+      .items-cell {
+        white-space: normal !important;
+        word-wrap: break-word;
+        max-width: 250px;
+      }
+      
+      @media (max-width: 1200px) {
+        .custom-table table {
+          min-width: 800px;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+          transition: transform 0.3s;
+        }
+        .sidebar.show {
+          transform: translateX(0);
+        }
+        .main-content, .footer {
+          margin-left: 0;
+        }
+        .stat-value {
+          font-size: 1.3rem;
+        }
+        .custom-table {
+          overflow-x: scroll;
+        }
+      }

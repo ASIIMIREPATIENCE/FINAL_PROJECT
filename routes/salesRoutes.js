@@ -3,6 +3,8 @@ const router = express.Router();
 const Sale = require('../models/Sales');
 const Stock = require('../models/Stock');
 
+
+
 function isAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
@@ -336,7 +338,7 @@ router.post('/updateSale/:id', isAuthenticated, async (req, res) => {
 
 router.post('/deleteSale/:id', isAuthenticated, async (req, res) => {
     try {
-        console.log('=== DELETE SALE ATTEMPT ===');
+        console.log(' DELETE SALE ATTEMPT ');
         console.log('Sale ID:', req.params.id);
         
         const sale = await Sale.findById(req.params.id);
